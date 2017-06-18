@@ -525,15 +525,15 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 			case 2: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
 			case 3: 
 			case 4: snprintf(inBuf, bufSize, "%s", confValue == 3 ? weather.condDesc : weather.condForecast); break;
-			case 5: snprintf(inBuf, bufSize, "%s   |   %s", weather.sunrise, weather.sunset); break;
+			case 5: snprintf(inBuf, bufSize, "%s                %s", weather.sunrise, weather.sunset); break;
 			case 21: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.location); break;
 			case 23:
 			case 24: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, confValue == 23 ? weather.condDesc : weather.condForecast); break;
-			case 25: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s   |   %s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.sunrise, weather.sunset); break;
+			case 25: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s                %s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.sunrise, weather.sunset); break;
 			case 12: snprintf(inBuf, bufSize, "%s\nLo %s%s  [ %s%s ]   Hi %s%s", weather.location, weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
 			case 13:
 			case 14: snprintf(inBuf, bufSize, "%s\n%s", weather.location, confValue == 13 ? weather.condDesc : weather.condForecast); break;
-			case 15: snprintf(inBuf, bufSize, "%s\n%s   |   %s",weather.location, weather.sunrise, weather.sunset); break;
+			case 15: snprintf(inBuf, bufSize, "%s\n%s                %s",weather.location, weather.sunrise, weather.sunset); break;
 			case 34: 
 			case 43:
 				if (strcmp(weather.condDesc, weather.condForecast) == 0) snprintf(inBuf, bufSize, "%s", weather.condDesc);
@@ -1110,7 +1110,7 @@ static void init() {
 	app_message_register_inbox_dropped(inbox_dropped_callback);
 	app_message_register_outbox_failed(outbox_failed_callback);
 	app_message_register_outbox_sent(outbox_sent_callback);
-	app_message_open(512, 512);
+	app_message_open(1024, 1024);
 
 	// Create main Window element
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Creation - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
