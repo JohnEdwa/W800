@@ -33,9 +33,9 @@ function pad (str, max) {
 }
 
 function tempTo(temp) {
-		if (settings['WeatherConf[1]'] == 1) return (Math.round( (temp - 273.15)*10 ) / 10).toFixed(0);
-		if (settings['WeatherConf[1]'] == 2) return (Math.round( ( (temp * 9/5) - 459.67)*10 ) / 10).toFixed(0);
-		if (settings['WeatherConf[1]'] == 3) return (Math.round(temp*10) / 10).toFixed(0);
+		if (settings['wConf[1]'] == 1) return (Math.round( (temp - 273.15)*10 ) / 10).toFixed(0);
+		if (settings['wConf[1]'] == 2) return (Math.round( ( (temp * 9/5) - 459.67)*10 ) / 10).toFixed(0);
+		if (settings['wConf[1]'] == 3) return (Math.round(temp*10) / 10).toFixed(0);
 		else return temp;
 }
 
@@ -45,9 +45,9 @@ function timeTo(time) {
 }
 
 function windTo(wind) {
-	if (settings['WeatherConf[2]'] == 1) return (Math.round(wind*10) / 10).toFixed(1);
-	if (settings['WeatherConf[2]'] == 3) return (Math.round( (wind * 2.23694)*10 ) / 10).toFixed(1);
-	if (settings['WeatherConf[2]'] == 2) return (Math.round( (wind * 3.6)*10 ) / 10).toFixed(1);
+	if (settings['wConf[2]'] == 1) return (Math.round(wind*10) / 10).toFixed(1);
+	if (settings['wConf[2]'] == 3) return (Math.round( (wind * 2.23694)*10 ) / 10).toFixed(1);
+	if (settings['wConf[2]'] == 2) return (Math.round( (wind * 3.6)*10 ) / 10).toFixed(1);
 	else return wind;
 }
 
@@ -71,26 +71,20 @@ function getWeather(locationString, autoLocation) {
 	var tempCurrent = null;
 	var tempMin = null;
 	var tempMax = null;
-
 	var windCurrent = null;
 	var windMax = null;
-
 	var humidity = null;
-
 	var sunrise = null;
-	var sunset = null;
-	
+	var sunset = null;	
 	var condMain = null;
 	var condDesc = null;
-	var condForecast = null;
-	
-	var location = null;
-	
+	var condForecast = null;	
+	var location = null;	
 	var forecastNumber = 0;
 	var time = null;
 	
 	console.log("Weather - Sending Requests");
-		if (settings['WeatherConf[0]'] == 2) {
+		if (settings['wConf[0]'] == 2) {
 			if (DEBUG) console.log('Weather - Using WU with API key [' + wuAPIkey + ']');
 			url = 'http://api.wunderground.com/api/' + wuAPIkey + '/forecast/conditions/astronomy/q/'+ locationString + '.json';
 
@@ -103,30 +97,30 @@ function getWeather(locationString, autoLocation) {
 							if (!('error' in json.response)) {
 
 								time = new Date();						
-								if (time.getHours() <= settings['WeatherConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
-								else if ( (time.getHours() >= settings['WeatherConf[7]']) && (settings['WeatherConf[7]'] >= settings['WeatherConf[6]']) ) {forecastNumber = 2; console.log("Weather - Forecast : Tomorrow.");}
+								if (time.getHours() <= settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
+								else if ( (time.getHours() >= settings['wConf[7]']) && (settings['wConf[7]'] >= settings['wConf[6]']) ) {forecastNumber = 2; console.log("Weather - Forecast : Tomorrow.");}
 								else {forecastNumber = 1; console.log("Weather - Forecast : Tonight.");}
 
-								if (settings['WeatherConf[1]'] == 1) {
+								if (settings['wConf[1]'] == 1) {
 									tempCurrent = round(0,json.current_observation.temp_c);
 									tempMin = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].low.celsius);
 									tempMax = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].high.celsius);
 								}
-								else if (settings['WeatherConf[1]'] == 2) {
+								else if (settings['wConf[1]'] == 2) {
 									tempCurrent = round(0,json.current_observation.temp_f);
 									tempMin = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].low.fahrenheit);
 									tempMax = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].high.fahrenheit);
 								}
 
-								if (settings['WeatherConf[2]'] == 1) {
+								if (settings['wConf[2]'] == 1) {
 									windCurrent = round(1,json.current_observation.wind_kph*0.277778);
 									windMax = round(1,json.forecast.simpleforecast.forecastday[forecastNumber].maxwind.kph*0.277778);
 								}
-								else if (settings['WeatherConf[2]'] == 2) {
+								else if (settings['wConf[2]'] == 2) {
 									windCurrent = round(1,json.current_observation.wind_kph);
 									windMax = round(1,json.forecast.simpleforecast.forecastday[forecastNumber].maxwind.kph);	
 								}
-								else if (settings['WeatherConf[2]'] == 3) {
+								else if (settings['wConf[2]'] == 3) {
 									windCurrent = round(1,json.current_observation.wind_mph);
 									windMax = round(1,json.forecast.simpleforecast.forecastday[forecastNumber].maxwind.mph);	
 								}
@@ -191,7 +185,7 @@ function getWeather(locationString, autoLocation) {
 				 if (json.cod == "200") {
 					 
 					 time = new Date();						
-					 if ( (time.getHours() >= settings['WeatherConf[7]']) && (settings['WeatherConf[7]'] >= settings['WeatherConf[6]']) ) {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
+					 if ( (time.getHours() >= settings['wConf[7]']) && (settings['wConf[7]'] >= settings['wConf[6]']) ) {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
 					 else {forecastNumber = 0; console.log("Weather - Forecast : Today");}
 					 
 					 //tempCurrent = tempTo(json.list[0].temp.day);
@@ -257,7 +251,7 @@ function getWeather(locationString, autoLocation) {
 function locationSuccess(pos) {
   // Construct URL
 	var location = null;
-	if (settings['WeatherConf[0]'] == 2) {
+	if (settings['wConf[0]'] == 2) {
 		location = pos.coords.latitude + ',' + pos.coords.longitude;
 	}
 	else {
@@ -273,11 +267,11 @@ function locationError(err) {
 }
 
 function getWeatherSetup() {
-	owmAPIkey = settings.WeatherKeyOWM;
-	wuAPIkey = settings.WeatherKeyWU;
-	if (settings.WeatherLocation === null || settings.WeatherLocation === undefined || settings.WeatherLocation === "") {
+	owmAPIkey = settings.keyOWM;
+	wuAPIkey = settings.keyWU;
+	if (settings.wLoc === null || settings.wLoc === undefined || settings.wLoc === "") {
 		navigator.geolocation.getCurrentPosition(locationSuccess,locationError, {timeout: 15000, maximumAge: 60000});
-		}	else { getWeather(settings.WeatherLocation, 0); }	
+		}	else { getWeather(settings.wLoc, 0); }	
 }
 
 // Listen for when the watchface is opened
@@ -288,7 +282,7 @@ Pebble.addEventListener('ready',
     if (DEBUG) console.log('PebbleKit JS ready!');
 		
     // Get the initial weather
-		if (settings.EnableWeather === true) { getWeatherSetup(); }
+		if (settings.enWeather === true) { getWeatherSetup(); }
   }
 );
 
@@ -299,6 +293,6 @@ Pebble.addEventListener('appmessage',
 		} catch (ee) { console.log("Could not load clay settings!");}
 		
 		console.log('Weather - Update Request received.');
-    if (settings.EnableWeather === true) { getWeatherSetup(); }
+    if (settings.enWeather === true) { getWeatherSetup(); }
   }                     
 );

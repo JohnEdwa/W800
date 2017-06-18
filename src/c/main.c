@@ -164,8 +164,8 @@ static char s_bufferWeatherBottom[64];
 // Define our settings struct
 typedef struct ClaySettings {
 	bool showZero;
-	bool enableHealth;
-	bool enableWeather;
+	bool enHealth;
+	bool enWeather;
 	unsigned char tapDuration;
 
 	unsigned char btDCVibe;
@@ -204,6 +204,8 @@ typedef struct ClaySettings {
 
 	unsigned char weatherBoxTop;
 	unsigned char weatherBoxBottom;
+	unsigned char weatherBoxTopTap;
+	unsigned char weatherBoxBottomTap;
 	unsigned char weatherProvider;
 	unsigned char weatherTempUnit;
 	unsigned char weatherWindUnit;
@@ -234,14 +236,15 @@ static void default_settings() {
 	conf.displayBorderColor = GColorBlack;
 
 	conf.btDCVibe = 0;	conf.btConVibe = 0;	conf.hourVibe = 0;	conf.vibeStrength = 3;
-	conf.enableHealth = 1;	conf.enableWeather = 1;
+	conf.enHealth = 1;	conf.enWeather = 1;
 	conf.tapDuration = 3;
 	conf.showZero = 1;	conf.mainTimeStyle = 2;	conf.dateStyle = 2;
 	conf.brandingStyle = 1;	conf.brandingLogo = 1;	conf.brandingTop = 1;	conf.brandingBottom = 2;	conf.toggleBold = 1;	conf.brandingLabel = 1;
 	conf.fourCaps = 1;	conf.fourData = 1;	 conf.fourDataTap = 9;
-	conf.infoLeftStyle = 1;	conf.infoRightStyle = 1; conf.infoLeftData = 7; conf.infoRightData = 8; conf.infoLeftDataTap = 14;	conf.infoRightDataTap = 14;
-	conf.bottomStyle = 2; conf.bottomLeftData = 4;	conf.bottomRightData = 3; conf.bottomLeftDataTap = 12;	conf.bottomRightDataTap = 13;
-	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 7;	 conf.weatherProvider = 1;	conf.weatherTempUnit = 1;	conf.weatherWindUnit = 1; conf.weatherUpdateRate = 30;
+	conf.infoLeftStyle = 1;	conf.infoRightStyle = 1; conf.infoLeftData = 7; conf.infoRightData = 8; conf.infoLeftDataTap = 0;	conf.infoRightDataTap = 0;
+	conf.bottomStyle = 2; conf.bottomLeftData = 4;	conf.bottomRightData = 3; conf.bottomLeftDataTap = 0;	conf.bottomRightDataTap = 0;
+	conf.weatherProvider = 1;	conf.weatherTempUnit = 1;	conf.weatherWindUnit = 1; conf.weatherUpdateRate = 30;
+	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 0; conf.weatherBoxTop = 24; conf.weatherBoxBottom = 15;
 	conf.weatherDayNight = 15;	conf.weatherNightMorning = 21;
 	strcpy(conf.locationString,""); strcpy(conf.wuKeyString,""); strcpy(conf.owmKeyString,"");
 	conf.batteryStyle = 0;
@@ -383,6 +386,7 @@ static void handle_tap(AccelAxisType axis, int32_t direction) {
 		tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
 		tapTrigger = true;
 		tapDuration = conf.tapDuration;
+		layer_mark_dirty(s_layer_background);
 		update_fourSlot(true);
 	}
 }
@@ -428,7 +432,7 @@ static char *getSlotData(char *inBuf, bool tap) {
 
 		switch (confValue) {
 			// Disabled / Hidden
-			case  0: strcpy(buf,""); break;
+			case  0: strcpy(buf," "); break;
 			// Day Word
 			case  1: strftime(buf, sizeof(buf), "%a", tick_time); break;
 			// Month Word
@@ -466,7 +470,7 @@ static char *getSlotData(char *inBuf, bool tap) {
 			case  9: snprintf(buf, sizeof(buf), "%3s%c", weather.tempCur, (conf.weatherTempUnit == 1 ? 'C' : (conf.weatherTempUnit == 2 ? 'F' : 'K'))); break;
 			case 10:  break;
 			case 11:  break;
-			// Temperature current
+			// Sunrise / Sunset
 			case 12:
 			case 13: snprintf(buf,sizeof(buf),  left ? "%5.5s " : " %5.5s", confValue == 12 ? weather.sunrise : weather.sunset); break;
 
@@ -482,7 +486,7 @@ static char *getSlotData(char *inBuf, bool tap) {
 					if (left) snprintf(outBuf, sizeof(buf), "%.*s", styleValue == 1 ? 8 : 6,  (confValue == 14 ? weather.condDesc : weather.condForecast));
 					else snprintf(outBuf, sizeof(buf), "%.*s", styleValue == 1 ? 8 : 6,  ((confValue == 14 ? weather.condDesc : weather.condForecast) + (styleValue == 1 ? 8 : 6)));
 				} break;
-			default: break;
+			default: strcpy(buf," "); break;
 		}
 
 		// Finally center the buffers properly.
@@ -506,8 +510,8 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 		char unit[3];
 		strcpy(unit,(conf.weatherTempUnit == 1 || conf.weatherTempUnit == 2 ? "°" : "K"));
 		
-		if (inBuf == s_bufferWeatherTop) {confValue = conf.weatherBoxTop;}
-		else if (inBuf == s_bufferWeatherBottom) {confValue = conf.weatherBoxBottom;}
+		if (inBuf == s_bufferWeatherTop) {confValue = tap ? conf.weatherBoxTopTap : conf.weatherBoxTop;}
+		else if (inBuf == s_bufferWeatherBottom) {confValue = tap ? conf.weatherBoxBottomTap : conf.weatherBoxBottom;}
 				
 		/*
 		if (inBuf == s_bufferWeatherTop)	{ bufSize = sizeof(s_bufferWeatherTop); confValue = tap ? (conf.infoLeftDataTap > 0 ? conf.infoLeftDataTap : conf.infoLeftData) : conf.infoLeftData;}
@@ -515,8 +519,30 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 		*/
 
 		switch (confValue) {
-			//Disabled
-			case 0: strcpy(inBuf,""); break;
+			
+			case 0: strcpy(inBuf," "); break;
+			case 1: snprintf(inBuf, bufSize, "%s", weather.location); break;
+			case 2: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
+			case 3: 
+			case 4: snprintf(inBuf, bufSize, "%s", confValue == 3 ? weather.condDesc : weather.condForecast); break;
+			case 5: snprintf(inBuf, bufSize, "%s   |   %s", weather.sunrise, weather.sunset); break;
+			case 21: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.location); break;
+			case 23:
+			case 24: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, confValue == 23 ? weather.condDesc : weather.condForecast); break;
+			case 25: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s   |   %s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.sunrise, weather.sunset); break;
+			case 12: snprintf(inBuf, bufSize, "%s\nLo %s%s  [ %s%s ]   Hi %s%s", weather.location, weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
+			case 13:
+			case 14: snprintf(inBuf, bufSize, "%s\n%s", weather.location, confValue == 13 ? weather.condDesc : weather.condForecast); break;
+			case 15: snprintf(inBuf, bufSize, "%s\n%s   |   %s",weather.location, weather.sunrise, weather.sunset); break;
+			case 34: 
+			case 43:
+				if (strcmp(weather.condDesc, weather.condForecast) == 0) snprintf(inBuf, bufSize, "%s", weather.condDesc);
+				else snprintf(inBuf, bufSize, "%s\n%s", confValue == 34 ? weather.condDesc : weather.condForecast, confValue == 34 ? weather.condForecast : weather.condDesc);
+				break;
+			default: strcpy(inBuf," "); break;
+			
+			/*
+			case 0: strcpy(inBuf," "); break;
 			case 1: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
 			case 2:
 			case 3: snprintf(inBuf, bufSize, "%s", confValue == 2 ? weather.condDesc : weather.condForecast); break;
@@ -526,10 +552,18 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 				if (strcmp(weather.condDesc, weather.condForecast) == 0) snprintf(inBuf, bufSize, "%s", weather.condDesc);
 				else snprintf(inBuf, bufSize, "%s\n%s", weather.condDesc, weather.condForecast);
 				break;
-			case 7: snprintf(inBuf, bufSize, "%s", weather.location);
-			default: break;
+			case 7: snprintf(inBuf, bufSize, "%s", weather.location); break;
+			default: strcpy(inBuf," "); break;
+			*/
 		}
+		
 		text_layer_set_text(layer, inBuf);
+		
+		// Vertical alignment
+		GRect frame = layer_get_frame(text_layer_get_layer(layer));
+		GSize content = text_layer_get_content_size(layer);
+		layer_set_frame(text_layer_get_layer(layer), GRect(frame.origin.x, frame.origin.y + (frame.size.h - content.h) / 2,frame.size.w, content.h));
+		if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Size: Frame %d/%d, Layer %d/%d. GRect: %d,%d,%d,%d",frame.size.w, frame.size.h, content.w, content.h,frame.origin.x, frame.origin.y + (frame.size.h - content.h - 5) / 2,frame.size.w, content.h);
 	}
 }
 
@@ -580,25 +614,32 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	gbitmap_set_palette(s_bitmap_brand_labels, bgPalette, false);
 	gbitmap_set_palette(s_bitmap_sheet_branding, bgPalette, false);
 
-	graphics_context_set_compositing_mode(ctx, GCompOpSet);
+	// Draw the BG bitmap
+	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
 	graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, gbitmap_get_bounds(s_bitmap_background));
 
+	
 	if (conf.brandingStyle == 1) {
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
-		graphics_context_set_stroke_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90,144-(SCREENLEFT*2),2), 0,0);
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT-1, SCREENTOP-1, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
 	}
-
+	
+	// If weather box is empty, draw the branding.
+	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
+		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(5, 5, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
+		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(60, 10, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+	}
+	
+	if ((!tapTrigger && conf.weatherBoxBottom == 0) || (tapTrigger && conf.weatherBoxBottomTap == 0)) {
+		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(0, 148, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
+	}
+														
 	if (conf.brandingLabel != 0) {
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(-5, -21, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(139, -20, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(139, 146, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 	}
-
-	if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(5, 5, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
-	if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(60, 10, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
-	if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(0, 148, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
 }
 
 // Builds the toggle layer
@@ -652,6 +693,7 @@ static void update_time(struct tm *tick_time, TimeUnits units_changed, bool firs
 			}
 			tapDuration = 0;
 			tapTrigger = false;
+			layer_mark_dirty(s_layer_background);
 			update_fourSlot(false);
 		}
 	}
@@ -741,7 +783,7 @@ static void main_window_load(Window *window) {
 	s_layer_background = layer_create(bounds);
 	layer_set_update_proc(s_layer_background, background_update_proc);
 	layer_add_child(window_get_root_layer(window), s_layer_background);
-
+	
 	// Create Toggles Layer
 	s_layer_toggle = layer_create(GRect(87,30,55,22));
 	layer_set_update_proc(s_layer_toggle, toggle_update_proc);
@@ -796,14 +838,12 @@ static void main_window_load(Window *window) {
 	if(conf.bottomStyle == 1) editTextLayer(s_layer_bottombar, GRect(0, SCREENTOP+91, 144, 20), conf.displayTextColor, GColorClear, s_font_infosmall, GTextAlignmentCenter);
 	else if (conf.bottomStyle == 2) editTextLayer(s_layer_bottombar, GRect(0, SCREENTOP+90, 144, 20), conf.displayTextColor, GColorClear, s_font_infobig, GTextAlignmentCenter);
 
-	// Weather Box layer.
-	editTextLayer(s_layer_weatherTop, GRect(0,
-			( (conf.weatherBoxTop == 4 || conf.weatherBoxTop == 5 || conf.weatherBoxTop == 6) ? -4:5)
-	, 144, 168-138), conf.bgTextColor, GColorClear, fonts_get_system_font(FONT_KEY_GOTHIC_14), GTextAlignmentCenter);
-
-	editTextLayer(s_layer_weatherBottom, GRect(0,
-			( (conf.weatherBoxBottom == 4 || conf.weatherBoxBottom == 5 || conf.weatherBoxBottom == 6) ? 139 : 145)
-	, 144, 168-138), conf.bgTextColor, GColorClear, fonts_get_system_font(FONT_KEY_GOTHIC_14), GTextAlignmentCenter);
+	// Weather Box layer
+	editTextLayer(s_layer_weatherTop, GRect(0, -4, 144, 28), conf.bgTextColor, GColorClear, fonts_get_system_font(FONT_KEY_GOTHIC_14), GTextAlignmentCenter);
+	editTextLayer(s_layer_weatherBottom, GRect(0, 139, 144, 28), conf.bgTextColor, GColorClear, fonts_get_system_font(FONT_KEY_GOTHIC_14), GTextAlignmentCenter);	
+	text_layer_set_overflow_mode(s_layer_weatherTop, GTextOverflowModeWordWrap);
+	text_layer_set_overflow_mode(s_layer_weatherBottom, GTextOverflowModeWordWrap);
+		
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Hiding Layers - heap used %d", (int) heap_bytes_used());
 
@@ -814,9 +854,6 @@ static void main_window_load(Window *window) {
 	layer_set_hidden(text_layer_get_layer(s_layer_infobar_left), conf.infoLeftStyle == 0 ? true : false);
 	layer_set_hidden(text_layer_get_layer(s_layer_infobar_right), conf.infoRightStyle == 0 ? true : false);
 	layer_set_hidden(text_layer_get_layer(s_layer_bottombar), conf.bottomStyle == 0 ? true : false);
-
-	layer_set_hidden(text_layer_get_layer(s_layer_weatherTop), conf.weatherBoxTop == 0 ? true : false);
-	layer_set_hidden(text_layer_get_layer(s_layer_weatherTop), conf.weatherBoxBottom == 0 ? true : false);
 
 	// Marks bg and toggle layer dirty to force a redraw
 	layer_mark_dirty(s_layer_background);
@@ -851,7 +888,7 @@ static void main_window_load(Window *window) {
 
 	#if defined(PBL_HEALTH)
 	// Attempt to subscribe
-	if (conf.enableHealth) {
+	if (conf.enHealth) {
 		if(!health_service_events_subscribe(handle_health, NULL)) APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
 		else health_service_set_heart_rate_sample_period(0);
 	}
@@ -972,17 +1009,20 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			}
 
 			// Weather Config
-			Tuple *t_weatherProvider = dict_find(iter, MESSAGE_KEY_WeatherConf);				if (t_weatherProvider) conf.weatherProvider = atoi(t_weatherProvider->value->cstring);
-			Tuple *t_weatherTempUnit = dict_find(iter, MESSAGE_KEY_WeatherConf+1);			if (t_weatherTempUnit) conf.weatherTempUnit = atoi(t_weatherTempUnit->value->cstring);
-			Tuple *t_weatherWindUnit = dict_find(iter, MESSAGE_KEY_WeatherConf+2);			if (t_weatherWindUnit) conf.weatherWindUnit = atoi(t_weatherWindUnit->value->cstring);
-			Tuple *t_weatherUpdate = dict_find(iter, MESSAGE_KEY_WeatherConf+3);				if (t_weatherUpdate) conf.weatherUpdateRate = atoi(t_weatherUpdate->value->cstring);
-			Tuple *t_weatherBoxTop = dict_find(iter, MESSAGE_KEY_WeatherConf+4);				if (t_weatherBoxTop) conf.weatherBoxTop = atoi(t_weatherBoxTop->value->cstring);
-			Tuple *t_weatherBoxBottom = dict_find(iter, MESSAGE_KEY_WeatherConf+5);			if (t_weatherBoxBottom) conf.weatherBoxBottom = atoi(t_weatherBoxBottom->value->cstring);
-			Tuple *t_weatherDayNight = dict_find(iter, MESSAGE_KEY_WeatherConf+6);			if (t_weatherDayNight) conf.weatherDayNight = atoi(t_weatherDayNight->value->cstring);
-			Tuple *t_weatherNightMorning = dict_find(iter, MESSAGE_KEY_WeatherConf+7);	if (t_weatherNightMorning) conf.weatherNightMorning = atoi(t_weatherNightMorning->value->cstring);
+			Tuple *t_weatherProvider = dict_find(iter, MESSAGE_KEY_wConf);				if (t_weatherProvider) conf.weatherProvider = atoi(t_weatherProvider->value->cstring);
+			Tuple *t_weatherTempUnit = dict_find(iter, MESSAGE_KEY_wConf+1);			if (t_weatherTempUnit) conf.weatherTempUnit = atoi(t_weatherTempUnit->value->cstring);
+			Tuple *t_weatherWindUnit = dict_find(iter, MESSAGE_KEY_wConf+2);			if (t_weatherWindUnit) conf.weatherWindUnit = atoi(t_weatherWindUnit->value->cstring);
+			Tuple *t_weatherUpdate = dict_find(iter, MESSAGE_KEY_wConf+3);				if (t_weatherUpdate) conf.weatherUpdateRate = atoi(t_weatherUpdate->value->cstring);
+			Tuple *t_weatherDayNight = dict_find(iter, MESSAGE_KEY_wConf+6);			if (t_weatherDayNight) conf.weatherDayNight = atoi(t_weatherDayNight->value->cstring);
+			Tuple *t_weatherNightMorning = dict_find(iter, MESSAGE_KEY_wConf+7);	if (t_weatherNightMorning) conf.weatherNightMorning = atoi(t_weatherNightMorning->value->cstring);
+			
+			Tuple *t_weatherBoxTop = dict_find(iter, MESSAGE_KEY_wConf+4);				if (t_weatherBoxTop) conf.weatherBoxTop = atoi(t_weatherBoxTop->value->cstring);
+			Tuple *t_weatherBoxBottom = dict_find(iter, MESSAGE_KEY_wConf+5);			if (t_weatherBoxBottom) conf.weatherBoxBottom = atoi(t_weatherBoxBottom->value->cstring);
+			Tuple *t_weatherBoxTopTap = dict_find(iter, MESSAGE_KEY_wConf+8);				if (t_weatherBoxTopTap) conf.weatherBoxTopTap = atoi(t_weatherBoxTopTap->value->cstring);
+			Tuple *t_weatherBoxBottomTap = dict_find(iter, MESSAGE_KEY_wConf+9);			if (t_weatherBoxBottomTap) conf.weatherBoxBottomTap = atoi(t_weatherBoxBottomTap->value->cstring);
 
-			Tuple *t_apiWUkey = dict_find(iter, MESSAGE_KEY_WeatherKeyWU);		if (t_apiWUkey) snprintf(conf.wuKeyString, sizeof(conf.wuKeyString), "%s", t_apiWUkey->value->cstring);
-			Tuple *t_apiOWMkey = dict_find(iter, MESSAGE_KEY_WeatherKeyOWM);	if (t_apiOWMkey) snprintf(conf.owmKeyString, sizeof(conf.owmKeyString), "%s", t_apiOWMkey->value->cstring);
+			Tuple *t_apiWUkey = dict_find(iter, MESSAGE_KEY_keyWU);		if (t_apiWUkey) snprintf(conf.wuKeyString, sizeof(conf.wuKeyString), "%s", t_apiWUkey->value->cstring);
+			Tuple *t_apiOWMkey = dict_find(iter, MESSAGE_KEY_keyOWM);	if (t_apiOWMkey) snprintf(conf.owmKeyString, sizeof(conf.owmKeyString), "%s", t_apiOWMkey->value->cstring);
 			if(!t_apiWUkey || !t_apiOWMkey) {
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: API keys not received.");
 			}
@@ -997,15 +1037,15 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: Vibe settings not received.");
 			}
 
-			Tuple *t_enableHealth = dict_find(iter, MESSAGE_KEY_EnableHealth);		if (t_enableHealth) conf.enableHealth = t_enableHealth->value->int32 == 1;
-			Tuple *t_enableWeather = dict_find(iter, MESSAGE_KEY_EnableWeather);	if (t_enableWeather) conf.enableWeather = t_enableWeather->value->int32 == 1;
+			Tuple *t_enHealth = dict_find(iter, MESSAGE_KEY_enHealth);		if (t_enHealth) conf.enHealth = t_enHealth->value->int32 == 1;
+			Tuple *t_enWeather = dict_find(iter, MESSAGE_KEY_enWeather);	if (t_enWeather) conf.enWeather = t_enWeather->value->int32 == 1;
 			Tuple *t_tapDuration = dict_find(iter, MESSAGE_KEY_TapDuration);			if (t_tapDuration) conf.tapDuration = t_tapDuration->value->int32;
 
 			Tuple *t_showZero = dict_find(iter, MESSAGE_KEY_showZero);						if (t_showZero) conf.showZero = t_showZero->value->int32 == 1;
 			Tuple *t_mainTimeStyle = dict_find(iter, MESSAGE_KEY_mainTimeStyle);	if (t_mainTimeStyle) conf.mainTimeStyle = atoi(t_mainTimeStyle->value->cstring);
 			Tuple *t_dateStyle = dict_find(iter, MESSAGE_KEY_dateStyle);					if (t_dateStyle) conf.dateStyle = atoi(t_dateStyle->value->cstring);
 
-			if(!t_tapDuration || !t_enableHealth || !t_enableWeather || !t_showZero || !t_mainTimeStyle || !t_dateStyle) {
+			if(!t_tapDuration || !t_enHealth || !t_enWeather || !t_showZero || !t_mainTimeStyle || !t_dateStyle) {
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: General settings not received.");
 			}
 
@@ -1038,12 +1078,12 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: BottomBar settings not received.");
 			}
 
-			Tuple *t_brandingLogo = dict_find(iter, MESSAGE_KEY_BrandingConf);			if (t_brandingLogo) conf.brandingLogo = atoi(t_brandingLogo->value->cstring);
-			Tuple *t_brandingTop = dict_find(iter, MESSAGE_KEY_BrandingConf+1);			if (t_brandingTop) conf.brandingTop = atoi(t_brandingTop->value->cstring);
-			Tuple *t_brandingBottom = dict_find(iter, MESSAGE_KEY_BrandingConf+2);	if (t_brandingBottom) conf.brandingBottom = atoi(t_brandingBottom->value->cstring);
-			Tuple *t_toggleBold = dict_find(iter, MESSAGE_KEY_BrandingConf+3);			if (t_toggleBold) conf.toggleBold = t_toggleBold->value->int32 == 1;
-			Tuple *t_brandingLabel = dict_find(iter, MESSAGE_KEY_BrandingConf+4);		if (t_brandingLabel) conf.brandingLabel = t_brandingLabel->value->int32 == 1;
-			Tuple *t_brandingStyle = dict_find(iter, MESSAGE_KEY_BrandingConf+5);		if (t_brandingStyle) conf.brandingStyle = atoi(t_brandingStyle->value->cstring);
+			Tuple *t_brandingLogo = dict_find(iter, MESSAGE_KEY_bConf);			if (t_brandingLogo) conf.brandingLogo = atoi(t_brandingLogo->value->cstring);
+			Tuple *t_brandingTop = dict_find(iter, MESSAGE_KEY_bConf+1);			if (t_brandingTop) conf.brandingTop = atoi(t_brandingTop->value->cstring);
+			Tuple *t_brandingBottom = dict_find(iter, MESSAGE_KEY_bConf+2);	if (t_brandingBottom) conf.brandingBottom = atoi(t_brandingBottom->value->cstring);
+			Tuple *t_toggleBold = dict_find(iter, MESSAGE_KEY_bConf+3);			if (t_toggleBold) conf.toggleBold = t_toggleBold->value->int32 == 1;
+			Tuple *t_brandingLabel = dict_find(iter, MESSAGE_KEY_bConf+4);		if (t_brandingLabel) conf.brandingLabel = t_brandingLabel->value->int32 == 1;
+			Tuple *t_brandingStyle = dict_find(iter, MESSAGE_KEY_bConf+5);		if (t_brandingStyle) conf.brandingStyle = atoi(t_brandingStyle->value->cstring);
 
 			if(!t_brandingLogo || !t_brandingTop || !t_brandingBottom || !t_toggleBold || !t_brandingLabel || !t_brandingStyle) {
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: Branding settings not received.");
@@ -1070,7 +1110,7 @@ static void init() {
 	app_message_register_inbox_dropped(inbox_dropped_callback);
 	app_message_register_outbox_failed(outbox_failed_callback);
 	app_message_register_outbox_sent(outbox_sent_callback);
-	app_message_open(512, 256);
+	app_message_open(512, 512);
 
 	// Create main Window element
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Creation - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());

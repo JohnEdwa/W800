@@ -5,10 +5,10 @@ module.exports = function(minified) {
   var HTML = minified.HTML;
 
 	function importPMkey() {
-		var PMemail = clayConfig.getItemByMessageKey('PmKeysEmail').get();
-		var PMpin = clayConfig.getItemByMessageKey('PmKeysPin').get();
-		var wuKey = clayConfig.getItemByMessageKey('WeatherKeyWU').get();
-		var owmKey = clayConfig.getItemByMessageKey('WeatherKeyOWM').get();
+		var PMemail = clayConfig.getItemByMessageKey('pmkEmail').get();
+		var PMpin = clayConfig.getItemByMessageKey('pmkPin').get();
+		var wuKey = clayConfig.getItemByMessageKey('keyWU').get();
+		var owmKey = clayConfig.getItemByMessageKey('keyOWM').get();
 		
 		try {
 			if (PMemail !== "" && PMpin !== "" && PMemail !== null && PMpin !== null && PMemail !== undefined && PMpin !== undefined) {
@@ -18,8 +18,8 @@ module.exports = function(minified) {
 						.then(function(result) {
 						var json = JSON.parse(result);
 						if(json.success) {					 
-							if(json.keys.weather.wu !== ""){ clayConfig.getItemByMessageKey('WeatherKeyWU').set(json.keys.weather.wu );}
-							if(json.keys.weather.owm !== ""){ clayConfig.getItemByMessageKey('WeatherKeyOWM').set(json.keys.weather.owm );}
+							if(json.keys.weather.wu !== ""){ clayConfig.getItemByMessageKey('keyWU').set(json.keys.weather.wu );}
+							if(json.keys.weather.owm !== ""){ clayConfig.getItemByMessageKey('keyOWM').set(json.keys.weather.owm );}
 							clayConfig.getItemById('pmkeyText').set("Import Successful.");	
 						} else {
 							clayConfig.getItemById('pmkeyText').set(json.error );	
@@ -62,9 +62,9 @@ module.exports = function(minified) {
 	
 	function forecastText() {
 		try {
-			var today = clayConfig.getItemByMessageKey('WeatherConf[6]').get();
-			var tomorrow = clayConfig.getItemByMessageKey('WeatherConf[7]').get();
-			var prov = clayConfig.getItemByMessageKey('WeatherConf[0]').get();
+			var today = clayConfig.getItemByMessageKey('wConf[6]').get();
+			var tomorrow = clayConfig.getItemByMessageKey('wConf[7]').get();
+			var prov = clayConfig.getItemByMessageKey('wConf[0]').get();
 			var time = new Date();						
 			
 			if (time.getHours() <= today) { clayConfig.getItemById('sliderText').set("Forecast at current time: Today.");}
@@ -78,7 +78,7 @@ module.exports = function(minified) {
 
   clayConfig.on(clayConfig.EVENTS.AFTER_BUILD, function() {
 		try {	
-			clayConfig.getItemByMessageKey('WeatherConf[2]').hide();
+			clayConfig.getItemByMessageKey('wConf[2]').hide();
 			//clayConfig.getItemById('change0').hide();
 			//clayConfig.getItemById('change1').hide();
 			//clayConfig.getItemById('change2').hide();
@@ -91,8 +91,8 @@ module.exports = function(minified) {
 		} catch (e) {}
 
 		try {
-			var sliderText1 = clayConfig.getItemByMessageKey('WeatherConf[6]');
-			var sliderText2 = clayConfig.getItemByMessageKey('WeatherConf[7]');
+			var sliderText1 = clayConfig.getItemByMessageKey('wConf[6]');
+			var sliderText2 = clayConfig.getItemByMessageKey('wConf[7]');
 			
 			forecastText.call(sliderText1);
 			sliderText1.on('change', forecastText);
