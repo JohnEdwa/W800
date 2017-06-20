@@ -13,8 +13,13 @@ module.exports = [
 	{
 		"type": "toggle",
 		"id":"changelog",
-		"label": "Version 0.6 - Tap for older changelog",
+		"label": "Version 0.7 - Tap for older changelog",
 		"defaultValue": false
+	},
+	{
+		"type": "text",
+		"id" : "change5",
+		"defaultValue": "Version 0.7:  2017-06-20<br> * Fixed Word Slot steps counter.<br>"
 	},
 	{
 		"type": "text",

@@ -1,7 +1,7 @@
 /*
 
 	W800 by JohnEdwa
-	Version 0.6 RC1
+	Version 0.7
 
 	I'm a hobby coder at best, and this is my very first Pebble Watchface,
 		so most of the code I've used here is just the first thing that worked,
@@ -458,7 +458,14 @@ static char *getSlotData(char *inBuf, bool tap) {
 				 else snprintf(buf, sizeof(buf), confValue == 5 ? "%3d%%" : "%3d", (int) batteryLevel*10);
 					break;
 			// Steps
-			case  7: snprintf(buf, sizeof(buf),left ? "%5d " : " %5d", (int) stepsValue); break;
+			case  7:
+				if (inBuf == s_bufferFourData) {
+					if (stepsValue < 10000) {snprintf(buf, sizeof(buf), "%4d", (int) stepsValue);}
+					else {snprintf(buf, sizeof(buf), "%2dk%d", (int) (stepsValue/1000), (int) stepsValue / 100 % 10);}
+				} else {
+					snprintf(buf, sizeof(buf),left ? "%5d " : " %5d", (int) stepsValue);
+				}			
+				break;
 			// HeartRate
 			case  8:
 				if (inBuf == s_bufferFourData) snprintf(buf, sizeof(buf), "%3d", (int) bpmValue);
@@ -467,7 +474,7 @@ static char *getSlotData(char *inBuf, bool tap) {
 					else snprintf(buf, sizeof(buf), " $%3d%c", (int) bpmValue,hrArrow);
 				} break;
 			// Temperature current
-			case  9: snprintf(buf, sizeof(buf), "%3s%c", weather.tempCur, (conf.weatherTempUnit == 1 ? 'C' : (conf.weatherTempUnit == 2 ? 'F' : 'K'))); break;
+			case  9: snprintf(buf, sizeof(buf), "%3s%c", weather.tempCur, (conf.weatherTempUnit == 1 ? (inBuf == s_bufferFourData ? '#' : 'C') : (conf.weatherTempUnit == 2 ? (inBuf == s_bufferFourData ? '@' : 'F') : 'K'))); break;
 			case 10:  break;
 			case 11:  break;
 			// Sunrise / Sunset
