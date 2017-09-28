@@ -20,7 +20,6 @@ var keys = require('message_keys');
 var settings = {};
 var err = {};
 
-
 var defaultOWMkey = '47890866bbb2ccff2ce7017025bd0ebb';
 //var defaultWUkey = '2a463e04116b6a6c'
 
@@ -86,7 +85,7 @@ function getWeather(locationString, autoLocation) {
 	console.log("Weather - Sending Requests");
 		if (settings['wConf[0]'] == 2) {
 			if (DEBUG) console.log('Weather - Using WU with API key [' + wuAPIkey + ']');
-			url = 'http://api.wunderground.com/api/' + wuAPIkey + '/forecast/conditions/astronomy/q/'+ locationString + '.json';
+			url = 'https://api.wunderground.com/api/' + wuAPIkey + '/forecast/conditions/astronomy/q/'+ locationString + '.json';
 
 			xhrRequest
 					 (url, 'GET', 
@@ -156,6 +155,7 @@ function getWeather(locationString, autoLocation) {
 								console.log("Weather - Current Weather Failure.");
 								console.log(JSON.stringify(json, null, 4));
 								err[keys.jsWeatherData + 12] = 'WU: ' + json.response.error.description + '';
+								err[keys.jsWeatherData + 13] = '0';
 					 			sendMessage(err);
 							}
 						}
@@ -168,11 +168,11 @@ function getWeather(locationString, autoLocation) {
 			var urlForecast;
 			var urlCurrent;
 			if (autoLocation) {
-				urlForecast = 'http://api.openweathermap.org/data/2.5/forecast/daily?' + locationString + '&appid=' + owmAPIkey + '&cnt=2';
-				urlCurrent = 'http://api.openweathermap.org/data/2.5/weather?' + locationString + '&appid=' + owmAPIkey;
+				urlForecast = 'https://api.openweathermap.org/data/2.5/forecast/daily?' + locationString + '&appid=' + owmAPIkey + '&cnt=2';
+				urlCurrent = 'https://api.openweathermap.org/data/2.5/weather?' + locationString + '&appid=' + owmAPIkey;
 			} else {
-				urlForecast = 'http://api.openweathermap.org/data/2.5/forecast/daily?q=' + locationString + '&appid=' + owmAPIkey + '&cnt=2';
-				urlCurrent = 'http://api.openweathermap.org/data/2.5/weather?q=' + locationString + '&appid=' + owmAPIkey;
+				urlForecast = 'https://api.openweathermap.org/data/2.5/forecast/daily?q=' + locationString + '&appid=' + owmAPIkey + '&cnt=2';
+				urlCurrent = 'https://api.openweathermap.org/data/2.5/weather?q=' + locationString + '&appid=' + owmAPIkey;
 			}
 
 			if (DEBUG) console.log(urlForecast); console.log(urlCurrent);
@@ -233,6 +233,7 @@ function getWeather(locationString, autoLocation) {
 								console.log("Weather - Current Weather Failure.");
 								console.log(JSON.stringify(json, null, 4));
 								err[keys.jsWeatherData + 12] = 'OWM: ' + json.message + '';
+								err[keys.jsWeatherData + 13] = '0';
 					 			sendMessage(err);
 							}
 						}
@@ -241,6 +242,7 @@ function getWeather(locationString, autoLocation) {
 					 	console.log("Weather - Forecast Weather Failure.");
 						console.log(JSON.stringify(json, null, 4));
 						err[keys.jsWeatherData + 12] = 'OWM: ' + json.message + '';
+					  err[keys.jsWeatherData + 13] = '0';
 					 	sendMessage(err);
 					}
 			 }
@@ -260,9 +262,14 @@ function locationSuccess(pos) {
 	getWeather(location, 1);
 }
 
-function locationError(err) {
-	console.log('Weather: Error requesting location!');
-	err[keys.jsWeatherData + 12] = 'Error requesting location!';
+function locationError(error) {
+	if(error.code == error.PERMISSION_DENIED) {
+    console.log('Weather: Location access was denied by the user.');
+		err[keys.jsWeatherData + 12] = 'Location Permission Denied.';
+  } else {
+		console.log('Weather: : (' + error.code + '): ' + error.message);
+		err[keys.jsWeatherData + 12] = 'Err: (' + error.code + '): ' + error.message;
+  }
 	sendMessage(err);
 }
 
@@ -270,8 +277,9 @@ function getWeatherSetup() {
 	owmAPIkey = settings.keyOWM;
 	wuAPIkey = settings.keyWU;
 	if (settings.wLoc === null || settings.wLoc === undefined || settings.wLoc === "") {
-		navigator.geolocation.getCurrentPosition(locationSuccess,locationError, {timeout: 15000, maximumAge: 60000});
-		}	else { getWeather(settings.wLoc, 0); }	
+		navigator.geolocation.getCurrentPosition(locationSuccess,locationError, {timeout: 15000, maximumAge: 60000, enableHighAccuracy: false});
+	}	else { getWeather(settings.wLoc, 0); }
+	//watchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {timeout: 5000, maximumAge: 0}); // Register to location updates
 }
 
 // Listen for when the watchface is opened

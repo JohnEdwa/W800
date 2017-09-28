@@ -40,7 +40,7 @@ module.exports = function(minified) {
 				clayConfig.getItemById('change2').show();
 				clayConfig.getItemById('change3').show();
 				clayConfig.getItemById('change4').show();
-				//clayConfig.getItemById('change5').show();
+				clayConfig.getItemById('change5').show();
 				//clayConfig.getItemById('change6').show();
 				//clayConfig.getItemById('change7').show();
 				//clayConfig.getItemById('change8').show();
@@ -51,8 +51,8 @@ module.exports = function(minified) {
 				clayConfig.getItemById('change1').hide();
 				clayConfig.getItemById('change2').hide();
 				clayConfig.getItemById('change3').hide();
-				//clayConfig.getItemById('change4').hide();
-				//clayConfig.getItemById('change5').hide();
+				clayConfig.getItemById('change4').hide();
+				clayConfig.getItemById('change5').hide();
 				//clayConfig.getItemById('change6').hide();
 				//clayConfig.getItemById('change7').hide();
 				//clayConfig.getItemById('change8').hide();

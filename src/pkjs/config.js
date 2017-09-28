@@ -13,8 +13,13 @@ module.exports = [
 	{
 		"type": "toggle",
 		"id":"changelog",
-		"label": "Version 0.7 - Tap for older changelog",
+		"label": "Version 0.8 - Tap for older changelog",
 		"defaultValue": false
+	},
+	{
+		"type": "text",
+		"id" : "change6",
+		"defaultValue": "Version 0.8:  2017-10-01<br> * Fonts fixed and modified to fit the W800 style better.<br> * Some weather related tweaks.<br>"
 	},
 	{
 		"type": "text",
@@ -1909,7 +1914,7 @@ module.exports = [
 		},
 		{
 			"type": "text",
-			"defaultValue": "Made by <a href='http://johnedwa.dy.fi'>Jonne 'JohnEdwa' Kuusela</a> - /u/JohnEdwa"
+			"defaultValue": "Made by <a href='http://johnedwa.dy.fi'>Jonne 'JohnEdwa' Kuusela</a> - /u/JohnEdwa<br>If you feel I deserve it, donate me a cup of coffee to help with further development."
 		},
 		{
 			"type": "text",

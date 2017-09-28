@@ -39,6 +39,22 @@
         "resources": {
             "media": [
                 {
+                    "characterRegex": "[0-9:. ]",
+                    "file": "fonts/FONT_SECOND_25",
+                    "name": "FONT_SECOND_25",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 2,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9: ]",
+                    "file": "fonts/FONT_HOUR_35",
+                    "name": "FONT_HOUR_35",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 1,
+                    "type": "font"
+                },
+                {
                     "file": "images/RES_ICON",
                     "menuIcon": true,
                     "name": "RES_ICON",
@@ -68,6 +84,7 @@
                     "file": "fonts/FONT_HOUR_BIG_42",
                     "name": "FONT_HOUR_BIG_42",
                     "targetPlatforms": null,
+                    "trackingAdjust": 3,
                     "type": "font"
                 },
                 {
@@ -89,20 +106,6 @@
                     "characterRegex": "[\u00b0 -~]",
                     "file": "fonts/FONT_FOURCHAR_16",
                     "name": "FONT_FOURCHAR_16",
-                    "targetPlatforms": null,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9:. ]",
-                    "file": "fonts/FONT_SECOND_32",
-                    "name": "FONT_SECOND_32",
-                    "targetPlatforms": null,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9: ]",
-                    "file": "fonts/FONT_HOUR_64",
-                    "name": "FONT_HOUR_64",
                     "targetPlatforms": null,
                     "type": "font"
                 },
@@ -136,5 +139,5 @@
             "watchface": true
         }
     },
-    "version": "0.7.0"
+    "version": "0.8.0"
 }

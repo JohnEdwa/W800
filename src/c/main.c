@@ -1,7 +1,7 @@
 /*
 
 	W800 by JohnEdwa
-	Version 0.7
+	Version 0.8
 
 	I'm a hobby coder at best, and this is my very first Pebble Watchface,
 		so most of the code I've used here is just the first thing that worked,
@@ -244,7 +244,7 @@ static void default_settings() {
 	conf.infoLeftStyle = 1;	conf.infoRightStyle = 1; conf.infoLeftData = 7; conf.infoRightData = 8; conf.infoLeftDataTap = 0;	conf.infoRightDataTap = 0;
 	conf.bottomStyle = 2; conf.bottomLeftData = 4;	conf.bottomRightData = 3; conf.bottomLeftDataTap = 0;	conf.bottomRightDataTap = 0;
 	conf.weatherProvider = 1;	conf.weatherTempUnit = 1;	conf.weatherWindUnit = 1; conf.weatherUpdateRate = 30;
-	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 0; conf.weatherBoxTop = 24; conf.weatherBoxBottom = 15;
+	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 0; conf.weatherBoxTopTap = 24; conf.weatherBoxBottomTap = 15;
 	conf.weatherDayNight = 15;	conf.weatherNightMorning = 21;
 	strcpy(conf.locationString,""); strcpy(conf.wuKeyString,""); strcpy(conf.owmKeyString,"");
 	conf.batteryStyle = 0;
@@ -254,7 +254,6 @@ static void default_settings() {
 
 // Define our Weather data struct
 typedef struct WeatherData {
-
 	unsigned char provider;
 	unsigned long timeStamp;
 	char tempCur[5];
@@ -271,12 +270,14 @@ typedef struct WeatherData {
 	char condMain[32];
 	char condDesc[32];
 	char condForecast[32];
+	
+	int retryTimer;
+	int retryCount;
 } WeatherData;
 static WeatherData weather;
 
 // Clear weather persistent weather data.
 static void clear_weather() {
-
 	weather.timeStamp = 0;
 	strcpy(weather.tempCur,"");
 	strcpy(weather.tempMin,"");
@@ -286,7 +287,7 @@ static void clear_weather() {
 	strcpy(weather.humidity,"");
 	strcpy(weather.sunset,"");
 	strcpy(weather.sunrise,"");
-	strcpy(weather.location,"");
+	strcpy(weather.location,"Loading...");
 	strcpy(weather.condMain,"");
 	strcpy(weather.condDesc,"");
 	strcpy(weather.condForecast,"");
@@ -409,7 +410,7 @@ static void handle_health(HealthEventType event, void *context) {
 
 // Gets the correct buffer data for the info slots
 static char *getSlotData(char *inBuf, bool tap) {
-	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "getSlotData");
+	//if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "getSlotData");
 	static char outBuf[16] = {};
 	strcpy(outBuf,inBuf);
 
@@ -461,7 +462,7 @@ static char *getSlotData(char *inBuf, bool tap) {
 			case  7:
 				if (inBuf == s_bufferFourData) {
 					if (stepsValue < 10000) {snprintf(buf, sizeof(buf), "%4d", (int) stepsValue);}
-					else {snprintf(buf, sizeof(buf), "%2dk%d", (int) (stepsValue/1000), (int) stepsValue / 100 % 10);}
+					else {snprintf(buf, sizeof(buf), "%2d.%d", (int) (stepsValue/1000), (int) stepsValue / 100 % 10);}
 				} else {
 					snprintf(buf, sizeof(buf),left ? "%5d " : " %5d", (int) stepsValue);
 				}			
@@ -526,7 +527,6 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 		*/
 
 		switch (confValue) {
-			
 			case 0: strcpy(inBuf," "); break;
 			case 1: snprintf(inBuf, bufSize, "%s", weather.location); break;
 			case 2: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
@@ -570,7 +570,7 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 		GRect frame = layer_get_frame(text_layer_get_layer(layer));
 		GSize content = text_layer_get_content_size(layer);
 		layer_set_frame(text_layer_get_layer(layer), GRect(frame.origin.x, frame.origin.y + (frame.size.h - content.h) / 2,frame.size.w, content.h));
-		if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Size: Frame %d/%d, Layer %d/%d. GRect: %d,%d,%d,%d",frame.size.w, frame.size.h, content.w, content.h,frame.origin.x, frame.origin.y + (frame.size.h - content.h - 5) / 2,frame.size.w, content.h);
+		//if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Size: Frame %d/%d, Layer %d/%d. GRect: %d,%d,%d,%d",frame.size.w, frame.size.h, content.w, content.h,frame.origin.x, frame.origin.y + (frame.size.h - content.h - 5) / 2,frame.size.w, content.h);
 	}
 }
 
@@ -713,10 +713,11 @@ static void update_time(struct tm *tick_time, TimeUnits units_changed, bool firs
 
 	// Time, Minutes/Hours (Also weather update)
 	if (units_changed & MINUTE_UNIT || firstRun) {
-			// GCheck for weather update
+			// Check for weather update, assuming we need to and haven't retried in a while 		
+			if (weather.retryTimer > 0) weather.retryTimer--;		
 			if ((time(NULL) - weather.timeStamp) > (conf.weatherUpdateRate < 15 ? conf.weatherUpdateRate*3600 : conf.weatherUpdateRate*60)) {
-				if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Updating Weather:  %d > %d", (time(NULL) - weather.timeStamp), (conf.weatherUpdateRate < 15 ? conf.weatherUpdateRate*3600 : conf.weatherUpdateRate*60));
-				get_weather();
+				if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather Weather Update:  %lu > %d, try %d, timer %d", (time(NULL) - weather.timeStamp), (conf.weatherUpdateRate < 15 ? conf.weatherUpdateRate*3600 : conf.weatherUpdateRate*60), weather.retryCount, weather.retryTimer);
+				if (weather.retryTimer == 0) get_weather();
 			}
 
 			strftime(s_bufferHour, sizeof(s_bufferHour), clock_is_24h_style() ? (conf.showZero ? "%H:%M" : "%k:%M" ) : (conf.showZero ? "%I:%M" : "%l:%M"), tick_time);
@@ -758,9 +759,9 @@ static void main_window_load(Window *window) {
 
 	// Create GFonts
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Create Fonts - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
-	s_font_hour = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_HOUR_64));
+	s_font_hour = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_HOUR_35));
 	s_font_hour_big = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_HOUR_BIG_42));
-	s_font_second = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SECOND_32));
+	s_font_second = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SECOND_25));
 	s_font_4char = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_FOURCHAR_16));
 	s_font_infobig = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_INFO_BIG_16));
 	s_font_infosmall = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_INFO_SMALL_16));
@@ -819,7 +820,7 @@ static void main_window_load(Window *window) {
 
 	// Configure Main Time Layers
 	if (conf.mainTimeStyle == 1) {
-		editTextLayer(s_layer_hour, GRect(SCREENLEFT+19, SCREENTOP+23, 100, 70), conf.displayTextColor, GColorClear, s_font_hour, GTextAlignmentLeft);
+		editTextLayer(s_layer_hour, GRect(SCREENLEFT+19, SCREENTOP+48, 100, 70), conf.displayTextColor, GColorClear, s_font_hour, GTextAlignmentLeft);
 		layer_set_frame(bitmap_layer_get_layer(s_layer_pm), GRect(SCREENLEFT+25, SCREENTOP+55, 10, 11));
 	}
 	else if (conf.mainTimeStyle == 2) {
@@ -827,8 +828,8 @@ static void main_window_load(Window *window) {
 		layer_set_frame(bitmap_layer_get_layer(s_layer_pm), GRect(SCREENLEFT+12, SCREENTOP+52, 10, 11));
 	}
 	else if (conf.mainTimeStyle == 3) {
-		editTextLayer(s_layer_hour,GRect(SCREENLEFT+4, SCREENTOP+23, 100, 70), conf.displayTextColor, GColorClear, s_font_hour, GTextAlignmentLeft);
-		editTextLayer(s_layer_second,GRect(SCREENLEFT+104, SCREENTOP+59, 40, 40), conf.displayTextColor, GColorClear, s_font_second, GTextAlignmentLeft);
+		editTextLayer(s_layer_hour,GRect(SCREENLEFT+4, SCREENTOP+48, 100, 70), conf.displayTextColor, GColorClear, s_font_hour, GTextAlignmentLeft);
+		editTextLayer(s_layer_second,GRect(SCREENLEFT+104, SCREENTOP+58, 40, 40), conf.displayTextColor, GColorClear, s_font_second, GTextAlignmentLeft);
 		layer_set_frame(bitmap_layer_get_layer(s_layer_pm), GRect(SCREENLEFT+10, SCREENTOP+55, 10, 11));
 	}
 
@@ -958,7 +959,6 @@ static void load_settings() {
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Received js Data, Reading");
 		// Check weather data tuples
-
 		Tuple *t_weatherTempCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 1);
 		Tuple *t_weatherTempMin = dict_find(iter, MESSAGE_KEY_jsWeatherData + 2);
 		Tuple *t_weatherTempMax = dict_find(iter, MESSAGE_KEY_jsWeatherData + 3);
@@ -977,8 +977,12 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		if(t_weatherLocation && t_weatherProvider && t_weatherTempCur && t_weatherTempMin && t_weatherTempMax && t_weatherCondMain
 			 && t_weatherCondDesc && t_weatherCondForecast && t_weatherWindCur && t_weatherWindMax &&t_weatherHumidity && t_weatherSunrise &&t_weatherSunset) {
 			if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Weather data.");
-			weather.provider = atoi(t_weatherProvider->value->cstring);
 
+			// Reset the retry
+			weather.retryCount = 0;
+			weather.retryTimer = 0;
+			
+			weather.provider = atoi(t_weatherProvider->value->cstring);
 			snprintf(weather.tempCur, sizeof(weather.tempCur), "%s", t_weatherTempCur->value->cstring);
 			snprintf(weather.tempMin, sizeof(weather.tempMin), "%s", t_weatherTempMin->value->cstring);
 			snprintf(weather.tempMax, sizeof(weather.tempMax), "%s", t_weatherTempMax->value->cstring);
@@ -990,7 +994,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			snprintf(weather.condMain, sizeof(weather.condMain), "%s", t_weatherCondMain->value->cstring);
 			snprintf(weather.condDesc, sizeof(weather.condDesc), "%s", t_weatherCondDesc->value->cstring);
 			snprintf(weather.condForecast, sizeof(weather.condForecast), "%s", t_weatherCondForecast->value->cstring);
-			snprintf(weather.location, sizeof(weather.location), "%s", t_weatherLocation->value->cstring);
+			snprintf(weather.location, sizeof(weather.location), "%s", t_weatherLocation->value->cstring);			
 			weather.timeStamp = time(NULL);
 			save_weather();
 			update_fourSlot(false);
@@ -998,6 +1002,9 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		else if (t_weatherLocation) {
 			// Error happened.
 			snprintf(weather.location, sizeof(weather.location), "%s", t_weatherLocation->value->cstring);
+			weather.retryTimer = weather.retryTimer + weather.retryCount;
+			weather.retryCount++;
+			if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather Retry: Count: %d, Timer: %d", weather.retryCount, weather.retryTimer);
 			update_fourSlot(false);
 		}
 		else {
@@ -1117,7 +1124,7 @@ static void init() {
 	app_message_register_inbox_dropped(inbox_dropped_callback);
 	app_message_register_outbox_failed(outbox_failed_callback);
 	app_message_register_outbox_sent(outbox_sent_callback);
-	app_message_open(1024, 1024);
+	app_message_open(2048, 2048);
 
 	// Create main Window element
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Creation - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
