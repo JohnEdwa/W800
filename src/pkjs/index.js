@@ -26,6 +26,22 @@ var defaultOWMkey = '47890866bbb2ccff2ce7017025bd0ebb';
 var owmAPIkey = '';
 var wuAPIkey = '';
 
+var url = null;	
+var tempCurrent = null;
+var tempMin = null;
+var tempMax = null;
+var windCurrent = null;
+var windMax = null;
+var humidity = null;
+var sunrise = null;
+var sunset = null;	
+var condMain = null;
+var condDesc = null;
+var condForecast = null;	
+var location = null;	
+var forecastNumber = 0;
+var time = null;
+
 function pad (str, max) {
   str = str.toString();
   return str.length < max ? pad("0" + str, max) : str;
@@ -59,29 +75,39 @@ function sendMessage(d) {
 	Pebble.sendAppMessage
 	(d,
 		function(e) {if (DEBUG) console.log('Info sent to Pebble successfully!');},
-		function(e) {console.log('Error sending info to Pebble!');}
+		function(e) {console.error('Error sending info to Pebble!');}
 	);
+}
+
+function buildMessage(provider) {
+	var d = {};
+	if (provider != 0) {
+		try {
+			d[keys.jsWeatherData + 1] = tempCurrent +'';
+			d[keys.jsWeatherData + 2] = tempMin +'';
+			d[keys.jsWeatherData + 3] = tempMax + '';
+			d[keys.jsWeatherData + 4] = windCurrent +'';
+			d[keys.jsWeatherData + 5] = windMax +'';
+			d[keys.jsWeatherData + 6] = humidity +'';
+			d[keys.jsWeatherData + 7] = sunrise + '';
+			d[keys.jsWeatherData + 8] = sunset + '';
+			d[keys.jsWeatherData + 12] = location + '';
+			d[keys.jsWeatherData + 13] = provider;
+			d[keys.jsWeatherData + 14] = condForecast + '';
+			d[keys.jsWeatherData + 15] = condMain + '';
+			d[keys.jsWeatherData + 16] = condDesc + '';
+
+			sendMessage(d);
+		} catch (e) {console.error('buildMessage: Failed!');}
+	}
+	else {
+		d[keys.jsWeatherData + 12] = location + '';
+		d[keys.jsWeatherData + 13] = 0;
+		sendMessage(d);
+	}
 }
 	
 function getWeather(locationString, autoLocation) {
-	
-	var url = null;
-	
-	var tempCurrent = null;
-	var tempMin = null;
-	var tempMax = null;
-	var windCurrent = null;
-	var windMax = null;
-	var humidity = null;
-	var sunrise = null;
-	var sunset = null;	
-	var condMain = null;
-	var condDesc = null;
-	var condForecast = null;	
-	var location = null;	
-	var forecastNumber = 0;
-	var time = null;
-	
 	console.log("Weather - Sending Requests");
 		if (settings['wConf[0]'] == 2) {
 			if (DEBUG) console.log('Weather - Using WU with API key [' + wuAPIkey + ']');
@@ -129,34 +155,21 @@ function getWeather(locationString, autoLocation) {
 								humidity = json.current_observation.relative_humidity;
 								condForecast = json.forecast.simpleforecast.forecastday[forecastNumber].conditions;
 								location = json.current_observation.display_location.city;
-
 								sunrise = pad(json.sun_phase.sunrise.hour,2) + ':' + pad(json.sun_phase.sunrise.minute,2);
 								sunset =  pad(json.sun_phase.sunset.hour,2) + ':' +  pad(json.sun_phase.sunset.minute,2);
 
-								// Assemble dictionary using our keys
-								var d = {};
-								d[keys.jsWeatherData + 1] = tempCurrent +'';
-								d[keys.jsWeatherData + 2] = tempMin +'';
-								d[keys.jsWeatherData + 3] = tempMax + '';
-								d[keys.jsWeatherData + 4] = windCurrent +'';
-								d[keys.jsWeatherData + 5] = windMax +'';
-								d[keys.jsWeatherData + 6] = humidity +'';
-								d[keys.jsWeatherData + 7] = sunrise + '';
-								d[keys.jsWeatherData + 8] = sunset + '';
-								d[keys.jsWeatherData + 12] = location + '';
-								d[keys.jsWeatherData + 13] = '2'; // WeatherProvider
-								d[keys.jsWeatherData + 14] = condForecast + '';
-								d[keys.jsWeatherData + 15] = condMain + '';
-								d[keys.jsWeatherData + 16] = condDesc + '';
-								
-								sendMessage(d);
+								buildMessage(2);
 							}
 							else {
-								console.log("Weather - Current Weather Failure.");
+								console.error("Weather - Current Weather Failure.");
+								location = 'WU: ' + json.response.error.description + '';
+								buildMessage(0); 
+								/*
 								console.log(JSON.stringify(json, null, 4));
 								err[keys.jsWeatherData + 12] = 'WU: ' + json.response.error.description + '';
 								err[keys.jsWeatherData + 13] = '0';
 					 			sendMessage(err);
+								*/
 							}
 						}
 					 );
@@ -213,37 +226,31 @@ function getWeather(locationString, autoLocation) {
 								sunset = timeTo(json.sys.sunset);
 								location = json.name;
 
-								var d = {};
-								d[keys.jsWeatherData + 1] = tempCurrent +'';
-								d[keys.jsWeatherData + 2] = tempMin +'';
-								d[keys.jsWeatherData + 3] = tempMax + '';
-								d[keys.jsWeatherData + 4] = windCurrent +'';
-								d[keys.jsWeatherData + 5] = windMax +'';
-								d[keys.jsWeatherData + 6] = humidity +'';
-								d[keys.jsWeatherData + 7] = sunrise + '';
-								d[keys.jsWeatherData + 8] = sunset + '';
-								d[keys.jsWeatherData + 12] = location + '';
-								d[keys.jsWeatherData + 13] = '1'; // WeatherProvider
-								d[keys.jsWeatherData + 14] = condForecast + '';
-								d[keys.jsWeatherData + 15] = condMain + '';
-								d[keys.jsWeatherData + 16] = condDesc + '';
-
-								sendMessage(d);
+								buildMessage(1);
+								//sendMessage(d);
 							} else {
-								console.log("Weather - Current Weather Failure.");
+								console.error("Weather - Current Weather Failure.");
+								location = 'OWM: ' + json.message + '';
+								buildMessage(0);
+								/*
 								console.log(JSON.stringify(json, null, 4));
 								err[keys.jsWeatherData + 12] = 'OWM: ' + json.message + '';
 								err[keys.jsWeatherData + 13] = '0';
 					 			sendMessage(err);
+								*/
 							}
 						}
 					 );
 				 } else {
-					 	console.log("Weather - Forecast Weather Failure.");
+					 	console.error("Weather - Forecast Weather Failure.");
+					 	location = 'OWM: ' + json.message + '';
+						buildMessage(0);
+					 /*
 						console.log(JSON.stringify(json, null, 4));
 						err[keys.jsWeatherData + 12] = 'OWM: ' + json.message + '';
 					  err[keys.jsWeatherData + 13] = '0';
 					 	sendMessage(err);
+						*/
 					}
 			 }
 			);
@@ -253,21 +260,17 @@ function getWeather(locationString, autoLocation) {
 function locationSuccess(pos) {
   // Construct URL
 	var location = null;
-	if (settings['wConf[0]'] == 2) {
-		location = pos.coords.latitude + ',' + pos.coords.longitude;
-	}
-	else {
-		location = 'lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude;
-	}
+	if (settings['wConf[0]'] == 2) { location = pos.coords.latitude + ',' + pos.coords.longitude;	}
+	else { location = 'lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude; }
 	getWeather(location, 1);
 }
 
 function locationError(error) {
 	if(error.code == error.PERMISSION_DENIED) {
-    console.log('Weather: Location access was denied by the user.');
+    console.error('Weather: Location access was denied by the user.');
 		err[keys.jsWeatherData + 12] = 'Location Permission Denied.';
   } else {
-		console.log('Weather: : (' + error.code + '): ' + error.message);
+		console.error('Weather: : (' + error.code + '): ' + error.message);
 		err[keys.jsWeatherData + 12] = 'Err: (' + error.code + '): ' + error.message;
   }
 	sendMessage(err);
@@ -286,8 +289,10 @@ function getWeatherSetup() {
 Pebble.addEventListener('ready', 
   function(e) {
 		try {settings = JSON.parse(localStorage.getItem('clay-settings')) || {};
-		} catch (ee) { console.log("Could not load clay settings!");}		
+		} catch (ee) { console.error("Could not load clay settings!");}		
     if (DEBUG) console.log('PebbleKit JS ready!');
+		
+		Pebble.sendAppMessage({'jsReady': 1});
 		
     // Get the initial weather
 		if (settings.enWeather === true) { getWeatherSetup(); }
@@ -298,7 +303,7 @@ Pebble.addEventListener('ready',
 Pebble.addEventListener('appmessage',
   function(e) {
 		try { settings = JSON.parse(localStorage.getItem('clay-settings')) || {};
-		} catch (ee) { console.log("Could not load clay settings!");}
+		} catch (ee) { console.error("Could not load clay settings!");}
 		
 		console.log('Weather - Update Request received.');
     if (settings.enWeather === true) { getWeatherSetup(); }

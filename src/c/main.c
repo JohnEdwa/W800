@@ -68,6 +68,8 @@ static char *getDateString(bool four, unsigned char mode);
 // GLOBAL VARIABLES
 // -----------------
 
+static bool s_jsReady = 0;
+
 HealthValue bpmOld = 0;
 HealthValue bpmValue = 0;
 HealthValue stepsValue = 0;
@@ -291,6 +293,9 @@ static void clear_weather() {
 	strcpy(weather.condMain,"");
 	strcpy(weather.condDesc,"");
 	strcpy(weather.condForecast,"");
+	
+	weather.retryTimer = 0;
+	weather.retryCount = 0;
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather: Weather Cleared.");
 }
@@ -360,7 +365,6 @@ static void vibrate(int8_t style) {
 	}
 }
 
-
 // Keeps track of battery state
 static void handle_battery(BatteryChargeState charge_state) {
 	if (charge_state.is_charging) batteryCharge = 1;
@@ -391,7 +395,6 @@ static void handle_tap(AccelAxisType axis, int32_t direction) {
 		update_fourSlot(true);
 	}
 }
-
 
 // Just calls update_health
 static void handle_health(HealthEventType event, void *context) {
@@ -510,7 +513,6 @@ static char *getSlotData(char *inBuf, bool tap) {
 	return outBuf;
 }
 
-
 // Sets a Weather box Data
 static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize, bool tap) {
 	if ((tap && tapTrigger) || (!tap && !tapTrigger)) {
@@ -573,7 +575,6 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 		//if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Size: Frame %d/%d, Layer %d/%d. GRect: %d,%d,%d,%d",frame.size.w, frame.size.h, content.w, content.h,frame.origin.x, frame.origin.y + (frame.size.h - content.h - 5) / 2,frame.size.w, content.h);
 	}
 }
-
 
 // Keeps track of the FourCharSlot data and tap updates.
 static void update_fourSlot(bool tap) {
@@ -748,7 +749,6 @@ static void timeInit() {
 	update_fourSlot(false);
 }
 
-
 // Loads the main window, bitmaps and layers
 static void main_window_load(Window *window) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Load - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
@@ -911,26 +911,32 @@ static void main_window_load(Window *window) {
 	timeInit();
 }
 
+// Ask JS for a weather update
 static void get_weather() {
-	DictionaryIterator *iter;
-	app_message_outbox_begin(&iter);
-	dict_write_uint8(iter, 0, 0);
-	app_message_outbox_send();
+	if (s_jsReady) {
+		DictionaryIterator *iter;
+		app_message_outbox_begin(&iter);
+		dict_write_uint8(iter, 0, 0);
+		app_message_outbox_send();
+	}
+	else APP_LOG(APP_LOG_LEVEL_ERROR, "GetWeather: js connection not ready.");
 }
 
+// Save the weather to persistent storage
 static void save_weather() {
 	int ret = persist_write_data(WEATHER_KEY, &weather, sizeof(weather));
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Weather Saved: (%d)", ret);
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather: Saved info with timestamp [%lu]", weather.timeStamp);
 }
 
+// Load weather from persistent storage and check it's not too old.
 static void load_weather() {
 	int ret = persist_read_data(WEATHER_KEY, &weather, sizeof(weather));
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Weather Loaded: (%d)", ret);
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather: loaded, ts: [%lu], timeNow: [%lu], age: [%lu] seconds", weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
 
 	if ( ((time(NULL)-weather.timeStamp) > (conf.weatherUpdateRate < 15 ? (conf.weatherUpdateRate*3600)*4 : (conf.weatherUpdateRate*60)*4) ) || weather.provider != conf.weatherProvider) {
-		if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather: data too old, clearing");
+		if (DEBUG) APP_LOG(APP_LOG_LEVEL_INFO, "Weather: data too old, clearing");
 		clear_weather();
 	}
 }
@@ -958,7 +964,12 @@ static void load_settings() {
 // Receive JS Messages from the phone
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Received js Data, Reading");
-		// Check weather data tuples
+	
+	// Check if it was the jsReady confirmation
+	Tuple *t_jsReady = dict_find(iter, MESSAGE_KEY_jsReady);
+	if (t_jsReady) {s_jsReady = t_jsReady->value->int32 == 1;}
+	else {	
+		// Check for weather data tuples
 		Tuple *t_weatherTempCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 1);
 		Tuple *t_weatherTempMin = dict_find(iter, MESSAGE_KEY_jsWeatherData + 2);
 		Tuple *t_weatherTempMax = dict_find(iter, MESSAGE_KEY_jsWeatherData + 3);
@@ -975,13 +986,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 		// weather data is available, save it
 		if(t_weatherLocation && t_weatherProvider && t_weatherTempCur && t_weatherTempMin && t_weatherTempMax && t_weatherCondMain
-			 && t_weatherCondDesc && t_weatherCondForecast && t_weatherWindCur && t_weatherWindMax &&t_weatherHumidity && t_weatherSunrise &&t_weatherSunset) {
-			if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Weather data.");
+			&& t_weatherCondDesc && t_weatherCondForecast && t_weatherWindCur && t_weatherWindMax &&t_weatherHumidity && t_weatherSunrise &&t_weatherSunset)
+		{
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Weather data.");
 
 			// Reset the retry
 			weather.retryCount = 0;
 			weather.retryTimer = 0;
-			
+
 			weather.provider = atoi(t_weatherProvider->value->cstring);
 			snprintf(weather.tempCur, sizeof(weather.tempCur), "%s", t_weatherTempCur->value->cstring);
 			snprintf(weather.tempMin, sizeof(weather.tempMin), "%s", t_weatherTempMin->value->cstring);
@@ -1004,11 +1016,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			snprintf(weather.location, sizeof(weather.location), "%s", t_weatherLocation->value->cstring);
 			weather.retryTimer = weather.retryTimer + weather.retryCount;
 			weather.retryCount++;
-			if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather Retry: Count: %d, Timer: %d", weather.retryCount, weather.retryTimer);
+			APP_LOG(APP_LOG_LEVEL_ERROR, "Weather Error: %s, Count: %d, Timer: %d",weather.location, weather.retryCount, weather.retryTimer);
 			update_fourSlot(false);
 		}
-		else {
-			if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Config data.");
+	else {
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Config data.");
 		 	// Must have been config settings then :)
 
 			// Colour config
@@ -1105,6 +1117,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 			save_settings();
 		}
+	}
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped! [%d]", reason);}

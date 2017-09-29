@@ -33,7 +33,8 @@
             "TapDuration",
             "pmkEmail",
             "pmkPin",
-            "Color"
+            "Color",
+            "jsReady"
         ],
         "projectType": "native",
         "resources": {
