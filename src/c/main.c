@@ -280,6 +280,7 @@ static WeatherData weather;
 
 // Clear weather persistent weather data.
 static void clear_weather() {
+	weather.provider = 0;
 	weather.timeStamp = 0;
 	strcpy(weather.tempCur,"");
 	strcpy(weather.tempMin,"");
@@ -545,8 +546,8 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 			case 15: snprintf(inBuf, bufSize, "%s\n%s                %s",weather.location, weather.sunrise, weather.sunset); break;
 			case 34: 
 			case 43:
-				if (strcmp(weather.condDesc, weather.condForecast) == 0) snprintf(inBuf, bufSize, "%s", weather.condDesc);
-				else snprintf(inBuf, bufSize, "%s\n%s", confValue == 34 ? weather.condDesc : weather.condForecast, confValue == 34 ? weather.condForecast : weather.condDesc);
+				//if (strcmp(weather.condDesc, weather.condForecast) == 0) snprintf(inBuf, bufSize, "%s", weather.condDesc);
+				snprintf(inBuf, bufSize, "%s\n%s", confValue == 34 ? weather.condDesc : weather.condForecast, confValue == 34 ? weather.condForecast : weather.condDesc);
 				break;
 			default: strcpy(inBuf," "); break;
 			
@@ -936,7 +937,9 @@ static void load_weather() {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather: loaded, ts: [%lu], timeNow: [%lu], age: [%lu] seconds", weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
 
 	if ( ((time(NULL)-weather.timeStamp) > (conf.weatherUpdateRate < 15 ? (conf.weatherUpdateRate*3600)*4 : (conf.weatherUpdateRate*60)*4) ) || weather.provider != conf.weatherProvider) {
-		if (DEBUG) APP_LOG(APP_LOG_LEVEL_INFO, "Weather: data too old, clearing");
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather: data too old, clearing. ");
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather: (wp: [%d], cwp: [%d], ts: [%lu], timeNow: [%lu], age: [%lu] seconds)", weather.provider, conf.weatherProvider, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
+
 		clear_weather();
 	}
 }
@@ -947,9 +950,10 @@ static void save_settings() {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Settings Saved: (%d)", ret);
 
 	clear_weather();
+	get_weather();
 	window_stack_pop_all(true);
 	window_stack_push(s_main_window, true);
-	get_weather();
+	
 }
 
 // Load Config settings
@@ -967,7 +971,10 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	
 	// Check if it was the jsReady confirmation
 	Tuple *t_jsReady = dict_find(iter, MESSAGE_KEY_jsReady);
-	if (t_jsReady) {s_jsReady = t_jsReady->value->int32 == 1;}
+	if (t_jsReady && !s_jsReady) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "jsReady received.");
+		s_jsReady = t_jsReady->value->int32 == 1;
+	}
 	else {	
 		// Check for weather data tuples
 		Tuple *t_weatherTempCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 1);
@@ -988,7 +995,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		if(t_weatherLocation && t_weatherProvider && t_weatherTempCur && t_weatherTempMin && t_weatherTempMax && t_weatherCondMain
 			&& t_weatherCondDesc && t_weatherCondForecast && t_weatherWindCur && t_weatherWindMax &&t_weatherHumidity && t_weatherSunrise &&t_weatherSunset)
 		{
-			APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Weather data.");
+			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather data.");
 
 			// Reset the retry
 			weather.retryCount = 0;
@@ -1019,8 +1026,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			APP_LOG(APP_LOG_LEVEL_ERROR, "Weather Error: %s, Count: %d, Timer: %d",weather.location, weather.retryCount, weather.retryTimer);
 			update_fourSlot(false);
 		}
-	else {
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Config data.");
+		else {
+			APP_LOG(APP_LOG_LEVEL_INFO, "Received Config data.");
 		 	// Must have been config settings then :)
 
 			// Colour config
@@ -1114,7 +1121,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			if(!t_brandingLogo || !t_brandingTop || !t_brandingBottom || !t_toggleBold || !t_brandingLabel || !t_brandingStyle) {
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: Branding settings not received.");
 			}
-
 			save_settings();
 		}
 	}

@@ -92,7 +92,7 @@ function buildMessage(provider) {
 			d[keys.jsWeatherData + 7] = sunrise + '';
 			d[keys.jsWeatherData + 8] = sunset + '';
 			d[keys.jsWeatherData + 12] = location + '';
-			d[keys.jsWeatherData + 13] = provider;
+			d[keys.jsWeatherData + 13] = provider + '';
 			d[keys.jsWeatherData + 14] = condForecast + '';
 			d[keys.jsWeatherData + 15] = condMain + '';
 			d[keys.jsWeatherData + 16] = condDesc + '';
@@ -292,10 +292,14 @@ Pebble.addEventListener('ready',
 		} catch (ee) { console.error("Could not load clay settings!");}		
     if (DEBUG) console.log('PebbleKit JS ready!');
 		
-		Pebble.sendAppMessage({'jsReady': 1});
+		Pebble.sendAppMessage
+		({'jsReady': 1},
+			function(e) {if (DEBUG) console.log('jsReady sent to Pebble successfully!');},
+			function(e) {console.error('Error sending info to Pebble!');}
+		);
 		
     // Get the initial weather
-		if (settings.enWeather === true) { getWeatherSetup(); }
+		//if (settings.enWeather === true) { getWeatherSetup(); }
   }
 );
 
