@@ -367,16 +367,18 @@ static void vibrate(int8_t style) {
 }
 
 // Keeps track of battery state
-static void handle_battery(BatteryChargeState charge_state) {
+static void handle_battery(BatteryChargeState charge_state) {	
 	if (charge_state.is_charging) batteryCharge = 1;
-	else if (charge_state.is_plugged)  batteryCharge = 2;
+	else if (charge_state.is_plugged) batteryCharge = 2;
 	else batteryCharge = 0;
+	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_battery: %d", batteryCharge);
 	batteryLevel = ((charge_state.charge_percent)/10);
 	layer_mark_dirty(s_layer_toggle);
 }
 
 // Keeps track of BT state
 static void handle_bluetooth(bool connected) {
+	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_bluetooth: %d", connected);
   bluetoothState = connected;
 	if(!connected && conf.btDCVibe != 0 && bluetoothStateOld == true) { vibrate(conf.btDCVibe); }
 	else if(connected && conf.btConVibe != 0 && bluetoothStateOld == false) {vibrate(conf.btConVibe);}
@@ -506,8 +508,8 @@ static char *getSlotData(char *inBuf, bool tap) {
 			if (inBuf == s_bufferFourData){
 				snprintf(outBuf, sizeof(buf), "%4s", buf);
 			} else {
-				if (left) snprintf(outBuf, sizeof(buf), "%*s%*s", (int) (styleValue == 1 ? 4 : 3 )+((strlen(buf) + (2/2))/2) , buf, (int) (styleValue == 1 ? 4 : 3 )-((strlen(buf) + (2/2))/2), "");
-				else snprintf(outBuf, sizeof(buf), "%*s%*s", (int) (styleValue == 1 ? 4 : 3 )+(strlen(buf)/2), buf, (int) (styleValue == 1 ? 4 : 3 )-(strlen(buf)/2), "");
+				if (left) snprintf(outBuf, sizeof(buf), "%*s%*s", (int) ((styleValue == 1 ? 4 : 3 )+((strlen(buf) + (2/2))/2)) , buf, (int) ((styleValue == 1 ? 4 : 3 )-((strlen(buf) + (2/2))/2)), "");
+				else snprintf(outBuf, sizeof(buf), "%*s%*s", (int) ((styleValue == 1 ? 4 : 3 )+(strlen(buf)/2)), buf, (int) ((styleValue == 1 ? 4 : 3 )-(strlen(buf)/2)), "");
 			}
 		}
 	}
@@ -627,7 +629,6 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
 	graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, gbitmap_get_bounds(s_bitmap_background));
 
-	
 	if (conf.brandingStyle == 1) {
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90,144-(SCREENLEFT*2),2), 0,0);
@@ -667,7 +668,6 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 
 	// Battery
 	if (batteryLevel >= 1 || batteryCharge == 1) {
-
 		graphics_context_set_fill_color(ctx, conf.displayTextColor);
 		graphics_context_set_stroke_color(ctx, conf.displayTextColor);
 		graphics_fill_rect(ctx, GRect(33,3,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0,0);
@@ -934,12 +934,11 @@ static void save_weather() {
 static void load_weather() {
 	int ret = persist_read_data(WEATHER_KEY, &weather, sizeof(weather));
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Weather Loaded: (%d)", ret);
-	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather: loaded, ts: [%lu], timeNow: [%lu], age: [%lu] seconds", weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
+	APP_LOG(APP_LOG_LEVEL_INFO, "Weather: loaded (%d), ts: [%lu], timeNow: [%lu], age: [%lu] seconds",ret, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
 
 	if ( ((time(NULL)-weather.timeStamp) > (conf.weatherUpdateRate < 15 ? (conf.weatherUpdateRate*3600)*4 : (conf.weatherUpdateRate*60)*4) ) || weather.provider != conf.weatherProvider) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather: data too old, clearing. ");
-		APP_LOG(APP_LOG_LEVEL_INFO, "Weather: (wp: [%d], cwp: [%d], ts: [%lu], timeNow: [%lu], age: [%lu] seconds)", weather.provider, conf.weatherProvider, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
-
+		//APP_LOG(APP_LOG_LEVEL_INFO, "Weather: (wp: [%d], cwp: [%d], ts: [%lu], timeNow: [%lu], age: [%lu] seconds)", weather.provider, conf.weatherProvider, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
 		clear_weather();
 	}
 }
