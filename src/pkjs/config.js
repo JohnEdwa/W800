@@ -19,7 +19,7 @@ module.exports = [
 	{
 		"type": "text",
 		"id" : "change6",
-		"defaultValue": "Version 0.8:  2017-10-01<br> * Fonts fixed and modified to fit the W800 style better.<br> * Some weather related tweaks.<br>"
+		"defaultValue": "Version 0.8:  2017-10-20<br> * Fonts fixed and modified to fit the W800 style better.<br> * Compiled for Chalk (Time Round) as a workaround config reset bug fix.<br> * Some weather related tweaks.<br>"
 	},
 	{
 		"type": "text",

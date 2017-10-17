@@ -133,6 +133,7 @@
         "sdkVersion": "3",
         "targetPlatforms": [
             "basalt",
+            "chalk",
             "diorite"
         ],
         "uuid": "3996d79b-21af-4f91-910d-f9ac159de130",

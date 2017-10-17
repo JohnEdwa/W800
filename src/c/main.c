@@ -20,8 +20,14 @@
 #define WEATHER_KEY 2
 
 // Draws are referenced to these if the layout changes.
-#define SCREENTOP 29
-#define SCREENLEFT 4
+#if defined(PBL_RECT)
+  #define SCREENTOP 29
+	#define SCREENLEFT 4
+#else
+  #define SCREENTOP 35
+	#define SCREENLEFT 22
+#endif
+
 
 //typedef enum {INFO_TIME, INFO_DATE, INFO_HEALTH, INFO_TOGGLES, INFO_TAP, INFO_RESET, INFO_WEATHER} infoType_e ;
 
@@ -627,28 +633,29 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 
 	// Draw the BG bitmap
 	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
-	graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, gbitmap_get_bounds(s_bitmap_background));
+	//graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, gbitmap_get_bounds(s_bitmap_background));
+	graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, PBL_IF_RECT_ELSE(gbitmap_get_bounds(s_bitmap_background),GRect(18, 6, gbitmap_get_bounds(s_bitmap_background).size.w, gbitmap_get_bounds(s_bitmap_background).size.h)));
 
 	if (conf.brandingStyle == 1) {
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90,144-(SCREENLEFT*2),2), 0,0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90, PBL_IF_RECT_ELSE(144,180)-(SCREENLEFT*2),2), 0,0);
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT-1, SCREENTOP-1, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
 	}
 	
 	// If weather box is empty, draw the branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
-		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(5, 5, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
-		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(60, 10, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+1, SCREENTOP-24, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
+		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+56, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
 	}
 	
 	if ((!tapTrigger && conf.weatherBoxBottom == 0) || (tapTrigger && conf.weatherBoxBottomTap == 0)) {
-		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(0, 148, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
+		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(SCREENLEFT-4, SCREENTOP+117, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
 	}
 														
 	if (conf.brandingLabel != 0) {
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(-5, -21, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(139, -20, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(139, 146, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT-9, SCREENTOP-50, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT+135, SCREENTOP-49, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT+135, SCREENTOP+117, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 	}
 }
 
@@ -794,7 +801,7 @@ static void main_window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), s_layer_background);
 	
 	// Create Toggles Layer
-	s_layer_toggle = layer_create(GRect(87,30,55,22));
+	s_layer_toggle = layer_create(GRect(SCREENLEFT+83,SCREENTOP+1,55,22));
 	layer_set_update_proc(s_layer_toggle, toggle_update_proc);
 	layer_add_child(window_get_root_layer(window), s_layer_toggle);
 
@@ -838,18 +845,18 @@ static void main_window_load(Window *window) {
 	if (conf.fourData != 0 || conf.fourDataTap != 0) editTextLayer(s_layer_4char, GRect(SCREENLEFT+9, SCREENTOP+4, 64, 20), conf.displayTextColor, GColorClear, s_font_4char, GTextAlignmentRight);
 
 	// Top Infobar
-	if (conf.infoLeftStyle == 1) editTextLayer(s_layer_infobar_left, GRect(0, SCREENTOP+26, 72, 20), conf.displayTextColor, GColorClear, s_font_infosmall, GTextAlignmentRight);
-	else if (conf.infoLeftStyle == 2) editTextLayer(s_layer_infobar_left, GRect(0, SCREENTOP+25, 72, 20), conf.displayTextColor, GColorClear, s_font_infobig, GTextAlignmentRight);
-	if (conf.infoRightStyle == 1)	editTextLayer(s_layer_infobar_right, GRect(73, SCREENTOP+26, 72, 20), conf.displayTextColor, GColorClear, s_font_infosmall, GTextAlignmentLeft);
-	else if (conf.infoRightStyle == 2) editTextLayer(s_layer_infobar_right, GRect(73, SCREENTOP+25, 72, 20), conf.displayTextColor, GColorClear, s_font_infobig, GTextAlignmentLeft);
+	if (conf.infoLeftStyle == 1) editTextLayer(s_layer_infobar_left, GRect(SCREENLEFT-4, SCREENTOP+26, 72, 20), conf.displayTextColor, GColorClear, s_font_infosmall, GTextAlignmentRight);
+	else if (conf.infoLeftStyle == 2) editTextLayer(s_layer_infobar_left, GRect(SCREENLEFT-4, SCREENTOP+25, 72, 20), conf.displayTextColor, GColorClear, s_font_infobig, GTextAlignmentRight);
+	if (conf.infoRightStyle == 1)	editTextLayer(s_layer_infobar_right, GRect(SCREENLEFT+69, SCREENTOP+26, 72, 20), conf.displayTextColor, GColorClear, s_font_infosmall, GTextAlignmentLeft);
+	else if (conf.infoRightStyle == 2) editTextLayer(s_layer_infobar_right, GRect(SCREENLEFT+69, SCREENTOP+25, 72, 20), conf.displayTextColor, GColorClear, s_font_infobig, GTextAlignmentLeft);
 
 	// Bottom Infobar
-	if(conf.bottomStyle == 1) editTextLayer(s_layer_bottombar, GRect(0, SCREENTOP+91, 144, 20), conf.displayTextColor, GColorClear, s_font_infosmall, GTextAlignmentCenter);
-	else if (conf.bottomStyle == 2) editTextLayer(s_layer_bottombar, GRect(0, SCREENTOP+90, 144, 20), conf.displayTextColor, GColorClear, s_font_infobig, GTextAlignmentCenter);
+	if(conf.bottomStyle == 1) editTextLayer(s_layer_bottombar, GRect(SCREENLEFT-4, SCREENTOP+91, 144, 20), conf.displayTextColor, GColorClear, s_font_infosmall, GTextAlignmentCenter);
+	else if (conf.bottomStyle == 2) editTextLayer(s_layer_bottombar, GRect(SCREENLEFT-4, SCREENTOP+90, 144, 20), conf.displayTextColor, GColorClear, s_font_infobig, GTextAlignmentCenter);
 
 	// Weather Box layer
-	editTextLayer(s_layer_weatherTop, GRect(0, -4, 144, 28), conf.bgTextColor, GColorClear, fonts_get_system_font(FONT_KEY_GOTHIC_14), GTextAlignmentCenter);
-	editTextLayer(s_layer_weatherBottom, GRect(0, 139, 144, 28), conf.bgTextColor, GColorClear, fonts_get_system_font(FONT_KEY_GOTHIC_14), GTextAlignmentCenter);	
+	editTextLayer(s_layer_weatherTop, GRect(SCREENLEFT-4, SCREENTOP-29-4, 144, 28), conf.bgTextColor, GColorClear, fonts_get_system_font(FONT_KEY_GOTHIC_14), GTextAlignmentCenter);
+	editTextLayer(s_layer_weatherBottom, GRect(SCREENLEFT-4, SCREENTOP-29+139, 144, 28), conf.bgTextColor, GColorClear, fonts_get_system_font(FONT_KEY_GOTHIC_14), GTextAlignmentCenter);	
 	text_layer_set_overflow_mode(s_layer_weatherTop, GTextOverflowModeWordWrap);
 	text_layer_set_overflow_mode(s_layer_weatherBottom, GTextOverflowModeWordWrap);
 		
