@@ -92,12 +92,6 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/IMAGE_BG_BLACK.PNG",
-                    "name": "IMAGE_BG_BLACK",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
                     "file": "images/IMAGE_BG_TINY.PNG",
                     "name": "IMAGE_BG_TINY",
                     "targetPlatforms": null,
@@ -132,6 +126,7 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
+            "aplite",
             "diorite"
         ],
         "uuid": "3996d79b-21af-4f91-910d-f9ac159de130",

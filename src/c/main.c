@@ -627,7 +627,6 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	gbitmap_set_palette(s_bitmap_brand_bg, displayPalette, false);
 
 	bgPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
-	//bgPalette[1] = conf.bgColor;
 	bgPalette[0] = conf.bgTextColor;
 	bgPalette[1] = conf.bgColor;
 	gbitmap_set_palette(s_bitmap_brand_labels, bgPalette, false);
