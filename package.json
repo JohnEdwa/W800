@@ -40,99 +40,98 @@
         "resources": {
             "media": [
                 {
-                    "file": "images/IMAGE_BG_TINY",
-                    "name": "IMAGE_BG_TINY",
+                    "characterRegex": "[\u00b0 -~]",
+                    "file": "fonts/FONT_FOURCHAR_16.TTF",
+                    "name": "FONT_FOURCHAR_16",
                     "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/RES_ICON",
-                    "menuIcon": true,
-                    "name": "RES_ICON",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_SHEET_TOGGLES",
-                    "name": "IMAGE_SHEET_TOGGLES",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_SHEET_BRANDING",
-                    "name": "IMAGE_SHEET_BRANDING",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_BUTTON_LABELS",
-                    "name": "IMAGE_BUTTON_LABELS",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_BG_BLACK",
-                    "name": "IMAGE_BG_BLACK",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_BG_BIT",
-                    "name": "IMAGE_BG_BIT",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "characterRegex": "[0-9:. ]",
-                    "file": "fonts/FONT_SECOND_25",
-                    "name": "FONT_SECOND_25",
-                    "targetPlatforms": null,
-                    "trackingAdjust": 2,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9A-Z %()*:$-]",
-                    "file": "fonts/FONT_INFO_SMALL_16",
-                    "name": "FONT_INFO_SMALL_16",
-                    "targetPlatforms": null,
-                    "trackingAdjust": -1,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9A-Z %()*:$-]",
-                    "file": "fonts/FONT_INFO_BIG_16",
-                    "name": "FONT_INFO_BIG_16",
-                    "targetPlatforms": null,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9:. ]",
-                    "file": "fonts/FONT_HOUR_BIG_42",
-                    "name": "FONT_HOUR_BIG_42",
-                    "targetPlatforms": null,
-                    "trackingAdjust": 3,
                     "type": "font"
                 },
                 {
                     "characterRegex": "[0-9: ]",
-                    "file": "fonts/FONT_HOUR_35",
+                    "file": "fonts/FONT_HOUR_35.TTF",
                     "name": "FONT_HOUR_35",
                     "targetPlatforms": null,
                     "trackingAdjust": 1,
                     "type": "font"
                 },
                 {
-                    "characterRegex": "[\u00b0 -~]",
-                    "file": "fonts/FONT_FOURCHAR_16",
-                    "name": "FONT_FOURCHAR_16",
+                    "characterRegex": "[0-9:. ]",
+                    "file": "fonts/FONT_HOUR_BIG_42.TTF",
+                    "name": "FONT_HOUR_BIG_42",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 3,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9A-Z %()*:$-]",
+                    "file": "fonts/FONT_INFO_BIG_16.TTF",
+                    "name": "FONT_INFO_BIG_16",
                     "targetPlatforms": null,
                     "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9A-Z %()*:$-]",
+                    "file": "fonts/FONT_INFO_SMALL_16.TTF",
+                    "name": "FONT_INFO_SMALL_16",
+                    "targetPlatforms": null,
+                    "trackingAdjust": -1,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9:. ]",
+                    "file": "fonts/FONT_SECOND_25.TTF",
+                    "name": "FONT_SECOND_25",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 2,
+                    "type": "font"
+                },
+                {
+                    "file": "images/IMAGE_BG_BIT.PNG",
+                    "name": "IMAGE_BG_BIT",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_BG_BLACK.PNG",
+                    "name": "IMAGE_BG_BLACK",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_BG_TINY.PNG",
+                    "name": "IMAGE_BG_TINY",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/RES_ICON.PNG",
+                    "menuIcon": true,
+                    "name": "RES_ICON",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_SHEET_TOGGLES.PNG",
+                    "name": "IMAGE_SHEET_TOGGLES",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_SHEET_BRANDING.PNG",
+                    "name": "IMAGE_SHEET_BRANDING",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_BUTTON_LABELS.PNG",
+                    "name": "IMAGE_BUTTON_LABELS",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
                 }
             ]
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "aplite",
             "diorite"
         ],
         "uuid": "3996d79b-21af-4f91-910d-f9ac159de130",
