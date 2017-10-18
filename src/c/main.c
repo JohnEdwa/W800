@@ -1246,15 +1246,12 @@ static char *getDateString(bool four, unsigned char mode) {
 	time_t temp = time(NULL);
 	struct tm *tick_time = localtime(&temp);
 	static char dateStringBuffer[8] = {};
+
+	const char *datestr[] = {	"%2d%2d",		"%2d%02d",		"%02d%2d",		"%02d%02d",	"%2d-%2d",		"%2d-%02d",		"%02d-%2d",		"%02d-%02d",	};
+	
 	if (mode == 0) {
-				 if (conf.dateStyle == 1) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ?  "%2d%2d"	: "%2d-%2d"	,tick_time->tm_mon+1,tick_time->tm_mday);
-		else if (conf.dateStyle == 2) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%2d%02d" 	:"%2d-%02d"	,tick_time->tm_mon+1,tick_time->tm_mday);
-		else if (conf.dateStyle == 3) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%02d%2d"	:"%02d-%2d"	,tick_time->tm_mon+1,tick_time->tm_mday);
-		else if (conf.dateStyle == 4) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%02d%02d"	:"%02d-%02d"	,tick_time->tm_mon+1,tick_time->tm_mday);
-		else if (conf.dateStyle == 5) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ?  "%2d%2d"	: "%2d-%2d"	,tick_time->tm_mday,tick_time->tm_mon+1);
-		else if (conf.dateStyle == 6) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%2d%02d"	:"%2d-%02d"	,tick_time->tm_mday,tick_time->tm_mon+1);
-		else if (conf.dateStyle == 7) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%02d%2d"	:"%02d-%2d"	,tick_time->tm_mday,tick_time->tm_mon+1);
-		else if (conf.dateStyle == 8) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%02d%02d"	:"%02d-%02d"	,tick_time->tm_mday,tick_time->tm_mon+1);
+		if (conf.dateStyle < 5) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? datestr[conf.dateStyle-1] : datestr[conf.dateStyle+3], tick_time->tm_mon+1, tick_time->tm_mday);
+		else snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? datestr[conf.dateStyle-5] : datestr[conf.dateStyle-1], tick_time->tm_mday, tick_time->tm_mon+1);
 	}
 		else if (mode == 1) {snprintf(dateStringBuffer, sizeof(dateStringBuffer), (conf.dateStyle == 1 || conf.dateStyle == 2 || conf.dateStyle == 5 || conf.dateStyle == 7) ? "%2d":"%02d" ,tick_time->tm_mon+1);}
 		else if (mode == 2) {snprintf(dateStringBuffer, sizeof(dateStringBuffer), (conf.dateStyle == 1 || conf.dateStyle == 3 || conf.dateStyle == 5 || conf.dateStyle == 6) ? "%2d":"%02d" ,tick_time->tm_mday);}
