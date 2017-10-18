@@ -149,10 +149,6 @@ static GBitmap *s_bitmap_toggle_battery;
 static GBitmap *s_bitmap_toggle_charge;
 static GBitmap *s_bitmap_toggle_pm;
 
-GColor *bgPalette;
-GColor *displayPalette;
-GColor *displayTextPalette;
-
 // Static Buffers (One larger than max size to account for end char)
 static char s_bufferHour[6];
 static char s_bufferSecond[3];
@@ -618,19 +614,29 @@ static void update_fourSlot(bool tap) {
 static void background_update_proc(Layer *layer, GContext *ctx) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "background_update_proc");
 
+	/*
+	GColor *bgPalette;
+	GColor *displayPalette;
+	GColor *displayTextPalette;
+	*/
+	
 	// Create the palettes from user colours
-	displayPalette = gbitmap_get_palette(s_bitmap_background);
-	displayPalette[0] = conf.displayBorderColor;
-	displayPalette[1] = conf.bgColor;
-	displayPalette[3] = conf.displayColor;
-	gbitmap_set_palette(s_bitmap_background, displayPalette, false);
-	gbitmap_set_palette(s_bitmap_brand_bg, displayPalette, false);
+	GColor *cornerPalette = gbitmap_get_palette(s_bitmap_background);
+	cornerPalette[0] = conf.displayBorderColor;
+	cornerPalette[1] = conf.bgColor;
+	cornerPalette[3] = conf.displayColor;
+	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
+	
+	GColor *bitPalette = gbitmap_get_palette(s_bitmap_brand_bg);
+	bitPalette[0] = conf.displayBorderColor;
+	bitPalette[1] = conf.displayColor;
+	gbitmap_set_palette(s_bitmap_brand_bg, bitPalette, false);
 
-	bgPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
-	bgPalette[0] = conf.bgTextColor;
-	bgPalette[1] = conf.bgColor;
-	gbitmap_set_palette(s_bitmap_brand_labels, bgPalette, false);
-	gbitmap_set_palette(s_bitmap_sheet_branding, bgPalette, false);
+	GColor *brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
+	brandingPalette[0] = conf.bgTextColor;
+	brandingPalette[1] = conf.bgColor;
+	gbitmap_set_palette(s_bitmap_brand_labels, brandingPalette, false);
+	gbitmap_set_palette(s_bitmap_sheet_branding, brandingPalette, false);
 
 	// Draw the BG bitmap
 	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
@@ -661,13 +667,10 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP-4, 144,-10), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP+114, 144,10), 0, 0);
 	
-	// Draw the UI Lines for W86
-		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP+25, 75, 2), 0, 0);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT+75, SCREENTOP+25, 1, 1), 0, 0);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT+76, SCREENTOP, 1, 25), 0, 0);
+	
 	
 	// Draw Toggle line
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, 57, 1), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, 56, 1), 0, 0);
 	
@@ -677,7 +680,14 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	if (conf.brandingStyle == 1) {
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90, PBL_IF_RECT_ELSE(144,180)-(SCREENLEFT*2),2), 0,0);
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT-1, SCREENTOP-1, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT+3, SCREENTOP+3, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
+	}
+	else {
+		// Draw the UI Lines for W86
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP+25, 75, 2), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+75, SCREENTOP+25, 1, 1), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+76, SCREENTOP, 1, 25), 0, 0);
 	}
 	
 	// If weather box is empty, draw the branding.
@@ -702,9 +712,9 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "toggle_update_proc");
 
 	// Create palettes from user colours
-	displayTextPalette = gbitmap_get_palette(s_bitmap_sheet_toggles);
-	displayTextPalette[0] = conf.displayTextColor;
-	gbitmap_set_palette(s_bitmap_sheet_toggles, displayTextPalette, false);
+	GColor *togglePalette = gbitmap_get_palette(s_bitmap_sheet_toggles);
+	togglePalette[0] = conf.displayTextColor;
+	gbitmap_set_palette(s_bitmap_sheet_toggles, togglePalette, false);
 
 	graphics_context_set_compositing_mode(ctx, GCompOpSet);
 
@@ -819,7 +829,6 @@ static void main_window_load(Window *window) {
 	// Load bitmaps
 	s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
 	s_bitmap_sheet_toggles = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_TOGGLES);
-	//s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BRANDING_LABELS);
 	s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUTTON_LABELS);
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Creating bitmaps - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
