@@ -627,14 +627,53 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	gbitmap_set_palette(s_bitmap_brand_bg, displayPalette, false);
 
 	bgPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
-	bgPalette[1] = conf.bgTextColor;
+	//bgPalette[1] = conf.bgColor;
+	bgPalette[0] = conf.bgTextColor;
+	bgPalette[1] = conf.bgColor;
 	gbitmap_set_palette(s_bitmap_brand_labels, bgPalette, false);
 	gbitmap_set_palette(s_bitmap_sheet_branding, bgPalette, false);
 
 	// Draw the BG bitmap
 	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
+	
+	graphics_context_set_fill_color(ctx, conf.bgColor);
+	graphics_fill_rect(ctx, GRect(0, 0, 180, 180), 0, 0);
+	
+	// Draw the display box
+		graphics_context_set_fill_color(ctx, conf.displayColor);		
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-3, SCREENTOP-3, 142, 116), 0, 0);	
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-2, SCREENTOP-2, 140, 114), 0, 0);
+		graphics_context_set_fill_color(ctx, conf.displayColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP, 136, 110), 0, 0);
+	
+	// Draw the corners
+		graphics_context_set_fill_color(ctx, conf.bgColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-14, SCREENTOP-14, 20,20), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-14, SCREENTOP-14, 20,20));	
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-130, SCREENTOP-14, 20,20), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP-14, 20,20));	
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-14, SCREENTOP+104, 20,20), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-14, SCREENTOP+104, 20,20));	
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+130, SCREENTOP+104, 20,20), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP+104, 20,20));
+	
+	// Hide the overflow.
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP-4, 144,-10), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP+114, 144,10), 0, 0);
+	
+	// Draw the UI Lines for W86
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP+25, 75, 2), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+75, SCREENTOP+25, 1, 1), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+76, SCREENTOP, 1, 25), 0, 0);
+	
+	// Draw Toggle line
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, 57, 1), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, 56, 1), 0, 0);
+	
 	//graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, gbitmap_get_bounds(s_bitmap_background));
-	graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, PBL_IF_RECT_ELSE(gbitmap_get_bounds(s_bitmap_background),GRect(18, 6, gbitmap_get_bounds(s_bitmap_background).size.w, gbitmap_get_bounds(s_bitmap_background).size.h)));
+	//graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, PBL_IF_RECT_ELSE(gbitmap_get_bounds(s_bitmap_background),GRect(18, 6, gbitmap_get_bounds(s_bitmap_background).size.w, gbitmap_get_bounds(s_bitmap_background).size.h)));
 
 	if (conf.brandingStyle == 1) {
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
@@ -776,7 +815,7 @@ static void main_window_load(Window *window) {
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Load Bitmap Sheets - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 	// Load Bitmaps
-	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BLACK);
+	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_TINY);
 	s_bitmap_brand_bg = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BIT);
 	// Load bitmaps
 	s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
