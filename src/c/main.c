@@ -644,8 +644,8 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	
 	// If weather box is empty, draw the branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
-		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+1, SCREENTOP-24, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
-		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+56, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
+		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+66, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
 	}
 	
 	if ((!tapTrigger && conf.weatherBoxBottom == 0) || (tapTrigger && conf.weatherBoxBottomTap == 0)) {
@@ -785,9 +785,9 @@ static void main_window_load(Window *window) {
 	s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUTTON_LABELS);
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Creating bitmaps - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
-	s_bitmap_brand_logo = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingLogo > 0 ? (conf.brandingLogo-1) * 20 : 0) , 64, 20));
-	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(64,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 80, 10));
-	s_bitmap_brand_bottom = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingBottom > 0 ? ((conf.brandingBottom-1) * 15) + 60 : 0), 144, 15));
+	s_bitmap_brand_logo = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingLogo > 0 ? (conf.brandingLogo-1) * 16 : 0) , 52, 16));
+	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(64,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 70, 9));
+	s_bitmap_brand_bottom = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingBottom > 0 ? ((conf.brandingBottom-1) * 12) + 48 : 0), 128, 12));
 	s_bitmap_toggle_enabled = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,0,17,4));
 	s_bitmap_toggle_battery = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,4,17,4));
 	s_bitmap_toggle_charge = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,8,17,4));
