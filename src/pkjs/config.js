@@ -70,7 +70,8 @@ module.exports = [
 			"type": "toggle",
 			"messageKey": "enHealth",
 			"label": "Enable Health",
-			"defaultValue": true
+			"defaultValue": true,
+			"capabilities": ["NOT_PLATFORM_APLITE"],
 		},
 		{
 			"type": "slider",
@@ -121,7 +122,8 @@ module.exports = [
 			},
 			{ 
 				"label": "Roman Numeral Vibrations",
-				"value": "7"
+				"value": "7",
+				"capabilities": ["NOT_PLATFORM_APLITE"],
 			},
 			]
 		},

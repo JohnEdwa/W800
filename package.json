@@ -40,6 +40,13 @@
         "resources": {
             "media": [
                 {
+                    "file": "images/IMAGE_BG_TINY",
+                    "name": "IMAGE_BG_TINY",
+                    "spaceOptimization": "memory",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
                     "characterRegex": "[0-9:. ]",
                     "file": "fonts/FONT_SECOND_25",
                     "name": "FONT_SECOND_25",
@@ -59,24 +66,21 @@
                     "file": "images/RES_ICON",
                     "menuIcon": true,
                     "name": "RES_ICON",
+                    "spaceOptimization": "memory",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
                     "file": "images/IMAGE_SHEET_BRANDING",
                     "name": "IMAGE_SHEET_BRANDING",
+                    "spaceOptimization": "memory",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
                     "file": "images/IMAGE_SHEET_TOGGLES",
                     "name": "IMAGE_SHEET_TOGGLES",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_BRANDING_LABELS",
-                    "name": "IMAGE_BRANDING_LABELS",
+                    "spaceOptimization": "memory",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
@@ -113,18 +117,21 @@
                 {
                     "file": "images/IMAGE_BG_BLACK",
                     "name": "IMAGE_BG_BLACK",
+                    "spaceOptimization": "memory",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
                     "file": "images/IMAGE_BG_BIT",
                     "name": "IMAGE_BG_BIT",
+                    "spaceOptimization": "memory",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
                     "file": "images/IMAGE_BUTTON_LABELS",
                     "name": "IMAGE_BUTTON_LABELS",
+                    "spaceOptimization": "memory",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 }
@@ -132,8 +139,7 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "basalt",
-            "chalk",
+            "aplite",
             "diorite"
         ],
         "uuid": "3996d79b-21af-4f91-910d-f9ac159de130",
