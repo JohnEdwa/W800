@@ -256,7 +256,7 @@ static void default_settings() {
 	conf.infoLeftStyle = 1;	conf.infoRightStyle = 1; conf.infoLeftData = 7; conf.infoRightData = 8; conf.infoLeftDataTap = 0;	conf.infoRightDataTap = 0;
 	conf.bottomStyle = 2; conf.bottomLeftData = 4;	conf.bottomRightData = 3; conf.bottomLeftDataTap = 0;	conf.bottomRightDataTap = 0;
 	conf.weatherProvider = 1;	conf.weatherTempUnit = 1;	conf.weatherWindUnit = 1; conf.weatherUpdateRate = 30;
-	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 0; conf.weatherBoxTopTap = 24; conf.weatherBoxBottomTap = 15;
+	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 13; conf.weatherBoxTopTap = 24; conf.weatherBoxBottomTap = 15;
 	conf.weatherDayNight = 15;	conf.weatherNightMorning = 21;
 	strcpy(conf.locationString,""); strcpy(conf.wuKeyString,""); strcpy(conf.owmKeyString,"");
 	conf.batteryStyle = 0;
@@ -364,6 +364,7 @@ static void vibrate(int8_t style) {
 			case 4: vibes_pwm(conf.vibeStrength, 150, 1); break;
 			case 5: vibes_pwm(conf.vibeStrength, 300, 1); break;
 			case 6: vibes_pwm(conf.vibeStrength, 500, 1); break;
+			#if !defined(PBL_PLATFORM_APLITE)
 			case 7:
 				;time_t temp = time(NULL);
 				struct tm *tick_time = localtime(&temp);
@@ -371,6 +372,7 @@ static void vibrate(int8_t style) {
 				strftime(hour, sizeof(hour), "%I", tick_time);
 				VibePattern hourPat = {.durations = romanVibes[atoi(hour)], .num_segments = ARRAY_LENGTH(romanVibes[atoi(hour)]),};
 				vibes_enqueue_custom_pattern(hourPat); break;
+			#endif
 			default:  break;
 		}
 	}
@@ -638,9 +640,47 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	gbitmap_set_palette(s_bitmap_sheet_branding, bgPalette, false);
 
 	// Draw the BG bitmap
-	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
+	
+	graphics_context_set_fill_color(ctx, conf.bgColor);
+	graphics_fill_rect(ctx, GRect(0, 0, 180, 180), 0, 0);
+	
+	// Draw the display box
+		graphics_context_set_fill_color(ctx, conf.displayColor);		
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-3, SCREENTOP-3, 142, 116), 0, 0);	
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-2, SCREENTOP-2, 140, 114), 0, 0);
+		graphics_context_set_fill_color(ctx, conf.displayColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP, 136, 110), 0, 0);
+	
+	// Draw the corners
+		graphics_context_set_fill_color(ctx, conf.bgColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-14, SCREENTOP-14, 20,20), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-14, SCREENTOP-14, 20,20));	
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-130, SCREENTOP-14, 20,20), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP-14, 20,20));	
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-14, SCREENTOP+104, 20,20), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-14, SCREENTOP+104, 20,20));	
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+130, SCREENTOP+104, 20,20), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP+104, 20,20));
+	
+	// Hide the overflow.
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP-4, 144,-10), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP+114, 144,10), 0, 0);
+	
+	// Draw the UI Lines for W86
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP+25, 75, 2), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+75, SCREENTOP+25, 1, 1), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+76, SCREENTOP, 1, 25), 0, 0);
+	
+	// Draw Toggle line
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, 57, 1), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, 56, 1), 0, 0);
+	
+	
+	//graphics_context_set_compositing_mode(ctx, GCompOpSet);	
 	//graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, gbitmap_get_bounds(s_bitmap_background));
-	graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, PBL_IF_RECT_ELSE(gbitmap_get_bounds(s_bitmap_background),GRect(18, 6, gbitmap_get_bounds(s_bitmap_background).size.w, gbitmap_get_bounds(s_bitmap_background).size.h)));
+	//graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, PBL_IF_RECT_ELSE(gbitmap_get_bounds(s_bitmap_background),GRect(18, 6, gbitmap_get_bounds(s_bitmap_background).size.w, gbitmap_get_bounds(s_bitmap_background).size.h)));
 
 	if (conf.brandingStyle == 1) {
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
@@ -648,16 +688,18 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT-1, SCREENTOP-1, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
 	}
 	
-	// If weather box is empty, draw the branding.
+	// If weather box is empty, draw the top branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
-		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+1, SCREENTOP-24, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
-		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+56, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
+		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+66, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
 	}
 	
+	// ...and bottom branding
 	if ((!tapTrigger && conf.weatherBoxBottom == 0) || (tapTrigger && conf.weatherBoxBottomTap == 0)) {
 		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(SCREENLEFT-4, SCREENTOP+117, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
 	}
-														
+	
+	// Next/Prev/Light labels
 	if (conf.brandingLabel != 0) {
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT-9, SCREENTOP-50, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT+135, SCREENTOP-49, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
@@ -683,16 +725,16 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	if (batteryLevel >= 1 || batteryCharge == 1) {
 		graphics_context_set_fill_color(ctx, conf.displayTextColor);
 		graphics_context_set_stroke_color(ctx, conf.displayTextColor);
-		graphics_fill_rect(ctx, GRect(33,3,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0,0);
-		graphics_fill_rect(ctx, GRect(32,4,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0,0);
-		graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 1, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
+		graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
+		graphics_fill_rect(ctx, GRect(30,1,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0,0);
+		graphics_fill_rect(ctx, GRect(29,2,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0,0);
 	}
 
 	// BT
-	if (bluetoothState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 8, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
+	if (bluetoothState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 7, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
 
 	// QT
-	if (quietTimeState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 15, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
+	if (quietTimeState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 14, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
 }
 
 // Time update function
@@ -782,23 +824,29 @@ static void main_window_load(Window *window) {
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Load Bitmap Sheets - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 	// Load Bitmaps
-	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BLACK);
+	//s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BLACK);
+	
+	#if defined(PBL_PLATFORM_APLITE)
+		s_bitmap_sheet_branding = gbitmap_create_blank(GSize(1,1), GBitmapFormat1BitPalette);
+	#else
+		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
+	#endif
+	
+	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_TINY);
 	s_bitmap_brand_bg = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BIT);
 	// Load bitmaps
-	s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
 	s_bitmap_sheet_toggles = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_TOGGLES);
-	//s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BRANDING_LABELS);
 	s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUTTON_LABELS);
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Creating bitmaps - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
-	s_bitmap_brand_logo = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingLogo > 0 ? (conf.brandingLogo-1) * 20 : 0) , 64, 20));
-	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(64,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 80, 10));
-	s_bitmap_brand_bottom = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingBottom > 0 ? ((conf.brandingBottom-1) * 15) + 60 : 0), 144, 15));
-	s_bitmap_toggle_enabled = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(27,0,21,6));
-	s_bitmap_toggle_battery = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(27,6,21,6));
-	s_bitmap_toggle_charge = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(27,12,21,6));
-	s_bitmap_toggle_label = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(0,(conf.toggleBold == true ? 24 : 0),27,24));
-	s_bitmap_toggle_pm = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(27,24,10,11));
+	s_bitmap_brand_logo = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingLogo > 0 ? (conf.brandingLogo-1) * 16 : 0) , 52, 16));
+	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(64,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 70, 9));
+	s_bitmap_brand_bottom = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingBottom > 0 ? ((conf.brandingBottom-1) * 12) + 48 : 0), 128, 12));
+	s_bitmap_toggle_enabled = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,0,17,4));
+	s_bitmap_toggle_battery = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,4,17,4));
+	s_bitmap_toggle_charge = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,8,17,4));
+	s_bitmap_toggle_label = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect((conf.toggleBold == true ? 23 : 0),0,23,20));
+	s_bitmap_toggle_pm = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,12,6,7));
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Create layers - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 	// Create background Layer
@@ -807,7 +855,7 @@ static void main_window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), s_layer_background);
 	
 	// Create Toggles Layer
-	s_layer_toggle = layer_create(GRect(SCREENLEFT+83,SCREENTOP+1,55,22));
+	s_layer_toggle = layer_create(GRect(SCREENLEFT+85,SCREENTOP+3,55,22));
 	layer_set_update_proc(s_layer_toggle, toggle_update_proc);
 	layer_add_child(window_get_root_layer(window), s_layer_toggle);
 
@@ -1143,7 +1191,7 @@ static void init() {
 	app_message_register_inbox_dropped(inbox_dropped_callback);
 	app_message_register_outbox_failed(outbox_failed_callback);
 	app_message_register_outbox_sent(outbox_sent_callback);
-	app_message_open(2048, 2048);
+	app_message_open(768, 64);
 
 	// Create main Window element
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Creation - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
@@ -1240,15 +1288,12 @@ static char *getDateString(bool four, unsigned char mode) {
 	time_t temp = time(NULL);
 	struct tm *tick_time = localtime(&temp);
 	static char dateStringBuffer[8] = {};
+
+	const char *datestr[] = {	"%2d%2d",		"%2d%02d",		"%02d%2d",		"%02d%02d",	"%2d-%2d",		"%2d-%02d",		"%02d-%2d",		"%02d-%02d",	};
+	
 	if (mode == 0) {
-				 if (conf.dateStyle == 1) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ?  "%2d%2d"	: "%2d-%2d"	,tick_time->tm_mon+1,tick_time->tm_mday);
-		else if (conf.dateStyle == 2) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%2d%02d" 	:"%2d-%02d"	,tick_time->tm_mon+1,tick_time->tm_mday);
-		else if (conf.dateStyle == 3) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%02d%2d"	:"%02d-%2d"	,tick_time->tm_mon+1,tick_time->tm_mday);
-		else if (conf.dateStyle == 4) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%02d%02d"	:"%02d-%02d"	,tick_time->tm_mon+1,tick_time->tm_mday);
-		else if (conf.dateStyle == 5) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ?  "%2d%2d"	: "%2d-%2d"	,tick_time->tm_mday,tick_time->tm_mon+1);
-		else if (conf.dateStyle == 6) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%2d%02d"	:"%2d-%02d"	,tick_time->tm_mday,tick_time->tm_mon+1);
-		else if (conf.dateStyle == 7) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%02d%2d"	:"%02d-%2d"	,tick_time->tm_mday,tick_time->tm_mon+1);
-		else if (conf.dateStyle == 8) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? "%02d%02d"	:"%02d-%02d"	,tick_time->tm_mday,tick_time->tm_mon+1);
+		if (conf.dateStyle < 5) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? datestr[conf.dateStyle-1] : datestr[conf.dateStyle+3], tick_time->tm_mon+1, tick_time->tm_mday);
+		else snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? datestr[conf.dateStyle-5] : datestr[conf.dateStyle-1], tick_time->tm_mday, tick_time->tm_mon+1);
 	}
 		else if (mode == 1) {snprintf(dateStringBuffer, sizeof(dateStringBuffer), (conf.dateStyle == 1 || conf.dateStyle == 2 || conf.dateStyle == 5 || conf.dateStyle == 7) ? "%2d":"%02d" ,tick_time->tm_mon+1);}
 		else if (mode == 2) {snprintf(dateStringBuffer, sizeof(dateStringBuffer), (conf.dateStyle == 1 || conf.dateStyle == 3 || conf.dateStyle == 5 || conf.dateStyle == 6) ? "%2d":"%02d" ,tick_time->tm_mday);}

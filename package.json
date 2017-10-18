@@ -71,12 +71,6 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/IMAGE_BRANDING_LABELS",
-                    "name": "IMAGE_BRANDING_LABELS",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
                     "file": "images/IMAGE_BG_BLACK",
                     "name": "IMAGE_BG_BLACK",
                     "targetPlatforms": null,
@@ -138,6 +132,7 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
+            "aplite",
             "diorite"
         ],
         "uuid": "3996d79b-21af-4f91-910d-f9ac159de130",
