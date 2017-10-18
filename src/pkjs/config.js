@@ -70,7 +70,8 @@ module.exports = [
 			"type": "toggle",
 			"messageKey": "enHealth",
 			"label": "Enable Health",
-			"defaultValue": true
+			"defaultValue": true,
+			"capabilities": ["NOT_PLATFORM_APLITE"],
 		},
 		{
 			"type": "slider",

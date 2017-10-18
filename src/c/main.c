@@ -85,13 +85,17 @@ static AppTimer *s_vibe_timer;
 unsigned char tapDuration = 0;
 bool tapTrigger = 0;
 bool vibeTrigger = 0;
-static const uint32_t romanVibes[13][7] = {
+
+#if defined(PBL_PLATFORM_APLITE)
+#else
+		static const uint32_t romanVibes[13][7] = {
 	{ 	0,	0,	0,	0,	0,	0,	0},
 	{ 120,	0,	0,	0,	0,	0,	0}, { 120,100,120,	0,	0,	0,	0},	{ 120,100,120,100,120,	0,	0},
 	{ 120,100,320,	0,	0,	0,	0},	{ 320,	0,	0,	0,	0,	0,	0},	{ 320,100,120,	0,	0,	0,	0},
 	{ 320,100,120,100,120,	0,	0},	{ 320,100,120,100,120,100,120},	{ 120,100,320,120,320,	0,	0},
 	{ 320,120,320,	0,	0,	0,	0},	{ 320,120,320,100,120,	0,	0},	{ 320,120,320,100,120,100,120}
 };
+#endif
 
 bool bluetoothState = false;
 bool bluetoothStateOld = true;
@@ -406,6 +410,7 @@ static void handle_tap(AccelAxisType axis, int32_t direction) {
 }
 
 // Just calls update_health
+#if defined(PBL_HEALTH)
 static void handle_health(HealthEventType event, void *context) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "update_health : %d", event);
 
@@ -419,6 +424,7 @@ static void handle_health(HealthEventType event, void *context) {
 	}
 	update_fourSlot(false);
 }
+#endif
 
 // Gets the correct buffer data for the info slots
 static char *getSlotData(char *inBuf, bool tap) {
@@ -983,23 +989,12 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	}
 	else {	
 		// Check for weather data tuples
-		Tuple *t_weatherTempCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 1);
-		Tuple *t_weatherTempMin = dict_find(iter, MESSAGE_KEY_jsWeatherData + 2);
-		Tuple *t_weatherTempMax = dict_find(iter, MESSAGE_KEY_jsWeatherData + 3);
-		Tuple *t_weatherWindCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 4);
-		Tuple *t_weatherWindMax = dict_find(iter, MESSAGE_KEY_jsWeatherData + 5);
-		Tuple *t_weatherHumidity = dict_find(iter, MESSAGE_KEY_jsWeatherData + 6);
-		Tuple *t_weatherSunrise = dict_find(iter, MESSAGE_KEY_jsWeatherData + 7);
-		Tuple *t_weatherSunset = dict_find(iter, MESSAGE_KEY_jsWeatherData + 8);
-		Tuple *t_weatherLocation = dict_find(iter, MESSAGE_KEY_jsWeatherData + 12);
-		Tuple *t_weatherProvider = dict_find(iter, MESSAGE_KEY_jsWeatherData + 13);
-		Tuple *t_weatherCondForecast = dict_find(iter, MESSAGE_KEY_jsWeatherData + 14);
-		Tuple *t_weatherCondMain = dict_find(iter, MESSAGE_KEY_jsWeatherData + 15);
-		Tuple *t_weatherCondDesc = dict_find(iter, MESSAGE_KEY_jsWeatherData + 16);
-
-		// weather data is available, save it
-		if(t_weatherLocation && t_weatherProvider && t_weatherTempCur && t_weatherTempMin && t_weatherTempMax && t_weatherCondMain
-			&& t_weatherCondDesc && t_weatherCondForecast && t_weatherWindCur && t_weatherWindMax &&t_weatherHumidity && t_weatherSunrise &&t_weatherSunset)
+		
+		Tuple *t_weather[17];
+		for (int i = 1; i <= 16; i++) {
+			t_weather[i] = dict_find(iter, MESSAGE_KEY_jsWeatherData + i);
+		}
+		if (t_weather[1] && (t_weather[13] != 0))
 		{
 			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather data.");
 
@@ -1007,26 +1002,27 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			weather.retryCount = 0;
 			weather.retryTimer = 0;
 
-			weather.provider = atoi(t_weatherProvider->value->cstring);
-			snprintf(weather.tempCur, sizeof(weather.tempCur), "%s", t_weatherTempCur->value->cstring);
-			snprintf(weather.tempMin, sizeof(weather.tempMin), "%s", t_weatherTempMin->value->cstring);
-			snprintf(weather.tempMax, sizeof(weather.tempMax), "%s", t_weatherTempMax->value->cstring);
-			snprintf(weather.windCur, sizeof(weather.windCur), "%s", t_weatherWindCur->value->cstring);
-			snprintf(weather.windMax, sizeof(weather.windMax), "%s", t_weatherWindMax->value->cstring);
-			snprintf(weather.humidity, sizeof(weather.humidity), "%s", t_weatherHumidity->value->cstring);
-			snprintf(weather.sunrise, sizeof(weather.sunrise), "%s", t_weatherSunrise->value->cstring);
-			snprintf(weather.sunset, sizeof(weather.sunset), "%s", t_weatherSunset->value->cstring);
-			snprintf(weather.condMain, sizeof(weather.condMain), "%s", t_weatherCondMain->value->cstring);
-			snprintf(weather.condDesc, sizeof(weather.condDesc), "%s", t_weatherCondDesc->value->cstring);
-			snprintf(weather.condForecast, sizeof(weather.condForecast), "%s", t_weatherCondForecast->value->cstring);
-			snprintf(weather.location, sizeof(weather.location), "%s", t_weatherLocation->value->cstring);			
+			weather.provider = atoi(t_weather[13]->value->cstring);
+			snprintf(weather.tempCur, sizeof(weather.tempCur), "%s", t_weather[1]->value->cstring);
+			snprintf(weather.tempMin, sizeof(weather.tempMin), "%s", t_weather[2]->value->cstring);
+			snprintf(weather.tempMax, sizeof(weather.tempMax), "%s", t_weather[3]->value->cstring);
+			snprintf(weather.windCur, sizeof(weather.windCur), "%s", t_weather[4]->value->cstring);
+			snprintf(weather.windMax, sizeof(weather.windMax), "%s", t_weather[5]->value->cstring);
+			snprintf(weather.humidity, sizeof(weather.humidity), "%s", t_weather[6]->value->cstring);
+			snprintf(weather.sunrise, sizeof(weather.sunrise), "%s", t_weather[7]->value->cstring);
+			snprintf(weather.sunset, sizeof(weather.sunset), "%s", t_weather[8]->value->cstring);
+			snprintf(weather.condMain, sizeof(weather.condMain), "%s", t_weather[15]->value->cstring);
+			snprintf(weather.condDesc, sizeof(weather.condDesc), "%s", t_weather[16]->value->cstring);
+			snprintf(weather.condForecast, sizeof(weather.condForecast), "%s", t_weather[14]->value->cstring);
+			snprintf(weather.location, sizeof(weather.location), "%s", t_weather[12]->value->cstring);			
 			weather.timeStamp = time(NULL);
+			APP_LOG(APP_LOG_LEVEL_INFO, "Location: %s, Forecast %s, Provider: %d", weather.location, weather.condForecast, weather.provider);
 			save_weather();
 			update_fourSlot(false);
 		}
-		else if (t_weatherLocation) {
+		else if (t_weather[12]) {
 			// Error happened.
-			snprintf(weather.location, sizeof(weather.location), "%s", t_weatherLocation->value->cstring);
+			snprintf(weather.location, sizeof(weather.location), "%s", t_weather[12]->value->cstring);
 			weather.retryTimer = weather.retryTimer + weather.retryCount;
 			weather.retryCount++;
 			APP_LOG(APP_LOG_LEVEL_ERROR, "Weather Error: %s, Count: %d, Timer: %d",weather.location, weather.retryCount, weather.retryTimer);
@@ -1037,96 +1033,94 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		 	// Must have been config settings then :)
 
 			// Colour config
-			Tuple *t_bgColor = dict_find(iter, MESSAGE_KEY_Color);								if (t_bgColor) conf.bgColor = GColorFromHEX(t_bgColor->value->int32);
-			Tuple *t_bgTextColor = dict_find(iter, MESSAGE_KEY_Color + 1);				if (t_bgTextColor) conf.bgTextColor = GColorFromHEX(t_bgTextColor->value->int32);
-			Tuple *t_displayColor = dict_find(iter, MESSAGE_KEY_Color + 2);				if (t_displayColor) conf.displayColor = GColorFromHEX(t_displayColor->value->int32);
-			Tuple *t_displayTextColor = dict_find(iter, MESSAGE_KEY_Color + 3);		if (t_displayTextColor) conf.displayTextColor = GColorFromHEX(t_displayTextColor->value->int32);
-			Tuple *t_displayBorderColor = dict_find(iter, MESSAGE_KEY_Color + 4);	if (t_displayBorderColor) conf.displayBorderColor = GColorFromHEX(t_displayBorderColor->value->int32);
-
-			if(!t_bgColor || !t_bgTextColor || !t_displayColor || !t_displayTextColor || !t_displayBorderColor) {
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: Colour settings not received.");
+			Tuple *t_cConfig[5];
+			for (int i = 0; i <= 5; i++) {
+				t_cConfig[i] = dict_find(iter, MESSAGE_KEY_Color + i);
 			}
+			if (t_cConfig[0]) conf.bgColor = GColorFromHEX(t_cConfig[0]->value->int32);
+			if (t_cConfig[1]) conf.bgTextColor = GColorFromHEX(t_cConfig[1]->value->int32);
+			if (t_cConfig[2]) conf.displayColor = GColorFromHEX(t_cConfig[2]->value->int32);
+			if (t_cConfig[3]) conf.displayTextColor = GColorFromHEX(t_cConfig[3]->value->int32);
+			if (t_cConfig[4]) conf.displayBorderColor = GColorFromHEX(t_cConfig[4]->value->int32);
 
-			// Weather Config
-			Tuple *t_weatherProvider = dict_find(iter, MESSAGE_KEY_wConf);				if (t_weatherProvider) conf.weatherProvider = atoi(t_weatherProvider->value->cstring);
-			Tuple *t_weatherTempUnit = dict_find(iter, MESSAGE_KEY_wConf+1);			if (t_weatherTempUnit) conf.weatherTempUnit = atoi(t_weatherTempUnit->value->cstring);
-			Tuple *t_weatherWindUnit = dict_find(iter, MESSAGE_KEY_wConf+2);			if (t_weatherWindUnit) conf.weatherWindUnit = atoi(t_weatherWindUnit->value->cstring);
-			Tuple *t_weatherUpdate = dict_find(iter, MESSAGE_KEY_wConf+3);				if (t_weatherUpdate) conf.weatherUpdateRate = atoi(t_weatherUpdate->value->cstring);
-			Tuple *t_weatherDayNight = dict_find(iter, MESSAGE_KEY_wConf+6);			if (t_weatherDayNight) conf.weatherDayNight = atoi(t_weatherDayNight->value->cstring);
-			Tuple *t_weatherNightMorning = dict_find(iter, MESSAGE_KEY_wConf+7);	if (t_weatherNightMorning) conf.weatherNightMorning = atoi(t_weatherNightMorning->value->cstring);
+			// Weather Config t_wConfig[]
+			Tuple *t_wConfig[10];
+			for (int i = 0; i <= 10; i++) {
+				t_wConfig[i] = dict_find(iter, MESSAGE_KEY_wConf + i);
+			}
+			if (t_wConfig[0]) conf.weatherProvider = atoi(t_wConfig[0]->value->cstring);
+			if (t_wConfig[1]) conf.weatherTempUnit = atoi(t_wConfig[1]->value->cstring);
+			if (t_wConfig[2]) conf.weatherWindUnit = atoi(t_wConfig[2]->value->cstring);
+			if (t_wConfig[3]) conf.weatherUpdateRate = atoi(t_wConfig[3]->value->cstring);
+			if (t_wConfig[4]) conf.weatherDayNight = atoi(t_wConfig[4]->value->cstring);
+			if (t_wConfig[5]) conf.weatherNightMorning = atoi(t_wConfig[5]->value->cstring);
 			
-			Tuple *t_weatherBoxTop = dict_find(iter, MESSAGE_KEY_wConf+4);				if (t_weatherBoxTop) conf.weatherBoxTop = atoi(t_weatherBoxTop->value->cstring);
-			Tuple *t_weatherBoxBottom = dict_find(iter, MESSAGE_KEY_wConf+5);			if (t_weatherBoxBottom) conf.weatherBoxBottom = atoi(t_weatherBoxBottom->value->cstring);
-			Tuple *t_weatherBoxTopTap = dict_find(iter, MESSAGE_KEY_wConf+8);				if (t_weatherBoxTopTap) conf.weatherBoxTopTap = atoi(t_weatherBoxTopTap->value->cstring);
-			Tuple *t_weatherBoxBottomTap = dict_find(iter, MESSAGE_KEY_wConf+9);			if (t_weatherBoxBottomTap) conf.weatherBoxBottomTap = atoi(t_weatherBoxBottomTap->value->cstring);
-
-			Tuple *t_apiWUkey = dict_find(iter, MESSAGE_KEY_keyWU);		if (t_apiWUkey) snprintf(conf.wuKeyString, sizeof(conf.wuKeyString), "%s", t_apiWUkey->value->cstring);
-			Tuple *t_apiOWMkey = dict_find(iter, MESSAGE_KEY_keyOWM);	if (t_apiOWMkey) snprintf(conf.owmKeyString, sizeof(conf.owmKeyString), "%s", t_apiOWMkey->value->cstring);
-			if(!t_apiWUkey || !t_apiOWMkey) {
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: API keys not received.");
-			}
-
+			if (t_wConfig[6]) conf.weatherBoxTop = atoi(t_wConfig[6]->value->cstring);
+			if (t_wConfig[7]) conf.weatherBoxBottom = atoi(t_wConfig[7]->value->cstring);
+			if (t_wConfig[8]) conf.weatherBoxTopTap = atoi(t_wConfig[8]->value->cstring);
+			if (t_wConfig[9]) conf.weatherBoxBottomTap = atoi(t_wConfig[6]->value->cstring);
+			
 			// Configuration
-			Tuple *t_btDCVibe = dict_find(iter, MESSAGE_KEY_VibeConf);					if (t_btDCVibe) conf.btDCVibe = atoi(t_btDCVibe->value->cstring);
-			Tuple *t_btConVibe = dict_find(iter, MESSAGE_KEY_VibeConf + 1);			if (t_btConVibe) conf.btConVibe = atoi(t_btConVibe->value->cstring);
-			Tuple *t_hourVibe = dict_find(iter, MESSAGE_KEY_VibeConf + 2);			if (t_hourVibe) conf.hourVibe = atoi(t_hourVibe->value->cstring);
-			Tuple *t_vibeStrength = dict_find(iter, MESSAGE_KEY_VibeConf + 3);	if (t_vibeStrength) conf.vibeStrength = t_vibeStrength->value->int32;
-
-			if(!t_btDCVibe || !t_btConVibe || !t_hourVibe || !t_vibeStrength) {
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: Vibe settings not received.");
+			
+			// Vibration Settings
+			Tuple *t_vConfig[5];
+			for (int i = 0; i <= 4; i++) {
+				t_vConfig[i] = dict_find(iter, MESSAGE_KEY_VibeConf + i);
 			}
+			if (t_vConfig[0]) conf.btDCVibe = atoi(t_vConfig[0]->value->cstring);
+			if (t_vConfig[1]) conf.btConVibe = atoi(t_vConfig[1]->value->cstring);
+			if (t_vConfig[2]) conf.hourVibe = atoi(t_vConfig[2]->value->cstring);
+			if (t_vConfig[3]) conf.vibeStrength = t_vConfig[3]->value->int32;
+			
+			// Other Misc settings
+			Tuple *t_miscConfig[10];
+			t_miscConfig[0] = dict_find(iter, MESSAGE_KEY_enHealth);			if (t_miscConfig[0]) conf.enHealth = t_miscConfig[0]->value->int32 == 1;
+			t_miscConfig[1] = dict_find(iter, MESSAGE_KEY_enWeather);			if (t_miscConfig[1]) conf.enWeather = t_miscConfig[1]->value->int32 == 1;
+			t_miscConfig[2] = dict_find(iter, MESSAGE_KEY_TapDuration);		if (t_miscConfig[2]) conf.tapDuration = t_miscConfig[2]->value->int32;
 
-			Tuple *t_enHealth = dict_find(iter, MESSAGE_KEY_enHealth);		if (t_enHealth) conf.enHealth = t_enHealth->value->int32 == 1;
-			Tuple *t_enWeather = dict_find(iter, MESSAGE_KEY_enWeather);	if (t_enWeather) conf.enWeather = t_enWeather->value->int32 == 1;
-			Tuple *t_tapDuration = dict_find(iter, MESSAGE_KEY_TapDuration);			if (t_tapDuration) conf.tapDuration = t_tapDuration->value->int32;
+			t_miscConfig[3] = dict_find(iter, MESSAGE_KEY_showZero);			if (t_miscConfig[3]) conf.showZero = t_miscConfig[3]->value->int32 == 1;
+			t_miscConfig[4] = dict_find(iter, MESSAGE_KEY_mainTimeStyle);	if (t_miscConfig[4]) conf.mainTimeStyle = atoi(t_miscConfig[4]->value->cstring);
+			t_miscConfig[5] = dict_find(iter, MESSAGE_KEY_dateStyle);			if (t_miscConfig[5]) conf.dateStyle = atoi(t_miscConfig[5]->value->cstring);
 
-			Tuple *t_showZero = dict_find(iter, MESSAGE_KEY_showZero);						if (t_showZero) conf.showZero = t_showZero->value->int32 == 1;
-			Tuple *t_mainTimeStyle = dict_find(iter, MESSAGE_KEY_mainTimeStyle);	if (t_mainTimeStyle) conf.mainTimeStyle = atoi(t_mainTimeStyle->value->cstring);
-			Tuple *t_dateStyle = dict_find(iter, MESSAGE_KEY_dateStyle);					if (t_dateStyle) conf.dateStyle = atoi(t_dateStyle->value->cstring);
+			t_miscConfig[6] = dict_find(iter, MESSAGE_KEY_FourConf+1);		if (t_miscConfig[6]) conf.fourData = atoi(t_miscConfig[6]->value->cstring);
+			t_miscConfig[7] = dict_find(iter, MESSAGE_KEY_FourConf+2);		if (t_miscConfig[7]) conf.fourDataTap = atoi(t_miscConfig[7]->value->cstring);
+			t_miscConfig[8] = dict_find(iter, MESSAGE_KEY_FourConf+0);		if (t_miscConfig[8]) conf.fourCaps = t_miscConfig[8]->value->int32 == 1;
 
-			if(!t_tapDuration || !t_enHealth || !t_enWeather || !t_showZero || !t_mainTimeStyle || !t_dateStyle) {
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: General settings not received.");
+			// InfoBar Settings
+			Tuple *t_ibConfig[6];
+			for (int i = 0; i <= 5; i++) {
+				t_ibConfig[i] = dict_find(iter, MESSAGE_KEY_InfoBarConf + i);
 			}
+			if (t_ibConfig[0]) conf.infoLeftStyle = atoi(t_ibConfig[0]->value->cstring);
+			if (t_ibConfig[1]) conf.infoLeftData = atoi(t_ibConfig[1]->value->cstring);
+			if (t_ibConfig[2]) conf.infoLeftDataTap = atoi(t_ibConfig[2]->value->cstring);
+			if (t_ibConfig[3]) conf.infoRightStyle = atoi(t_ibConfig[3]->value->cstring);
+			if (t_ibConfig[4]) conf.infoRightData = atoi(t_ibConfig[4]->value->cstring);
+			if (t_ibConfig[5]) conf.infoRightDataTap = atoi(t_ibConfig[5]->value->cstring);
 
-			Tuple *t_fourData = dict_find(iter, MESSAGE_KEY_FourConf+1);		if (t_fourData) conf.fourData = atoi(t_fourData->value->cstring);
-			Tuple *t_fourDataTap = dict_find(iter, MESSAGE_KEY_FourConf+2);	if (t_fourDataTap) conf.fourDataTap = atoi(t_fourDataTap->value->cstring);
-			Tuple *t_fourCaps = dict_find(iter, MESSAGE_KEY_FourConf);			if (t_fourCaps) conf.fourCaps = t_fourCaps->value->int32 == 1;
-
-			if(!t_fourData || !t_fourDataTap || !t_fourCaps ) {
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: Four Slot settings not received.");
+			// Bottom Bar settings
+			Tuple *t_bbConfig[5];
+			for (int i = 0; i <= 4; i++) {
+				t_bbConfig[i] = dict_find(iter, MESSAGE_KEY_BottomBarConf + i);
 			}
+			if (t_bbConfig[0]) conf.bottomStyle = atoi(t_bbConfig[0]->value->cstring);
+			if (t_bbConfig[1]) conf.bottomLeftData = atoi(t_bbConfig[1]->value->cstring);
+			if (t_bbConfig[2]) conf.bottomLeftDataTap = atoi(t_bbConfig[2]->value->cstring);
+			if (t_bbConfig[3]) conf.bottomRightData = atoi(t_bbConfig[3]->value->cstring);
+			if (t_bbConfig[4]) conf.bottomRightDataTap = atoi(t_bbConfig[4]->value->cstring);
 
-			Tuple *t_infoLeftStyle = dict_find(iter, MESSAGE_KEY_InfoBarConf);			if (t_infoLeftStyle) conf.infoLeftStyle = atoi(t_infoLeftStyle->value->cstring);
-			Tuple *t_infoLeftData = dict_find(iter, MESSAGE_KEY_InfoBarConf+1);			if (t_infoLeftData) conf.infoLeftData = atoi(t_infoLeftData->value->cstring);
-			Tuple *t_infoLeftDataTap = dict_find(iter, MESSAGE_KEY_InfoBarConf+2);	if (t_infoLeftDataTap) conf.infoLeftDataTap = atoi(t_infoLeftDataTap->value->cstring);
-			Tuple *t_infoRightStyle = dict_find(iter, MESSAGE_KEY_InfoBarConf+3);		if (t_infoRightStyle) conf.infoRightStyle = atoi(t_infoRightStyle->value->cstring);
-			Tuple *t_infoRightData = dict_find(iter, MESSAGE_KEY_InfoBarConf+4);		if (t_infoRightData) conf.infoRightData = atoi(t_infoRightData->value->cstring);
-			Tuple *t_infoRightDataTap = dict_find(iter, MESSAGE_KEY_InfoBarConf+5);	if (t_infoRightDataTap) conf.infoRightDataTap = atoi(t_infoRightDataTap->value->cstring);
-
-			if(!t_infoLeftStyle || !t_infoLeftData || !t_infoLeftDataTap || !t_infoRightStyle || !t_infoRightData || !t_infoRightDataTap) {
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: InfoBar settings not received.");
+			// Branding settings
+			Tuple *t_bConfig[6];
+			for (int i = 0; i <= 5; i++) {
+				t_bConfig[i] = dict_find(iter, MESSAGE_KEY_bConf + i);
 			}
-
-			Tuple *t_bottomStyle = dict_find(iter, MESSAGE_KEY_BottomBarConf);					if (t_bottomStyle) conf.bottomStyle = atoi(t_bottomStyle->value->cstring);
-			Tuple *t_bottomLeftData = dict_find(iter, MESSAGE_KEY_BottomBarConf+1);			if (t_bottomLeftData) conf.bottomLeftData = atoi(t_bottomLeftData->value->cstring);
-			Tuple *t_bottomLeftDataTap = dict_find(iter, MESSAGE_KEY_BottomBarConf+2);	if (t_bottomLeftDataTap) conf.bottomLeftDataTap = atoi(t_bottomLeftDataTap->value->cstring);
-			Tuple *t_bottomRightData = dict_find(iter, MESSAGE_KEY_BottomBarConf+3);		if (t_bottomRightData) conf.bottomRightData = atoi(t_bottomRightData->value->cstring);
-			Tuple *t_bottomRightDataTap = dict_find(iter, MESSAGE_KEY_BottomBarConf+4);	if (t_bottomRightDataTap) conf.bottomRightDataTap = atoi(t_bottomRightDataTap->value->cstring);
-
-			if(!t_bottomStyle || !t_bottomLeftData || !t_bottomLeftDataTap || !t_bottomRightData || !t_bottomRightDataTap) {
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: BottomBar settings not received.");
-			}
-
-			Tuple *t_brandingLogo = dict_find(iter, MESSAGE_KEY_bConf);			if (t_brandingLogo) conf.brandingLogo = atoi(t_brandingLogo->value->cstring);
-			Tuple *t_brandingTop = dict_find(iter, MESSAGE_KEY_bConf+1);			if (t_brandingTop) conf.brandingTop = atoi(t_brandingTop->value->cstring);
-			Tuple *t_brandingBottom = dict_find(iter, MESSAGE_KEY_bConf+2);	if (t_brandingBottom) conf.brandingBottom = atoi(t_brandingBottom->value->cstring);
-			Tuple *t_toggleBold = dict_find(iter, MESSAGE_KEY_bConf+3);			if (t_toggleBold) conf.toggleBold = t_toggleBold->value->int32 == 1;
-			Tuple *t_brandingLabel = dict_find(iter, MESSAGE_KEY_bConf+4);		if (t_brandingLabel) conf.brandingLabel = t_brandingLabel->value->int32 == 1;
-			Tuple *t_brandingStyle = dict_find(iter, MESSAGE_KEY_bConf+5);		if (t_brandingStyle) conf.brandingStyle = atoi(t_brandingStyle->value->cstring);
-
-			if(!t_brandingLogo || !t_brandingTop || !t_brandingBottom || !t_toggleBold || !t_brandingLabel || !t_brandingStyle) {
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Conf Error: Branding settings not received.");
-			}
+			if (t_bConfig[0]) conf.brandingLogo = atoi(t_bConfig[0]->value->cstring);
+			if (t_bConfig[1]) conf.brandingTop = atoi(t_bConfig[1]->value->cstring);
+			if (t_bConfig[2]) conf.brandingBottom = atoi(t_bConfig[2]->value->cstring);
+			if (t_bConfig[3]) conf.toggleBold = t_bConfig[3]->value->int32 == 1;
+			if (t_bConfig[4]) conf.brandingLabel = t_bConfig[4]->value->int32 == 1;
+			if (t_bConfig[5]) conf.brandingStyle = atoi(t_bConfig[5]->value->cstring);
+			
 			save_settings();
 		}
 	}

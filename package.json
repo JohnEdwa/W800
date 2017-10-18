@@ -40,31 +40,15 @@
         "resources": {
             "media": [
                 {
-                    "characterRegex": "[0-9:. ]",
-                    "file": "fonts/FONT_SECOND_25",
-                    "name": "FONT_SECOND_25",
+                    "file": "images/IMAGE_BG_TINY",
+                    "name": "IMAGE_BG_TINY",
                     "targetPlatforms": null,
-                    "trackingAdjust": 2,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9: ]",
-                    "file": "fonts/FONT_HOUR_35",
-                    "name": "FONT_HOUR_35",
-                    "targetPlatforms": null,
-                    "trackingAdjust": 1,
-                    "type": "font"
+                    "type": "bitmap"
                 },
                 {
                     "file": "images/RES_ICON",
                     "menuIcon": true,
                     "name": "RES_ICON",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_SHEET_BRANDING",
-                    "name": "IMAGE_SHEET_BRANDING",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
@@ -75,40 +59,22 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/IMAGE_BRANDING_LABELS",
-                    "name": "IMAGE_BRANDING_LABELS",
+                    "file": "images/IMAGE_SHEET_BRANDING",
+                    "name": "IMAGE_SHEET_BRANDING",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
-                    "characterRegex": "[0-9:. ]",
-                    "file": "fonts/FONT_HOUR_BIG_42",
-                    "name": "FONT_HOUR_BIG_42",
+                    "file": "images/IMAGE_BUTTON_LABELS",
+                    "name": "IMAGE_BUTTON_LABELS",
                     "targetPlatforms": null,
-                    "trackingAdjust": 3,
-                    "type": "font"
+                    "type": "bitmap"
                 },
                 {
-                    "characterRegex": "[0-9A-Z %()*:$-]",
-                    "file": "fonts/FONT_INFO_BIG_16",
-                    "name": "FONT_INFO_BIG_16",
+                    "file": "images/IMAGE_BRANDING_LABELS",
+                    "name": "IMAGE_BRANDING_LABELS",
                     "targetPlatforms": null,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9A-Z %()*:$-]",
-                    "file": "fonts/FONT_INFO_SMALL_16",
-                    "name": "FONT_INFO_SMALL_16",
-                    "targetPlatforms": null,
-                    "trackingAdjust": -1,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[\u00b0 -~]",
-                    "file": "fonts/FONT_FOURCHAR_16",
-                    "name": "FONT_FOURCHAR_16",
-                    "targetPlatforms": null,
-                    "type": "font"
+                    "type": "bitmap"
                 },
                 {
                     "file": "images/IMAGE_BG_BLACK",
@@ -123,17 +89,55 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/IMAGE_BUTTON_LABELS",
-                    "name": "IMAGE_BUTTON_LABELS",
+                    "characterRegex": "[0-9:. ]",
+                    "file": "fonts/FONT_SECOND_25",
+                    "name": "FONT_SECOND_25",
                     "targetPlatforms": null,
-                    "type": "bitmap"
+                    "trackingAdjust": 2,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9A-Z %()*:$-]",
+                    "file": "fonts/FONT_INFO_SMALL_16",
+                    "name": "FONT_INFO_SMALL_16",
+                    "targetPlatforms": null,
+                    "trackingAdjust": -1,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9A-Z %()*:$-]",
+                    "file": "fonts/FONT_INFO_BIG_16",
+                    "name": "FONT_INFO_BIG_16",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9:. ]",
+                    "file": "fonts/FONT_HOUR_BIG_42",
+                    "name": "FONT_HOUR_BIG_42",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 3,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9: ]",
+                    "file": "fonts/FONT_HOUR_35",
+                    "name": "FONT_HOUR_35",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 1,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[\u00b0 -~]",
+                    "file": "fonts/FONT_FOURCHAR_16",
+                    "name": "FONT_FOURCHAR_16",
+                    "targetPlatforms": null,
+                    "type": "font"
                 }
             ]
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "basalt",
-            "chalk",
             "diorite"
         ],
         "uuid": "3996d79b-21af-4f91-910d-f9ac159de130",
