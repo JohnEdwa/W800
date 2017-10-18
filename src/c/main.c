@@ -669,26 +669,29 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	
 	
 	
-	// Draw Toggle line
-		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, 57, 1), 0, 0);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, 56, 1), 0, 0);
-	
-	//graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, gbitmap_get_bounds(s_bitmap_background));
-	//graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, PBL_IF_RECT_ELSE(gbitmap_get_bounds(s_bitmap_background),GRect(18, 6, gbitmap_get_bounds(s_bitmap_background).size.w, gbitmap_get_bounds(s_bitmap_background).size.h)));
-
+	// Show the W800 border...
 	if (conf.brandingStyle == 1) {
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90, PBL_IF_RECT_ELSE(144,180)-(SCREENLEFT*2),2), 0,0);
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT+3, SCREENTOP+3, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
 	}
-	else {
-		// Draw the UI Lines for W86
+	else if (conf.brandingStyle == 2) {
+		// ..or draw the UI Lines for W86
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP+25, 75, 2), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+75, SCREENTOP+25, 1, 1), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+76, SCREENTOP, 1, 25), 0, 0);
 	}
+	if (conf.brandingStyle != 0 && conf.brandingStyle != 3) {
+	// Draw Toggle line
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, 57, 1), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, 56, 1), 0, 0);
+	}
+	if (conf.brandingStyle != 0 && conf.brandingStyle != 2 && conf.brandingStyle != 4) {
+		// Draw Bottom Line
+		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90, PBL_IF_RECT_ELSE(144,180)-(SCREENLEFT*2),2), 0,0);
+	}
+	
 	
 	// If weather box is empty, draw the branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
@@ -696,10 +699,12 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+66, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
 	}
 	
+	// Bottom Branding
 	if ((!tapTrigger && conf.weatherBoxBottom == 0) || (tapTrigger && conf.weatherBoxBottomTap == 0)) {
 		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(SCREENLEFT-4, SCREENTOP+117, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
 	}
-														
+	
+	// NExt/Prev/Light labels
 	if (conf.brandingLabel != 0) {
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT-9, SCREENTOP-50, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT+135, SCREENTOP-49, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));

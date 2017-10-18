@@ -19,7 +19,7 @@ module.exports = [
 	{
 		"type": "text",
 		"id" : "change6",
-		"defaultValue": "Version 0.8:  2017-10-20<br> * Fonts fixed and modified to fit the W800 style better.<br> * Compiled for Chalk (Time Round) as a workaround config reset bug fix.<br> * Some weather related tweaks.<br>"
+		"defaultValue": "Version 0.8:  2017-10-20<br> * Few new <b>Display Styles</b><br> * Initial Aplite release!<br> * Compiled for Chalk (Time Round) as a workaround config reset bug fix.<br> * Fonts fixed and modified to fit the W800 style better.<br> * Lots of tweaks and optimizations.<br>"
 	},
 	{
 		"type": "text",
@@ -341,7 +341,7 @@ module.exports = [
 			"type": "select",
 			"messageKey": "bConf[5]",
 			"defaultValue": "1",
-			"label": "Background style",
+			"label": "Display style",
 			"options": [
 				{ 
 					"label": "W800",
@@ -350,15 +350,42 @@ module.exports = [
 				{ 
 					"label": "W96H",
 					"value": "2"
+				},
+				{ 
+					"label": "Only Bottom Divider",
+					"value": "3"
+				},
+				{ 
+					"label": "Only Toggle Divider",
+					"value": "4"
+				},
+				{ 
+					"label": "Only Both Dividers",
+					"value": "5"
+				},
+				{ 
+					"label": "Clean",
+					"value": "0"
 				}
 			]
+		},
+		{
+			"type": "toggle",
+			"messageKey": "bConf[3]",
+			"label": "Bold Bat/Ble/Qtm labels.",
+			"defaultValue": true
+		},
+		{
+			"type": "toggle",
+			"messageKey": "bConf[4]",
+			"label": "Show Light/Next/Prev labels.",
+			"defaultValue": true
 		},
 		{
 			"type": "select",
 			"messageKey": "bConf[0]",
 			"defaultValue": "1",
 			"label": "Top Logo",
-			"description" : "Overwritten by Top Weather Box",
 			"options": [
 				{ 
 					"label": "Nothing", 
@@ -383,7 +410,6 @@ module.exports = [
 			"messageKey": "bConf[1]",
 			"defaultValue": "1",
 			"label": "Top Slogan",
-			"description" : "Overwritten by Top Weather Box",
 			"options": [
 				{ 
 					"label": "Nothing", 
@@ -416,7 +442,6 @@ module.exports = [
 			"messageKey": "bConf[2]",
 			"defaultValue": "2",
 			"label": "Bottom Slogan",
-			"description" : "Overwritten by Bottom Weather Box",
 			"options": [
 				{ 
 					"label": "Nothing", 
@@ -435,18 +460,6 @@ module.exports = [
 					"value": "3"
 				}
 			]
-		},
-		{
-			"type": "toggle",
-			"messageKey": "bConf[3]",
-			"label": "Bold Bat/Ble/Qtm labels.",
-			"defaultValue": true
-		},
-		{
-			"type": "toggle",
-			"messageKey": "bConf[4]",
-			"label": "Show Light/Next/Prev labels.",
-			"defaultValue": true
 		}
 	]
 },
