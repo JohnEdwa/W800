@@ -668,6 +668,10 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	// Hide the overflow.
 		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP-4, 144,-10), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP+114, 144,10), 0, 0);
+		#if defined(PBL_ROUND)
+			graphics_fill_rect(ctx, GRect(SCREENLEFT-4, 0, -20,180), 0, 0);
+			graphics_fill_rect(ctx, GRect(SCREENLEFT+140, 0, 20,180), 0, 0);	
+		#endif
 	
 	
 	
