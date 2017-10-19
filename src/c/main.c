@@ -718,14 +718,11 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	togglePalette[0] = conf.displayTextColor;
 	gbitmap_set_palette(s_bitmap_sheet_toggles, togglePalette, false);
 
-	gbitmap_set_palette(s_bitmap_sheet_toggles, displayTextPalette, false);
-
 	// Draw the labels
 	graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_label, GRect(0, 0, gbitmap_get_bounds(s_bitmap_toggle_label).size.w, gbitmap_get_bounds(s_bitmap_toggle_label).size.h));
 
 	// Battery
 	if (batteryLevel >= 1 || batteryCharge == 1) {
-		graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 1, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
 		graphics_context_set_fill_color(ctx, conf.displayTextColor);
 		graphics_context_set_stroke_color(ctx, conf.displayTextColor);
 		graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
@@ -998,7 +995,7 @@ static void load_weather() {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Weather Loaded: (%d)", ret);
 	APP_LOG(APP_LOG_LEVEL_INFO, "Weather: loaded (%d), ts: [%lu], timeNow: [%lu], age: [%lu] seconds",ret, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
 
-	if ( ((time(NULL)-weather.timeStamp) > (conf.weatherUpdateRate < 15 ? (conf.weatherUpdateRate*3600)*4 : (conf.weatherUpdateRate*60)*4) ) || weather.provider != conf.weatherProvider) {
+	if ( ((time(NULL)-weather.timeStamp) > (conf.weatherUpdateRate < 30 ? (conf.weatherUpdateRate*3600)*4 : (conf.weatherUpdateRate*60)*4) ) || weather.provider != conf.weatherProvider) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather: data too old, clearing. ");
 		//APP_LOG(APP_LOG_LEVEL_INFO, "Weather: (wp: [%d], cwp: [%d], ts: [%lu], timeNow: [%lu], age: [%lu] seconds)", weather.provider, conf.weatherProvider, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
 		clear_weather();
@@ -1038,30 +1035,13 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	}
 	else {	
 		// Check for weather data tuples
-
-		/*
-		Tuple *t_weatherTempCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 1);
-		Tuple *t_weatherTempMin = dict_find(iter, MESSAGE_KEY_jsWeatherData + 2);
-		Tuple *t_weatherTempMax = dict_find(iter, MESSAGE_KEY_jsWeatherData + 3);
-		Tuple *t_weatherWindCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 4);
-		Tuple *t_weatherWindMax = dict_find(iter, MESSAGE_KEY_jsWeatherData + 5);
-		Tuple *t_weatherHumidity = dict_find(iter, MESSAGE_KEY_jsWeatherData + 6);
-		Tuple *t_weatherSunrise = dict_find(iter, MESSAGE_KEY_jsWeatherData + 7);
-		Tuple *t_weatherSunset = dict_find(iter, MESSAGE_KEY_jsWeatherData + 8);
-		Tuple *t_weatherLocation = dict_find(iter, MESSAGE_KEY_jsWeatherData + 12);
-		Tuple *t_weatherProvider = dict_find(iter, MESSAGE_KEY_jsWeatherData + 13);
-		Tuple *t_weatherCondForecast = dict_find(iter, MESSAGE_KEY_jsWeatherData + 14);
-		Tuple *t_weatherCondMain = dict_find(iter, MESSAGE_KEY_jsWeatherData + 15);
-		Tuple *t_weatherCondDesc = dict_find(iter, MESSAGE_KEY_jsWeatherData + 16);
-		*/
-
+		
 		Tuple *t_weather[17];
 		for (int i = 0; i <= 16; i++) {
 			t_weather[i] = dict_find(iter, MESSAGE_KEY_jsWeatherData + i);
 		}
 		
 		// weather data is available, save it
-		//if(t_weatherLocation && t_weatherProvider && t_weatherTempCur && t_weatherTempMin && t_weatherTempMax && t_weatherCondMain && t_weatherCondDesc && t_weatherCondForecast && t_weatherWindCur && t_weatherWindMax &&t_weatherHumidity && t_weatherSunrise &&t_weatherSunset)
 		if (t_weather[13] != 0 && t_weather[12])
 		{
 			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather data.");
@@ -1127,7 +1107,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			if (t_wConfig[6]) conf.weatherBoxTop = atoi(t_wConfig[6]->value->cstring);
 			if (t_wConfig[7]) conf.weatherBoxBottom = atoi(t_wConfig[7]->value->cstring);
 			if (t_wConfig[8]) conf.weatherBoxTopTap = atoi(t_wConfig[8]->value->cstring);
-			if (t_wConfig[9]) conf.weatherBoxBottomTap = atoi(t_wConfig[6]->value->cstring);
+			if (t_wConfig[9]) conf.weatherBoxBottomTap = atoi(t_wConfig[9]->value->cstring);
 			
 			// Configuration
 			
