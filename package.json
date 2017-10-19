@@ -40,53 +40,23 @@
         "resources": {
             "media": [
                 {
-                    "file": "images/IMAGE_BG_TINY",
-                    "name": "IMAGE_BG_TINY",
-                    "spaceOptimization": "memory",
+                    "characterRegex": "[\u00b0 -~]",
+                    "file": "fonts/FONT_FOURCHAR_16.TTF",
+                    "name": "FONT_FOURCHAR_16",
                     "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "characterRegex": "[0-9:. ]",
-                    "file": "fonts/FONT_SECOND_25",
-                    "name": "FONT_SECOND_25",
-                    "targetPlatforms": null,
-                    "trackingAdjust": 2,
                     "type": "font"
                 },
                 {
                     "characterRegex": "[0-9: ]",
-                    "file": "fonts/FONT_HOUR_35",
                     "name": "FONT_HOUR_35",
                     "targetPlatforms": null,
                     "trackingAdjust": 1,
                     "type": "font"
                 },
-                {
-                    "file": "images/RES_ICON",
-                    "menuIcon": true,
-                    "name": "RES_ICON",
-                    "spaceOptimization": "memory",
-                    "targetPlatforms": null,
                     "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_SHEET_BRANDING",
-                    "name": "IMAGE_SHEET_BRANDING",
-                    "spaceOptimization": "memory",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_SHEET_TOGGLES",
-                    "name": "IMAGE_SHEET_TOGGLES",
-                    "spaceOptimization": "memory",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
                 {
                     "characterRegex": "[0-9:. ]",
-                    "file": "fonts/FONT_HOUR_BIG_42",
+                    "file": "fonts/FONT_HOUR_BIG_42.TTF",
                     "name": "FONT_HOUR_BIG_42",
                     "targetPlatforms": null,
                     "trackingAdjust": 3,
@@ -94,42 +64,59 @@
                 },
                 {
                     "characterRegex": "[0-9A-Z %()*:$-]",
-                    "file": "fonts/FONT_INFO_BIG_16",
+                    "file": "fonts/FONT_INFO_BIG_16.TTF",
                     "name": "FONT_INFO_BIG_16",
                     "targetPlatforms": null,
                     "type": "font"
                 },
                 {
                     "characterRegex": "[0-9A-Z %()*:$-]",
-                    "file": "fonts/FONT_INFO_SMALL_16",
+                    "file": "fonts/FONT_INFO_SMALL_16.TTF",
                     "name": "FONT_INFO_SMALL_16",
                     "targetPlatforms": null,
                     "trackingAdjust": -1,
                     "type": "font"
                 },
                 {
-                    "characterRegex": "[\u00b0 -~]",
-                    "file": "fonts/FONT_FOURCHAR_16",
-                    "name": "FONT_FOURCHAR_16",
+                    "characterRegex": "[0-9:. ]",
+                    "file": "fonts/FONT_SECOND_25.TTF",
+                    "name": "FONT_SECOND_25",
                     "targetPlatforms": null,
+                    "trackingAdjust": 2,
                     "type": "font"
                 },
                 {
-                    "file": "images/IMAGE_BG_BLACK",
-                    "name": "IMAGE_BG_BLACK",
-                    "spaceOptimization": "memory",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMAGE_BG_BIT",
+                    "file": "images/IMAGE_BG_BIT.PNG",
                     "name": "IMAGE_BG_BIT",
-                    "spaceOptimization": "memory",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/IMAGE_BUTTON_LABELS",
+                    "file": "images/IMAGE_BG_TINY.PNG",
+                    "name": "IMAGE_BG_TINY",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/RES_ICON.PNG",
+                    "menuIcon": true,
+                    "name": "RES_ICON",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_SHEET_TOGGLES.PNG",
+                    "name": "IMAGE_SHEET_TOGGLES",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_SHEET_BRANDING.PNG",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMAGE_BUTTON_LABELS.PNG",
                     "name": "IMAGE_BUTTON_LABELS",
                     "spaceOptimization": "memory",
                     "targetPlatforms": null,

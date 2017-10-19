@@ -86,9 +86,8 @@ unsigned char tapDuration = 0;
 bool tapTrigger = 0;
 bool vibeTrigger = 0;
 
-#if defined(PBL_PLATFORM_APLITE)
-#else
-		static const uint32_t romanVibes[13][7] = {
+#if !defined(PBL_PLATFORM_APLITE)
+static const uint32_t romanVibes[13][7] = {
 	{ 	0,	0,	0,	0,	0,	0,	0},
 	{ 120,	0,	0,	0,	0,	0,	0}, { 120,100,120,	0,	0,	0,	0},	{ 120,100,120,100,120,	0,	0},
 	{ 120,100,320,	0,	0,	0,	0},	{ 320,	0,	0,	0,	0,	0,	0},	{ 320,100,120,	0,	0,	0,	0},
@@ -96,8 +95,6 @@ bool vibeTrigger = 0;
 	{ 320,120,320,	0,	0,	0,	0},	{ 320,120,320,100,120,	0,	0},	{ 320,120,320,100,120,100,120}
 };
 #endif
-
-
 
 bool bluetoothState = false;
 bool bluetoothStateOld = true;
@@ -154,11 +151,6 @@ static GBitmap *s_bitmap_toggle_enabled;
 static GBitmap *s_bitmap_toggle_battery;
 static GBitmap *s_bitmap_toggle_charge;
 static GBitmap *s_bitmap_toggle_pm;
-
-GColor *bgPalette;
-GColor *cornerPalette;
-GColor *brandPalette;
-GColor *displayTextPalette;
 
 // Static Buffers (One larger than max size to account for end char)
 static char s_bufferHour[6];
@@ -369,13 +361,13 @@ static void vibrate(int8_t style) {
 			case 6: vibes_pwm(conf.vibeStrength, 500, 1); break;
 			#if !defined(PBL_PLATFORM_APLITE)
 			case 7:
-					;time_t temp = time(NULL);
-					struct tm *tick_time = localtime(&temp);
-					char hour[4];
-					strftime(hour, sizeof(hour), "%I", tick_time);
-					VibePattern hourPat = {.durations = romanVibes[atoi(hour)], .num_segments = ARRAY_LENGTH(romanVibes[atoi(hour)]),};
-					vibes_enqueue_custom_pattern(hourPat); break;
-				#endif
+				;time_t temp = time(NULL);
+				struct tm *tick_time = localtime(&temp);
+				char hour[4];
+				strftime(hour, sizeof(hour), "%I", tick_time);
+				VibePattern hourPat = {.durations = romanVibes[atoi(hour)], .num_segments = ARRAY_LENGTH(romanVibes[atoi(hour)]),};
+				vibes_enqueue_custom_pattern(hourPat); break;
+			#endif
 			default:  break;
 		}
 	}
@@ -614,58 +606,38 @@ static void update_fourSlot(bool tap) {
 static void background_update_proc(Layer *layer, GContext *ctx) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "background_update_proc");
 
+	/*
+	GColor *bgPalette;
+	GColor *displayPalette;
+	GColor *displayTextPalette;
+	*/
+	
 	// Create the palettes from user colours
-	cornerPalette = gbitmap_get_palette(s_bitmap_background);
-	brandPalette = gbitmap_get_palette(s_bitmap_brand_bg);
-	bgPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
-	
-		cornerPalette[0] = conf.displayBorderColor;
-		cornerPalette[1] = conf.bgColor;
-		cornerPalette[2] = conf.displayColor;
-	
-	#if defined(PBL_PLATFORM_APLITE)
-		/*
-		cornerPalette[0] = conf.displayBorderColor;
-		cornerPalette[1] = conf.bgColor;
-		cornerPalette[2] = conf.displayColor;
-		*/
-
-		brandPalette[0] = conf.bgColor;
-		brandPalette[1] = conf.displayBorderColor;
-		brandPalette[2] = conf.displayColor;
-	
-		bgPalette[0] = conf.bgTextColor;
-		bgPalette[1] = conf.bgColor;
-	#else
-		/*
-		cornerPalette[0] = conf.displayBorderColor;
-		cornerPalette[1] = conf.bgColor;
-		cornerPalette[2] = conf.displayColor;
-		*/
-
-		brandPalette[0] = conf.bgColor;
-		brandPalette[1] = conf.displayBorderColor;
-		brandPalette[2] = conf.displayColor;
-	
-		bgPalette[0] = conf.bgTextColor;
-		bgPalette[1] = conf.bgColor;
-	#endif
-
-	graphics_context_set_compositing_mode(ctx, GCompOpAssign);
-	
+	GColor *cornerPalette = gbitmap_get_palette(s_bitmap_background);
+	cornerPalette[0] = conf.displayBorderColor;
+	cornerPalette[1] = conf.bgColor;
+	cornerPalette[3] = conf.displayColor;
 	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
-	gbitmap_set_palette(s_bitmap_brand_bg, brandPalette, false);
-	gbitmap_set_palette(s_bitmap_brand_labels, bgPalette, false);
-	gbitmap_set_palette(s_bitmap_sheet_branding, bgPalette, false);
+	
+	GColor *bitPalette = gbitmap_get_palette(s_bitmap_brand_bg);
+	bitPalette[0] = conf.displayBorderColor;
+	bitPalette[1] = conf.displayColor;
+	gbitmap_set_palette(s_bitmap_brand_bg, bitPalette, false);
+
+	GColor *brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
+	brandingPalette[0] = conf.bgTextColor;
+	brandingPalette[1] = conf.bgColor;
+	gbitmap_set_palette(s_bitmap_brand_labels, brandingPalette, false);
+	gbitmap_set_palette(s_bitmap_sheet_branding, brandingPalette, false);
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "background_update_proc6");
 	// Draw the BG bitmap
+	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
 	
-		graphics_context_set_fill_color(ctx, conf.bgColor);
-		graphics_fill_rect(ctx, GRect(0, 0, 180, 180), 0, 0);
-		
+	graphics_context_set_fill_color(ctx, conf.bgColor);
+	graphics_fill_rect(ctx, GRect(0, 0, 180, 180), 0, 0);
 	
-		// Draw the display box
+	// Draw the display box
 		graphics_context_set_fill_color(ctx, conf.displayColor);		
 		graphics_fill_rect(ctx, GRect(SCREENLEFT-3, SCREENTOP-3, 142, 116), 0, 0);	
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
@@ -673,7 +645,7 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 		graphics_context_set_fill_color(ctx, conf.displayColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP, 136, 110), 0, 0);
 	
-		// Draw the corners
+	// Draw the corners
 		graphics_context_set_fill_color(ctx, conf.bgColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT-14, SCREENTOP-14, 20,20), 0, 0);
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-14, SCREENTOP-14, 20,20));	
@@ -683,45 +655,53 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-14, SCREENTOP+104, 20,20));	
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+130, SCREENTOP+104, 20,20), 0, 0);
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP+104, 20,20));
-		
-		// Hide the overflow.
+	
+	// Hide the overflow.
 		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP-4, 144,-10), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP+114, 144,10), 0, 0);
+		#if defined(PBL_ROUND)
+			graphics_fill_rect(ctx, GRect(SCREENLEFT-4, 0, -20,180), 0, 0);
+			graphics_fill_rect(ctx, GRect(SCREENLEFT+140, 0, 20,180), 0, 0);	
+		#endif
 	
-		// Draw the UI Lines for W86
+	
+	
+	// Show the W800 border...
+	if (conf.brandingStyle == 1) {
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
+		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT+3, SCREENTOP+3, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
+	}
+	else if (conf.brandingStyle == 2) {
+		// ..or draw the UI Lines for W86
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT, SCREENTOP+25, 75, 2), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+75, SCREENTOP+25, 1, 1), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+76, SCREENTOP, 1, 25), 0, 0);
-	
-		// Draw Toggle line
+	}
+	if (conf.brandingStyle != 0 && conf.brandingStyle != 3) {
+	// Draw Toggle line
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, 57, 1), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, 56, 1), 0, 0);
-
-		/*
-		graphics_draw_line(ctx, GPoint(SCREENLEFT,SCREENTOP+25), GPoint(SCREENLEFT+76,SCREENTOP+25));
-		graphics_draw_line(ctx, GPoint(SCREENLEFT,SCREENTOP+26), GPoint(SCREENLEFT+75,SCREENTOP+26));
-		graphics_draw_line(ctx, GPoint(SCREENLEFT+76,SCREENTOP), GPoint(SCREENLEFT+76,SCREENTOP+25));
-		*/
-
-		//graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, PBL_IF_RECT_ELSE(gbitmap_get_bounds(s_bitmap_background),GRect(18, 6, gbitmap_get_bounds(s_bitmap_background).size.w, gbitmap_get_bounds(s_bitmap_background).size.h)));
-	
-	if (conf.brandingStyle == 1) {
-		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90, PBL_IF_RECT_ELSE(144,180)-(SCREENLEFT*2),2), 0,0);
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT-1, SCREENTOP-1, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
 	}
+	if (conf.brandingStyle != 0 && conf.brandingStyle != 2 && conf.brandingStyle != 4) {
+		// Draw Bottom Line
+		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90, PBL_IF_RECT_ELSE(144,180)-(SCREENLEFT*2),2), 0,0);
+	}
+	
 	
 	// If weather box is empty, draw the branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
-		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+1, SCREENTOP-24, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
-		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+56, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
+		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+66, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
 	}
 	
+	// Bottom Branding
 	if ((!tapTrigger && conf.weatherBoxBottom == 0) || (tapTrigger && conf.weatherBoxBottomTap == 0)) {
-		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(SCREENLEFT-4, SCREENTOP+117, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
+		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(SCREENLEFT+4, SCREENTOP+121, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
 	}
-														
+	
+	// NExt/Prev/Light labels
 	if (conf.brandingLabel != 0) {
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT-9, SCREENTOP-50, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT+135, SCREENTOP-49, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
@@ -734,11 +714,9 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "toggle_update_proc");
 
 	// Create palettes from user colours
-	displayTextPalette = gbitmap_get_palette(s_bitmap_sheet_toggles);
-	
-	displayTextPalette[0] = conf.displayTextColor;
-	displayTextPalette[1] = conf.displayColor;
-	graphics_context_set_compositing_mode(ctx, GCompOpAssign);
+	GColor *togglePalette = gbitmap_get_palette(s_bitmap_sheet_toggles);
+	togglePalette[0] = conf.displayTextColor;
+	gbitmap_set_palette(s_bitmap_sheet_toggles, togglePalette, false);
 
 	gbitmap_set_palette(s_bitmap_sheet_toggles, displayTextPalette, false);
 
@@ -750,15 +728,16 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 		graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 1, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
 		graphics_context_set_fill_color(ctx, conf.displayTextColor);
 		graphics_context_set_stroke_color(ctx, conf.displayTextColor);
-		graphics_fill_rect(ctx, GRect(33,3,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0, 0);
-		graphics_fill_rect(ctx, GRect(32,4,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0, 0);
+		graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
+		graphics_fill_rect(ctx, GRect(30,1,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+		graphics_fill_rect(ctx, GRect(29,2,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
 	}
 
 	// BT
-	if (bluetoothState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 8, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
-
+	if (bluetoothState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 7, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
+ 
 	// QT
-	if (quietTimeState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 15, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
+	if (quietTimeState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 14, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
 }
 
 // Time update function
@@ -847,31 +826,31 @@ static void main_window_load(Window *window) {
 	s_font_infosmall = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_INFO_SMALL_16));
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Load Bitmap Sheets - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
-	
-	
-	#if defined(PBL_PLATFORM_APLITE)
-		s_bitmap_sheet_branding = gbitmap_create_blank(GSize(1,1), GBitmapFormat1BitPalette);
-	#else
-		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
-	#endif
-	
-	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_TINY);	
+	// Load Bitmaps
+	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_TINY);
 	s_bitmap_brand_bg = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BIT);
 	// Load bitmaps
 	
+	#if !defined(PBL_PLATFORM_APLITE)
+		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
+	#else
+		//s_bitmap_sheet_branding = gbitmap_create_blank(GSize(1,1), GBitmapFormat1BitPalette);
+		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
+	#endif
+
 	s_bitmap_sheet_toggles = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_TOGGLES);
 	s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUTTON_LABELS);
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Creating bitmaps - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
-	s_bitmap_brand_logo = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingLogo > 0 ? (conf.brandingLogo-1) * 20 : 0) , 64, 20));
-	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(64,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 80, 10));
-	s_bitmap_brand_bottom = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingBottom > 0 ? ((conf.brandingBottom-1) * 15) + 60 : 0), 144, 15));
-	s_bitmap_toggle_enabled = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(27,0,21,6));
-	s_bitmap_toggle_battery = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(27,6,21,6));
-	s_bitmap_toggle_charge = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(27,12,21,6));
-	s_bitmap_toggle_label = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(0,(conf.toggleBold == true ? 24 : 0),27,24));
-	s_bitmap_toggle_pm = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(27,24,10,11));
-
+	s_bitmap_brand_logo = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingLogo > 0 ? (conf.brandingLogo-1) * 16 : 0) , 52, 16));
+	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(64,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 70, 9));
+	s_bitmap_brand_bottom = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingBottom > 0 ? ((conf.brandingBottom-1) * 12) + 48 : 0), 128, 12));
+	s_bitmap_toggle_enabled = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,0,17,4));
+	s_bitmap_toggle_battery = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,4,17,4));
+	s_bitmap_toggle_charge = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,8,17,4));
+	s_bitmap_toggle_label = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect((conf.toggleBold == true ? 23 : 0),0,23,20));
+	s_bitmap_toggle_pm = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,12,6,7));
+	
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Create layers - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 	// Create background Layer
 	s_layer_background = layer_create(bounds);
@@ -879,7 +858,7 @@ static void main_window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), s_layer_background);
 	
 	// Create Toggles Layer
-	s_layer_toggle = layer_create(GRect(SCREENLEFT+83,SCREENTOP+1,55,22));
+	s_layer_toggle = layer_create(GRect(SCREENLEFT+85,SCREENTOP+3,55,22));
 	layer_set_update_proc(s_layer_toggle, toggle_update_proc);
 	layer_add_child(window_get_root_layer(window), s_layer_toggle);
 
@@ -1059,26 +1038,45 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	}
 	else {	
 		// Check for weather data tuples
-		
+
+		/*
+		Tuple *t_weatherTempCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 1);
+		Tuple *t_weatherTempMin = dict_find(iter, MESSAGE_KEY_jsWeatherData + 2);
+		Tuple *t_weatherTempMax = dict_find(iter, MESSAGE_KEY_jsWeatherData + 3);
+		Tuple *t_weatherWindCur = dict_find(iter, MESSAGE_KEY_jsWeatherData + 4);
+		Tuple *t_weatherWindMax = dict_find(iter, MESSAGE_KEY_jsWeatherData + 5);
+		Tuple *t_weatherHumidity = dict_find(iter, MESSAGE_KEY_jsWeatherData + 6);
+		Tuple *t_weatherSunrise = dict_find(iter, MESSAGE_KEY_jsWeatherData + 7);
+		Tuple *t_weatherSunset = dict_find(iter, MESSAGE_KEY_jsWeatherData + 8);
+		Tuple *t_weatherLocation = dict_find(iter, MESSAGE_KEY_jsWeatherData + 12);
+		Tuple *t_weatherProvider = dict_find(iter, MESSAGE_KEY_jsWeatherData + 13);
+		Tuple *t_weatherCondForecast = dict_find(iter, MESSAGE_KEY_jsWeatherData + 14);
+		Tuple *t_weatherCondMain = dict_find(iter, MESSAGE_KEY_jsWeatherData + 15);
+		Tuple *t_weatherCondDesc = dict_find(iter, MESSAGE_KEY_jsWeatherData + 16);
+		*/
+
 		Tuple *t_weather[17];
-		for (int i = 1; i <= 16; i++) {
+		for (int i = 0; i <= 16; i++) {
 			t_weather[i] = dict_find(iter, MESSAGE_KEY_jsWeatherData + i);
 		}
-		if (t_weather[1] && (t_weather[13] != 0))
+		
+		// weather data is available, save it
+		//if(t_weatherLocation && t_weatherProvider && t_weatherTempCur && t_weatherTempMin && t_weatherTempMax && t_weatherCondMain && t_weatherCondDesc && t_weatherCondForecast && t_weatherWindCur && t_weatherWindMax &&t_weatherHumidity && t_weatherSunrise &&t_weatherSunset)
+		if (t_weather[13] != 0 && t_weather[12])
 		{
 			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather data.");
 
 			// Reset the retry
 			weather.retryCount = 0;
 			weather.retryTimer = 0;
-
+			
 			weather.provider = atoi(t_weather[13]->value->cstring);
 			snprintf(weather.tempCur, sizeof(weather.tempCur), "%s", t_weather[1]->value->cstring);
 			snprintf(weather.tempMin, sizeof(weather.tempMin), "%s", t_weather[2]->value->cstring);
 			snprintf(weather.tempMax, sizeof(weather.tempMax), "%s", t_weather[3]->value->cstring);
-			snprintf(weather.windCur, sizeof(weather.windCur), "%s", t_weather[4]->value->cstring);
-			snprintf(weather.windMax, sizeof(weather.windMax), "%s", t_weather[5]->value->cstring);
-			snprintf(weather.humidity, sizeof(weather.humidity), "%s", t_weather[6]->value->cstring);
+			//snprintf(weather.windCur, sizeof(weather.windCur), "%s", t_weather[]->value->cstring);
+			//snprintf(weather.windMax, sizeof(weather.windMax), "%s", t_weather[]->value->cstring);
+			//snprintf(weather.humidity, sizeof(weather.humidity), "%s", t_weather[]->value->cstring);
 			snprintf(weather.sunrise, sizeof(weather.sunrise), "%s", t_weather[7]->value->cstring);
 			snprintf(weather.sunset, sizeof(weather.sunset), "%s", t_weather[8]->value->cstring);
 			snprintf(weather.condMain, sizeof(weather.condMain), "%s", t_weather[15]->value->cstring);
@@ -1090,9 +1088,10 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			save_weather();
 			update_fourSlot(false);
 		}
-		else if (t_weather[12]) {
+		else if (t_weather[13] == 0 && t_weather[12]) {
 			// Error happened.
-			snprintf(weather.location, sizeof(weather.location), "%s", t_weather[12]->value->cstring);
+			snprintf(weather.location, sizeof(weather.location), "%s", t_weather[13]->value->cstring);
+			
 			weather.retryTimer = weather.retryTimer + weather.retryCount;
 			weather.retryCount++;
 			APP_LOG(APP_LOG_LEVEL_ERROR, "Weather Error: %s, Count: %d, Timer: %d",weather.location, weather.retryCount, weather.retryTimer);
@@ -1173,6 +1172,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			for (int i = 0; i <= 4; i++) {
 				t_bbConfig[i] = dict_find(iter, MESSAGE_KEY_BottomBarConf + i);
 			}
+
 			if (t_bbConfig[0]) conf.bottomStyle = atoi(t_bbConfig[0]->value->cstring);
 			if (t_bbConfig[1]) conf.bottomLeftData = atoi(t_bbConfig[1]->value->cstring);
 			if (t_bbConfig[2]) conf.bottomLeftDataTap = atoi(t_bbConfig[2]->value->cstring);
@@ -1213,7 +1213,7 @@ static void init() {
 	app_message_register_inbox_dropped(inbox_dropped_callback);
 	app_message_register_outbox_failed(outbox_failed_callback);
 	app_message_register_outbox_sent(outbox_sent_callback);
-	app_message_open(750, 64);
+	app_message_open(768, 64);
 
 	// Create main Window element
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Creation - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
