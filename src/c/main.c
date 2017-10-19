@@ -847,7 +847,8 @@ static void main_window_load(Window *window) {
 	#if !defined(PBL_PLATFORM_APLITE)
 		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
 	#else
-		s_bitmap_sheet_branding = gbitmap_create_blank(GSize(1,1), GBitmapFormat1BitPalette);
+		//s_bitmap_sheet_branding = gbitmap_create_blank(GSize(1,1), GBitmapFormat1BitPalette);
+		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
 	#endif
 	s_bitmap_sheet_toggles = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_TOGGLES);
 	s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUTTON_LABELS);
