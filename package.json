@@ -48,12 +48,12 @@
                 },
                 {
                     "characterRegex": "[0-9: ]",
+                    "file": "fonts/FONT_HOUR_35.TTF",
                     "name": "FONT_HOUR_35",
                     "targetPlatforms": null,
                     "trackingAdjust": 1,
                     "type": "font"
                 },
-                    "type": "bitmap"
                 {
                     "characterRegex": "[0-9:. ]",
                     "file": "fonts/FONT_HOUR_BIG_42.TTF",
@@ -112,13 +112,13 @@
                 },
                 {
                     "file": "images/IMAGE_SHEET_BRANDING.PNG",
+                    "name": "IMAGE_SHEET_BRANDING",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
                     "file": "images/IMAGE_BUTTON_LABELS.PNG",
                     "name": "IMAGE_BUTTON_LABELS",
-                    "spaceOptimization": "memory",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 }
