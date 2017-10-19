@@ -401,7 +401,8 @@ static void handle_tap(AccelAxisType axis, int32_t direction) {
 	}
 }
 
-// Just calls update_health
+#if !defined(PBL_PLATFORM_APLITE)
+//Just calls update_health
 static void handle_health(HealthEventType event, void *context) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "update_health : %d", event);
 
@@ -415,6 +416,7 @@ static void handle_health(HealthEventType event, void *context) {
 	}
 	update_fourSlot(false);
 }
+#endif
 
 // Gets the correct buffer data for the info slots
 static char *getSlotData(char *inBuf, bool tap) {
@@ -701,7 +703,7 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	
 	// Bottom Branding
 	if ((!tapTrigger && conf.weatherBoxBottom == 0) || (tapTrigger && conf.weatherBoxBottomTap == 0)) {
-		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(SCREENLEFT-4, SCREENTOP+117, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
+		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(SCREENLEFT+4, SCREENTOP+121, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
 	}
 	
 	// NExt/Prev/Light labels
@@ -731,8 +733,8 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 		graphics_context_set_fill_color(ctx, conf.displayTextColor);
 		graphics_context_set_stroke_color(ctx, conf.displayTextColor);
 		graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
-		graphics_fill_rect(ctx, GRect(30,1,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0,0);
-		graphics_fill_rect(ctx, GRect(29,2,(batteryLevel == 10 ? 12 : batteryLevel+2),1), 0,0);
+		graphics_fill_rect(ctx, GRect(30,1,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+		graphics_fill_rect(ctx, GRect(29,2,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
 	}
 
 	// BT
@@ -832,7 +834,12 @@ static void main_window_load(Window *window) {
 	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_TINY);
 	s_bitmap_brand_bg = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BIT);
 	// Load bitmaps
-	s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
+	
+	#if !defined(PBL_PLATFORM_APLITE)
+		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
+	#else
+		s_bitmap_sheet_branding = gbitmap_create_blank(GSize(1,1), GBitmapFormat1BitPalette);
+	#endif
 	s_bitmap_sheet_toggles = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_TOGGLES);
 	s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUTTON_LABELS);
 
@@ -845,7 +852,7 @@ static void main_window_load(Window *window) {
 	s_bitmap_toggle_charge = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,8,17,4));
 	s_bitmap_toggle_label = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect((conf.toggleBold == true ? 23 : 0),0,23,20));
 	s_bitmap_toggle_pm = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,12,6,7));
-
+	
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Create layers - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 	// Create background Layer
 	s_layer_background = layer_create(bounds);
@@ -960,8 +967,6 @@ static void main_window_load(Window *window) {
 		if(!health_service_events_subscribe(handle_health, NULL)) APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
 		else health_service_set_heart_rate_sample_period(0);
 	}
-	#else
-	APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
 	#endif
 
 	// TAp handler
@@ -1201,7 +1206,7 @@ static void init() {
 	app_message_register_inbox_dropped(inbox_dropped_callback);
 	app_message_register_outbox_failed(outbox_failed_callback);
 	app_message_register_outbox_sent(outbox_sent_callback);
-	app_message_open(2048, 2048);
+	app_message_open(768, 64);
 
 	// Create main Window element
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Creation - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
