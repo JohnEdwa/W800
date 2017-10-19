@@ -85,6 +85,8 @@ static AppTimer *s_vibe_timer;
 unsigned char tapDuration = 0;
 bool tapTrigger = 0;
 bool vibeTrigger = 0;
+
+#if !defined(PBL_PLATFORM_APLITE)
 static const uint32_t romanVibes[13][7] = {
 	{ 	0,	0,	0,	0,	0,	0,	0},
 	{ 120,	0,	0,	0,	0,	0,	0}, { 120,100,120,	0,	0,	0,	0},	{ 120,100,120,100,120,	0,	0},
@@ -92,6 +94,7 @@ static const uint32_t romanVibes[13][7] = {
 	{ 320,100,120,100,120,	0,	0},	{ 320,100,120,100,120,100,120},	{ 120,100,320,120,320,	0,	0},
 	{ 320,120,320,	0,	0,	0,	0},	{ 320,120,320,100,120,	0,	0},	{ 320,120,320,100,120,100,120}
 };
+#endif
 
 bool bluetoothState = false;
 bool bluetoothStateOld = true;
@@ -356,6 +359,7 @@ static void vibrate(int8_t style) {
 			case 4: vibes_pwm(conf.vibeStrength, 150, 1); break;
 			case 5: vibes_pwm(conf.vibeStrength, 300, 1); break;
 			case 6: vibes_pwm(conf.vibeStrength, 500, 1); break;
+			#if !defined(PBL_PLATFORM_APLITE)
 			case 7:
 				;time_t temp = time(NULL);
 				struct tm *tick_time = localtime(&temp);
@@ -363,6 +367,7 @@ static void vibrate(int8_t style) {
 				strftime(hour, sizeof(hour), "%I", tick_time);
 				VibePattern hourPat = {.durations = romanVibes[atoi(hour)], .num_segments = ARRAY_LENGTH(romanVibes[atoi(hour)]),};
 				vibes_enqueue_custom_pattern(hourPat); break;
+			#endif
 			default:  break;
 		}
 	}
