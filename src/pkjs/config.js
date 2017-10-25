@@ -1799,6 +1799,7 @@ module.exports = [
 			"type": "select",
 			"messageKey": "wConf[3]",
 			"defaultValue": "30",
+			"description" : "Weather data that is 4 times older than this value gets cleared (15 min -> 60 min, 2 hours -> 8 hours)",
 			"label": "Weather update period.",
 			"options": [
 				{ 

@@ -1021,6 +1021,7 @@ static void load_settings() {
 	// Read settings from persistent storage, if they exist
 	int ret = persist_read_data(SETTINGS_KEY, &conf, sizeof(conf));
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Settings Loaded (%d)", ret);
+	//APP_LOG(APP_LOG_LEVEL_DEBUG, "Colours: %d / %d / %d / %d", conf.displayTextColor, conf.displayColor, conf.displayBorderColor, conf.bgTextColor);
 }
 
 // Receive JS Messages from the phone
