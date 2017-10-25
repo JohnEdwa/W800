@@ -21,7 +21,7 @@
             "toggleBold",
             "InfoBarConf[6]",
             "BottomBarConf[5]",
-            "bConf[6]",
+            "bConf[7]",
             "FourConf[3]",
             "wConf[20]",
             "keyWU",
@@ -39,6 +39,14 @@
         "projectType": "native",
         "resources": {
             "media": [
+                {
+                    "characterRegex": "[0-9:chr!]",
+                    "file": "fonts/FONT_BAT_5.TTF",
+                    "name": "FONT_BAT_16",
+                    "targetPlatforms": null,
+                    "trackingAdjust": 1,
+                    "type": "font"
+                },
                 {
                     "file": "images/RES_ICON.PNG",
                     "menuIcon": true,
@@ -129,7 +137,8 @@
             "aplite",
             "basalt",
             "chalk",
-            "diorite"
+            "diorite",
+            "emery"
         ],
         "uuid": "3996d79b-21af-4f91-910d-f9ac159de130",
         "watchapp": {
