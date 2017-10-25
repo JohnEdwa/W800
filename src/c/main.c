@@ -115,6 +115,7 @@ static GFont s_font_hour_big;
 static GFont s_font_4char;
 static GFont s_font_infobig;
 static GFont s_font_infosmall;
+static GFont s_font_bat;
 
 // Text Layers
 static TextLayer *s_layer_hour;
@@ -722,12 +723,35 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_label, GRect(0, 0, gbitmap_get_bounds(s_bitmap_toggle_label).size.w, gbitmap_get_bounds(s_bitmap_toggle_label).size.h));
 
 	// Battery
-	if (batteryLevel >= 1 || batteryCharge == 1) {
-		graphics_context_set_fill_color(ctx, conf.displayTextColor);
-		graphics_context_set_stroke_color(ctx, conf.displayTextColor);
-		graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
-		graphics_fill_rect(ctx, GRect(30,1,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
-		graphics_fill_rect(ctx, GRect(29,2,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+	if (conf.batteryStyle == 1) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "BatStyle 1");
+		if (batteryLevel >= 1 || batteryCharge == 1) {
+			graphics_context_set_fill_color(ctx, conf.displayTextColor);
+			graphics_context_set_stroke_color(ctx, conf.displayTextColor);
+			graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_charge, GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
+			graphics_fill_rect(ctx, GRect(31,0,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+			graphics_fill_rect(ctx, GRect(30,1,(batteryLevel == 10 ? 13 : batteryLevel+2),2), 0,0);
+			graphics_fill_rect(ctx, GRect(29,3,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+		}
+	}
+	else if (conf.batteryStyle == 2) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "BatStyle 2");
+		char batBuf[8];
+		if (batteryCharge == 1)  { snprintf(batBuf, sizeof(batBuf), "chr"); }
+		else if (batteryLevel >= 1) { snprintf(batBuf, sizeof(batBuf), "%d", batteryLevel*10); }
+		else { snprintf(batBuf, sizeof(batBuf), "!!!"); }
+		graphics_context_set_text_color(ctx, conf.displayTextColor);		
+		graphics_draw_text(ctx, batBuf, s_font_bat, GRect(26,-11,16,16), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
+	}
+	else {
+		APP_LOG(APP_LOG_LEVEL_INFO, "BatStyle something else");
+		if (batteryLevel >= 1 || batteryCharge == 1) {
+			graphics_context_set_fill_color(ctx, conf.displayTextColor);
+			graphics_context_set_stroke_color(ctx, conf.displayTextColor);
+			graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
+			graphics_fill_rect(ctx, GRect(30,1,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+			graphics_fill_rect(ctx, GRect(29,2,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+		}
 	}
 
 	// BT
@@ -821,6 +845,7 @@ static void main_window_load(Window *window) {
 	s_font_4char = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_FOURCHAR_16));
 	s_font_infobig = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_INFO_BIG_16));
 	s_font_infosmall = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_INFO_SMALL_16));
+	s_font_bat = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BAT_16));
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Load Bitmap Sheets - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 	// Load Bitmaps
@@ -1161,8 +1186,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			if (t_bbConfig[4]) conf.bottomRightDataTap = atoi(t_bbConfig[4]->value->cstring);
 
 			// Branding settings
-			Tuple *t_bConfig[6];
-			for (int i = 0; i <= 5; i++) {
+			Tuple *t_bConfig[7];
+			for (int i = 0; i <= 6; i++) {
 				t_bConfig[i] = dict_find(iter, MESSAGE_KEY_bConf + i);
 			}
 			if (t_bConfig[0]) conf.brandingLogo = atoi(t_bConfig[0]->value->cstring);
@@ -1171,6 +1196,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			if (t_bConfig[3]) conf.toggleBold = t_bConfig[3]->value->int32 == 1;
 			if (t_bConfig[4]) conf.brandingLabel = t_bConfig[4]->value->int32 == 1;
 			if (t_bConfig[5]) conf.brandingStyle = atoi(t_bConfig[5]->value->cstring);
+			if (t_bConfig[6]) conf.batteryStyle = atoi(t_bConfig[6]->value->cstring);
 			
 			save_settings();
 		}
@@ -1261,6 +1287,7 @@ static void main_window_unload(Window *window) {
 	fonts_unload_custom_font(s_font_4char);
 	fonts_unload_custom_font(s_font_infobig);
 	fonts_unload_custom_font(s_font_infosmall);
+	fonts_unload_custom_font(s_font_bat);
 }
 
 static void deinit() {

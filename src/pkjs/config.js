@@ -371,6 +371,26 @@ module.exports = [
 			]
 		},
 		{
+			"type": "select",
+			"messageKey": "bConf[6]",
+			"defaultValue": "1",
+			"label": "Battery Toggle Style",
+			"options": [
+				{ 
+					"label": "Toggle button bar.",
+					"value": "0"
+				},
+				{ 
+					"label": "Full height bar.",
+					"value": "1"
+				},
+				{ 
+					"label": "Numbers.",
+					"value": "2"
+				}
+			]
+		},
+		{
 			"type": "toggle",
 			"messageKey": "bConf[3]",
 			"label": "Bold Bat/Ble/Qtm labels.",
