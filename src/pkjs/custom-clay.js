@@ -32,34 +32,6 @@ module.exports = function(minified) {
 		} catch (e) {}
 	}
 	
-	function toggleChangelog() {
-    if (this.get()) {
-			try {
-				clayConfig.getItemById('change0').show();
-				clayConfig.getItemById('change1').show();
-				clayConfig.getItemById('change2').show();
-				clayConfig.getItemById('change3').show();
-				clayConfig.getItemById('change4').show();
-				clayConfig.getItemById('change5').show();
-				//clayConfig.getItemById('change6').show();
-				//clayConfig.getItemById('change7').show();
-				//clayConfig.getItemById('change8').show();
-			} catch (e) {}
-    } else {
-			try {
-				clayConfig.getItemById('change0').hide();
-				clayConfig.getItemById('change1').hide();
-				clayConfig.getItemById('change2').hide();
-				clayConfig.getItemById('change3').hide();
-				clayConfig.getItemById('change4').hide();
-				clayConfig.getItemById('change5').hide();
-				//clayConfig.getItemById('change6').hide();
-				//clayConfig.getItemById('change7').hide();
-				//clayConfig.getItemById('change8').hide();
-			} catch (e) {}
-    }
-  }
-	
 	function forecastText() {
 		try {
 			var today = clayConfig.getItemByMessageKey('wConf[6]').get();
@@ -75,19 +47,62 @@ module.exports = function(minified) {
 			}			
 		} catch (e) {}
 	}
-
+	
+	function toggleChangelog() {
+		if (this.get()) {
+			try { clayConfig.getItemById('change1').show(); } catch (e) {}
+			try { clayConfig.getItemById('change2').show(); } catch (e) {}
+			try { clayConfig.getItemById('change3').show(); } catch (e) {}
+			try { clayConfig.getItemById('change4').show(); } catch (e) {}
+			try { clayConfig.getItemById('change5').show(); } catch (e) {}
+			try { clayConfig.getItemById('change6').show(); } catch (e) {}
+			try { clayConfig.getItemById('change7').show(); } catch (e) {}
+			try { clayConfig.getItemById('change8').show(); } catch (e) {}
+		} else {
+			try { clayConfig.getItemById('change1').hide(); } catch (e) {}
+			try { clayConfig.getItemById('change2').hide(); } catch (e) {}
+			try { clayConfig.getItemById('change3').hide(); } catch (e) {}
+			try { clayConfig.getItemById('change4').hide(); } catch (e) {}
+			try { clayConfig.getItemById('change5').hide(); } catch (e) {}
+			try { clayConfig.getItemById('change6').hide(); } catch (e) {}
+			try { clayConfig.getItemById('change7').hide(); } catch (e) {}
+			try { clayConfig.getItemById('change8').hide(); } catch (e) {}
+    }
+  }
+	
+	function toggleCredits() {
+    if (this.get()) {
+			try { clayConfig.getItemById('credits0').show(); } catch (e) {}
+			try { clayConfig.getItemById('credits1').show(); } catch (e) {}
+			try { clayConfig.getItemById('credits2').show(); } catch (e) {}
+			try { clayConfig.getItemById('credits3').show(); } catch (e) {}
+    } else {
+			try { clayConfig.getItemById('credits0').hide(); } catch (e) {}
+			try { clayConfig.getItemById('credits1').hide(); } catch (e) {}
+			try { clayConfig.getItemById('credits2').hide(); } catch (e) {}
+			try { clayConfig.getItemById('credits3').hide(); } catch (e) {}
+    }
+  }
+	
+	function toggleIssues() {
+    if (this.get()) {
+			try { clayConfig.getItemById('issues0').show(); } catch (e) {}
+			try { clayConfig.getItemById('issues1').show(); } catch (e) {}
+			try { clayConfig.getItemById('issues2').show(); } catch (e) {}
+			try { clayConfig.getItemById('issues3').show(); } catch (e) {}
+    } else {
+			try { clayConfig.getItemById('issues0').hide(); } catch (e) {}
+			try { clayConfig.getItemById('issues1').hide(); } catch (e) {}
+			try { clayConfig.getItemById('issues2').hide(); } catch (e) {}
+			try { clayConfig.getItemById('issues3').hide(); } catch (e) {}
+    }
+  }
+	
+	
   clayConfig.on(clayConfig.EVENTS.AFTER_BUILD, function() {
 		try {	
 			clayConfig.getItemByMessageKey('wConf[2]').hide();
 			//clayConfig.getItemById('change0').hide();
-			//clayConfig.getItemById('change1').hide();
-			//clayConfig.getItemById('change2').hide();
-			//clayConfig.getItemById('change3').hide();
-			//clayConfig.getItemById('change4').hide();
-			//clayConfig.getItemById('change5').hide();
-			//clayConfig.getItemById('change6').hide();
-			//clayConfig.getItemById('change7').hide();
-			//clayConfig.getItemById('change8').hide();
 		} catch (e) {}
 
 		try {
@@ -103,6 +118,18 @@ module.exports = function(minified) {
 			var changelogToggle = clayConfig.getItemById('changelog');
 			toggleChangelog.call(changelogToggle);
 			changelogToggle.on('change', toggleChangelog);
+		} catch (e) {}
+		
+		try {
+			var creditsToggle = clayConfig.getItemById('credits');
+			toggleCredits.call(creditsToggle);
+			creditsToggle.on('change', toggleCredits);
+		} catch (e) {}
+		
+		try {
+			var issuesToggle = clayConfig.getItemById('issues');
+			toggleIssues.call(issuesToggle);
+			issuesToggle.on('change', toggleIssues);
 		} catch (e) {}
 		
 		try {
