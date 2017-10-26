@@ -256,7 +256,7 @@ static void default_settings() {
 	conf.batteryStyle = 0;
 	
 	#if defined(PBL_PLATFORM_APLITE)
-	conf.enHealth = 1; conf.infoLeftData = 14; conf.infoRightData = 14;
+	conf.enHealth = 0; conf.infoLeftData = 14; conf.infoRightData = 14;
 	#endif
 	
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Default settings loaded.");
@@ -648,24 +648,21 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	
 	// Draw the corners
 		graphics_context_set_fill_color(ctx, conf.bgColor);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT-14, SCREENTOP-14, 20,20), 0, 0);
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-14, SCREENTOP-14, 20,20));	
-		graphics_fill_rect(ctx, GRect(SCREENLEFT-130, SCREENTOP-14, 20,20), 0, 0);
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP-14, 20,20));	
-		graphics_fill_rect(ctx, GRect(SCREENLEFT-14, SCREENTOP+104, 20,20), 0, 0);
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-14, SCREENTOP+104, 20,20));	
-		graphics_fill_rect(ctx, GRect(SCREENLEFT+130, SCREENTOP+104, 20,20), 0, 0);
-		graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP+104, 20,20));
-	
-	// Hide the overflow.
-		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP-4, 144,-10), 0, 0);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT-4, SCREENTOP+114, 144,10), 0, 0);
-		#if defined(PBL_ROUND)
-			graphics_fill_rect(ctx, GRect(SCREENLEFT-4, 0, -20,180), 0, 0);
-			graphics_fill_rect(ctx, GRect(SCREENLEFT+140, 0, 20,180), 0, 0);	
+		#if defined(PBL_RECT)
+			gbitmap_set_bounds(s_bitmap_background, GRect(10, 10, 10,10));
+			graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-4, SCREENTOP-4, 10,10));	
+			gbitmap_set_bounds(s_bitmap_background, GRect(0, 10, 10,10));
+			graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP-4, 10,10));
+			gbitmap_set_bounds(s_bitmap_background, GRect(10, 0, 10,10));
+			graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT-4, SCREENTOP+104, 10,10));
+			gbitmap_set_bounds(s_bitmap_background, GRect(0, 0, 10,10));
+			graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP+104, 10,10));
+		#else
+			//gbitmap_set_bounds(s_bitmap_background, GRect(0, 0, 128,23));
+			graphics_draw_rotated_bitmap(ctx, s_bitmap_background, GPoint(0,0), DEG_TO_TRIGANGLE(90), GPoint(SCREENLEFT+154, SCREENTOP-9));
+			//gbitmap_set_bounds(s_bitmap_background, GRect(0, 23, 128,23));
+			graphics_draw_rotated_bitmap(ctx, s_bitmap_background, GPoint(128,23), DEG_TO_TRIGANGLE(270), GPoint(SCREENLEFT+4, SCREENTOP-10));
 		#endif
-	
-	
 	
 	// Show the W800 border...
 	if (conf.brandingStyle == 1) {
@@ -682,12 +679,12 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	if (conf.brandingStyle != 0 && conf.brandingStyle != 3) {
 	// Draw Toggle line
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, 57, 1), 0, 0);
-		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, 56, 1), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, PBL_IF_RECT_ELSE(57,68), 1), 0, 0);
+		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, PBL_IF_RECT_ELSE(56,68), 1), 0, 0);
 	}
 	if (conf.brandingStyle != 0 && conf.brandingStyle != 2 && conf.brandingStyle != 4) {
 		// Draw Bottom Line
-		graphics_fill_rect(ctx, GRect(SCREENLEFT,SCREENTOP+90, PBL_IF_RECT_ELSE(144,180)-(SCREENLEFT*2),2), 0,0);
+		graphics_fill_rect(ctx, GRect(PBL_IF_RECT_ELSE(SCREENLEFT,SCREENLEFT-8),SCREENTOP+90, PBL_IF_RECT_ELSE(144-SCREENLEFT*2, 180-(SCREENLEFT-9)*2),2), 0,0);
 	}
 	
 	
@@ -848,15 +845,7 @@ static void main_window_load(Window *window) {
 	// Load Bitmaps
 	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_TINY);
 	s_bitmap_brand_bg = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BIT);
-	// Load bitmaps
-	
-	#if !defined(PBL_PLATFORM_APLITE)
-		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
-	#else
-		//s_bitmap_sheet_branding = gbitmap_create_blank(GSize(1,1), GBitmapFormat1BitPalette);
-		s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
-	#endif
-
+	s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
 	s_bitmap_sheet_toggles = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_TOGGLES);
 	s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUTTON_LABELS);
 
