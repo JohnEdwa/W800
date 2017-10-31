@@ -13,7 +13,8 @@
 
 #include <pebble.h>
 
-#define DEBUG 0
+#define DEBUG 1
+#define COLORDEBUG 1
 
 // Persistent storage key
 #define SETTINGS_KEY 1
@@ -65,6 +66,7 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context);
 static void init ();
 int main (void);
 
+static void vibes_pwm(int8_t strength, uint16_t duration, bool twice);
 static char *upcase (char *str);
 static void editTextLayer (TextLayer *layer, GRect location, GColor colour, GColor background, GFont font, GTextAlignment alignment);
 static char *getDateString(bool four, unsigned char mode);
@@ -100,8 +102,6 @@ bool quietTimeState = false;
 
 unsigned char batteryLevel = 0;
 unsigned char batteryCharge = 0;
-
-
 
 // Windows
 static Window *s_main_window;
@@ -313,38 +313,6 @@ static void clear_weather() {
 // HANDLER FUNCTIONS
 //------------------
 
-// Creates a custom Vibe pattern that emulates a strength setting
-void vibes_pwm(int8_t strength, uint16_t duration, bool twice) {
-	uint32_t pwm_segments[100];
-	strength = strength + 3;
-	uint8_t totalSegments = 0;
-	if (strength >= 10) {
-		if (twice) {
-			pwm_segments[0] = duration/2;
-			pwm_segments[1] = duration/3;
-			pwm_segments[2] = duration/2;
-			totalSegments = 3;
-		}
-		else {
-			pwm_segments[0] = duration;
-			totalSegments = 1;
-		}
-	}
-	else {
-		totalSegments = (int) duration/5;
-		uint8_t currentSegment = 0;
-		for(int i = 0; i < (int) duration/10; i++) {
-			pwm_segments[currentSegment] = strength;
-			if ((twice == 1) && (i == totalSegments/4)) pwm_segments[currentSegment+1] = (int) duration/3;
-			else pwm_segments[currentSegment+1] = 10 - strength;
-			currentSegment = currentSegment + 2;
-		}
-	}
-	vibes_cancel();
-	VibePattern pwm_pat = {.durations = pwm_segments, .num_segments = totalSegments};
-	vibes_enqueue_custom_pattern(pwm_pat);
-}
-
 // App timer that disables tap triggering when vibrating
 static void timout_timer_handler(void *context) {vibeTrigger = false;}
 
@@ -376,12 +344,17 @@ static void vibrate(int8_t style) {
 
 // Keeps track of battery state
 static void handle_battery(BatteryChargeState charge_state) {	
+	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_battery: plugged: %d, charge: %d, state: %d", charge_state.is_plugged, charge_state.is_charging, charge_state.charge_percent);
+	unsigned char oldCharge = batteryCharge;
+	unsigned char oldLevel = batteryLevel;
 	if (charge_state.is_charging) batteryCharge = 1;
 	else if (charge_state.is_plugged) batteryCharge = 2;
 	else batteryCharge = 0;
-	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_battery: %d", batteryCharge);
 	batteryLevel = ((charge_state.charge_percent)/10);
-	layer_mark_dirty(s_layer_toggle);
+	
+	if (oldLevel != batteryLevel || oldCharge != batteryCharge) {
+		layer_mark_dirty(s_layer_toggle);
+	}
 }
 
 // Keeps track of BT state
@@ -390,8 +363,10 @@ static void handle_bluetooth(bool connected) {
   bluetoothState = connected;
 	if(!connected && conf.btDCVibe != 0 && bluetoothStateOld == true) { vibrate(conf.btDCVibe); }
 	else if(connected && conf.btConVibe != 0 && bluetoothStateOld == false) {vibrate(conf.btConVibe);}
-	bluetoothStateOld = bluetoothState;
-	layer_mark_dirty(s_layer_toggle);
+	if (bluetoothStateOld != bluetoothState){
+		bluetoothStateOld = bluetoothState;
+		layer_mark_dirty(s_layer_toggle);
+	}
 }
 
 // Triggers on a tap
@@ -402,7 +377,7 @@ static void handle_tap(AccelAxisType axis, int32_t direction) {
 		tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
 		tapTrigger = true;
 		tapDuration = conf.tapDuration;
-		layer_mark_dirty(s_layer_background);
+		//layer_mark_dirty(s_layer_background);
 		update_fourSlot(true);
 	}
 }
@@ -415,12 +390,15 @@ static void handle_health(HealthEventType event, void *context) {
 		if (event == HealthEventSignificantUpdate || event == HealthEventHeartRateUpdate) {
 			bpmValue = health_service_peek_current_value(HealthMetricHeartRateBPM);
 			hrArrow = bpmValue > bpmOld ? ')' : (bpmValue < bpmOld ? '(' : ' ');
-			bpmOld = bpmValue;
+			if (bpmOld != bpmValue) {
+				bpmOld = bpmValue;
+				update_fourSlot(false);
+			}
 		}
 		if (event == HealthEventSignificantUpdate || event == HealthEventMovementUpdate) {
 			stepsValue = health_service_sum_today(HealthMetricStepCount);
+			update_fourSlot(false);
 		}
-		update_fourSlot(false);
 }
 #endif
 
@@ -626,12 +604,16 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	gbitmap_set_palette(s_bitmap_brand_bg, bitPalette, false);
 
 	GColor *brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
+	if (COLORDEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "bgText: %d/%d/%d, bgColor: %d/%d/%d",conf.bgTextColor.r,conf.bgTextColor.g,conf.bgTextColor.b ,conf.bgColor.r,conf.bgColor.g,conf.bgColor.b );
 	brandingPalette[0] = conf.bgTextColor;
 	brandingPalette[1] = conf.bgColor;
-	gbitmap_set_palette(s_bitmap_brand_labels, brandingPalette, false);
 	gbitmap_set_palette(s_bitmap_sheet_branding, brandingPalette, false);
+	
+	GColor *brandingPalette2 = gbitmap_get_palette(s_bitmap_brand_labels);
+	brandingPalette2[0] = conf.bgTextColor;
+	brandingPalette2[1] = conf.bgColor;
+	gbitmap_set_palette(s_bitmap_brand_labels, brandingPalette2, false);
 
-	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "background_update_proc6");
 	// Draw the BG bitmap
 	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
 	
@@ -684,10 +666,10 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	}
 	if (conf.brandingStyle != 0 && conf.brandingStyle != 2 && conf.brandingStyle != 4) {
 		// Draw Bottom Line
+		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(PBL_IF_RECT_ELSE(SCREENLEFT,SCREENLEFT-8),SCREENTOP+90, PBL_IF_RECT_ELSE(144-SCREENLEFT*2, 180-(SCREENLEFT-9)*2),2), 0,0);
 	}
-	
-	
+		
 	// If weather box is empty, draw the branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
 		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
@@ -714,6 +696,7 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	// Create palettes from user colours
 	GColor *togglePalette = gbitmap_get_palette(s_bitmap_sheet_toggles);
 	togglePalette[0] = conf.displayTextColor;
+	togglePalette[1] = conf.displayColor;
 	gbitmap_set_palette(s_bitmap_sheet_toggles, togglePalette, false);
 
 	// Draw the labels
@@ -775,7 +758,7 @@ static void update_time(struct tm *tick_time, TimeUnits units_changed, bool firs
 			}
 			tapDuration = 0;
 			tapTrigger = false;
-			layer_mark_dirty(s_layer_background);
+			//layer_mark_dirty(s_layer_background);
 			update_fourSlot(false);
 		}
 	}
@@ -1284,6 +1267,38 @@ int main(void) {
   init();
   app_event_loop();
   deinit();
+}
+
+// Creates a custom Vibe pattern that emulates a strength setting
+void vibes_pwm(int8_t strength, uint16_t duration, bool twice) {
+	uint32_t pwm_segments[100];
+	strength = strength + 3;
+	uint8_t totalSegments = 0;
+	if (strength >= 10) {
+		if (twice) {
+			pwm_segments[0] = duration/2;
+			pwm_segments[1] = duration/3;
+			pwm_segments[2] = duration/2;
+			totalSegments = 3;
+		}
+		else {
+			pwm_segments[0] = duration;
+			totalSegments = 1;
+		}
+	}
+	else {
+		totalSegments = (int) duration/5;
+		uint8_t currentSegment = 0;
+		for(int i = 0; i < (int) duration/10; i++) {
+			pwm_segments[currentSegment] = strength;
+			if ((twice == 1) && (i == totalSegments/4)) pwm_segments[currentSegment+1] = (int) duration/3;
+			else pwm_segments[currentSegment+1] = 10 - strength;
+			currentSegment = currentSegment + 2;
+		}
+	}
+	vibes_cancel();
+	VibePattern pwm_pat = {.durations = pwm_segments, .num_segments = totalSegments};
+	vibes_enqueue_custom_pattern(pwm_pat);
 }
 
 // Helper that makes a string ALL CAPS
