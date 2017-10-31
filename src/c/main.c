@@ -13,8 +13,8 @@
 
 #include <pebble.h>
 
-#define DEBUG 1
-#define COLORDEBUG 1
+#define DEBUG 0
+#define COLORDEBUG 0
 
 // Persistent storage key
 #define SETTINGS_KEY 1
@@ -150,6 +150,13 @@ static GBitmap *s_bitmap_toggle_enabled;
 static GBitmap *s_bitmap_toggle_battery;
 static GBitmap *s_bitmap_toggle_charge;
 static GBitmap *s_bitmap_toggle_pm;
+
+// Palettes
+static GColor *cornerPalette;
+static GColor *bitPalette;
+static GColor *brandingPalette;
+static GColor *brandingPalette2;
+static GColor *togglePalette;
 
 // Static Buffers (One larger than max size to account for end char)
 static char s_bufferHour[6];
@@ -584,41 +591,12 @@ static void update_fourSlot(bool tap) {
 // Builds the background layer
 static void background_update_proc(Layer *layer, GContext *ctx) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "background_update_proc");
-
-	/*
-	GColor *bgPalette;
-	GColor *displayPalette;
-	GColor *displayTextPalette;
-	*/
 	
-	// Create the palettes from user colours
-	GColor *cornerPalette = gbitmap_get_palette(s_bitmap_background);
-	cornerPalette[0] = conf.displayBorderColor;
-	cornerPalette[1] = conf.bgColor;
-	cornerPalette[3] = conf.displayColor;
-	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
-	
-	GColor *bitPalette = gbitmap_get_palette(s_bitmap_brand_bg);
-	bitPalette[0] = conf.displayBorderColor;
-	bitPalette[1] = conf.displayColor;
-	gbitmap_set_palette(s_bitmap_brand_bg, bitPalette, false);
-
-	GColor *brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
-	if (COLORDEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "bgText: %d/%d/%d, bgColor: %d/%d/%d",conf.bgTextColor.r,conf.bgTextColor.g,conf.bgTextColor.b ,conf.bgColor.r,conf.bgColor.g,conf.bgColor.b );
-	brandingPalette[0] = conf.bgTextColor;
-	brandingPalette[1] = conf.bgColor;
-	gbitmap_set_palette(s_bitmap_sheet_branding, brandingPalette, false);
-	
-	GColor *brandingPalette2 = gbitmap_get_palette(s_bitmap_brand_labels);
-	brandingPalette2[0] = conf.bgTextColor;
-	brandingPalette2[1] = conf.bgColor;
-	gbitmap_set_palette(s_bitmap_brand_labels, brandingPalette2, false);
-
 	// Draw the BG bitmap
 	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
 	
-	graphics_context_set_fill_color(ctx, conf.bgColor);
-	graphics_fill_rect(ctx, GRect(0, 0, 180, 180), 0, 0);
+	//graphics_context_set_fill_color(ctx, conf.bgColor);
+	//graphics_fill_rect(ctx, GRect(0, 0, 180, 180), 0, 0);
 	
 	// Draw the display box
 		graphics_context_set_fill_color(ctx, conf.displayColor);		
@@ -693,36 +671,35 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "toggle_update_proc");
 
-	// Create palettes from user colours
-	GColor *togglePalette = gbitmap_get_palette(s_bitmap_sheet_toggles);
-	togglePalette[0] = conf.displayTextColor;
-	togglePalette[1] = conf.displayColor;
-	gbitmap_set_palette(s_bitmap_sheet_toggles, togglePalette, false);
-
 	// Draw the labels
 	graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_label, GRect(0, 0, gbitmap_get_bounds(s_bitmap_toggle_label).size.w, gbitmap_get_bounds(s_bitmap_toggle_label).size.h));
 
 	// Battery
 	if (conf.batteryStyle == 1) {
+		// Full bar
 		if (batteryLevel >= 1 || batteryCharge == 1) {
 			graphics_context_set_fill_color(ctx, conf.displayTextColor);
 			graphics_context_set_stroke_color(ctx, conf.displayTextColor);
 			graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_charge, GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
-			graphics_fill_rect(ctx, GRect(31,0,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
 			graphics_fill_rect(ctx, GRect(30,1,(batteryLevel == 10 ? 13 : batteryLevel+2),2), 0,0);
-			graphics_fill_rect(ctx, GRect(29,3,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+			if (batteryCharge != 1) {
+				graphics_fill_rect(ctx, GRect(31,0,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+				graphics_fill_rect(ctx, GRect(29,3,(batteryLevel == 10 ? 13 : batteryLevel+2),1), 0,0);
+			}
+			
 		}
 	}
 	else if (conf.batteryStyle == 2) {
+		// Text
 		char batBuf[8];
-		if (batteryCharge == 1)  { snprintf(batBuf, sizeof(batBuf), "chr"); }
-		else if (batteryLevel >= 1) { snprintf(batBuf, sizeof(batBuf), "%d", batteryLevel*10); }
+		if (batteryLevel >= 1  || batteryCharge == 1) { snprintf(batBuf, sizeof(batBuf), batteryCharge == 1 ? "+%d" : "%d", batteryLevel*10); }
 		else { snprintf(batBuf, sizeof(batBuf), "!!!"); }
 		graphics_context_set_text_color(ctx, conf.displayTextColor);		
 		graphics_draw_text(ctx, batBuf, s_font_bat, GRect(26,-11,16,16), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
 	}
 	else {
 		if (batteryLevel >= 1 || batteryCharge == 1) {
+			// Toggle button
 			graphics_context_set_fill_color(ctx, conf.displayTextColor);
 			graphics_context_set_stroke_color(ctx, conf.displayTextColor);
 			graphics_draw_bitmap_in_rect(ctx, (batteryCharge == 1 ? s_bitmap_toggle_charge : s_bitmap_toggle_battery), GRect(28, 0, gbitmap_get_bounds(s_bitmap_toggle_charge).size.w, gbitmap_get_bounds(s_bitmap_toggle_charge).size.h));
@@ -738,8 +715,10 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	if (quietTimeState) graphics_draw_bitmap_in_rect(ctx, s_bitmap_toggle_enabled, GRect(28, 14, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.w, gbitmap_get_bounds(s_bitmap_toggle_enabled).size.h));
 }
 
+
 // Time update function
 static void update_time(struct tm *tick_time, TimeUnits units_changed, bool firstRun) {
+	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Time Tick - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 
 	// Hourly Vibration
 	if (units_changed & HOUR_UNIT && !quietTimeState && conf.hourVibe) {
@@ -771,6 +750,9 @@ static void update_time(struct tm *tick_time, TimeUnits units_changed, bool firs
 
 	// Time, Minutes/Hours (Also weather update)
 	if (units_changed & MINUTE_UNIT || firstRun) {
+			// Poll for Quiet Time
+			quietTimeState = quiet_time_is_active();
+		
 			// Check for weather update, assuming we need to and haven't retried in a while 		
 			if (weather.retryTimer > 0) weather.retryTimer--;		
 			if ((time(NULL) - weather.timeStamp) > (conf.weatherUpdateRate < 15 ? conf.weatherUpdateRate*3600 : conf.weatherUpdateRate*60)) {
@@ -783,10 +765,6 @@ static void update_time(struct tm *tick_time, TimeUnits units_changed, bool firs
 			text_layer_set_text(s_layer_hour, s_bufferHour);
 			update_fourSlot(false);
 	}
-
-	// Poll for Quiet Time
-	quietTimeState = quiet_time_is_active();
-	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Time Tick - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 }
 
 // Tick handles, just calls update_time.
@@ -842,7 +820,34 @@ static void main_window_load(Window *window) {
 	s_bitmap_toggle_label = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect((conf.toggleBold == true ? 23 : 0),0,23,20));
 	s_bitmap_toggle_pm = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,12,6,7));
 	
-	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Create layers - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
+	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting Bitmap Palettes - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
+	cornerPalette = gbitmap_get_palette(s_bitmap_background);
+	cornerPalette[0] = conf.displayBorderColor;
+	cornerPalette[1] = conf.bgColor;
+	cornerPalette[3] = conf.displayColor;
+	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
+	
+	bitPalette = gbitmap_get_palette(s_bitmap_brand_bg);
+	bitPalette[0] = conf.displayBorderColor;
+	bitPalette[1] = conf.displayColor;
+	gbitmap_set_palette(s_bitmap_brand_bg, bitPalette, false);
+	
+	brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
+	brandingPalette[0] = conf.bgTextColor;
+	brandingPalette[1] = conf.bgColor;
+	gbitmap_set_palette(s_bitmap_sheet_branding, brandingPalette, false);
+	
+	brandingPalette2 = gbitmap_get_palette(s_bitmap_brand_labels);
+	brandingPalette2[0] = conf.bgTextColor;
+	brandingPalette2[1] = conf.bgColor;
+	gbitmap_set_palette(s_bitmap_brand_labels, brandingPalette2, false);
+	
+	togglePalette = gbitmap_get_palette(s_bitmap_sheet_toggles);
+	togglePalette[0] = conf.displayTextColor;
+	togglePalette[1] = conf.displayColor;
+	gbitmap_set_palette(s_bitmap_sheet_toggles, togglePalette, false);
+	
+	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Creating layers - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 	// Create background Layer
 	s_layer_background = layer_create(bounds);
 	layer_set_update_proc(s_layer_background, background_update_proc);
@@ -1245,7 +1250,7 @@ static void main_window_unload(Window *window) {
 
 	gbitmap_destroy(s_bitmap_sheet_branding);
 	gbitmap_destroy(s_bitmap_sheet_toggles);
-
+	
 	// Destroy BitmapLayer
 	bitmap_layer_destroy(s_layer_pm);
 
