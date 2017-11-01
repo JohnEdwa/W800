@@ -6,19 +6,20 @@ module.exports = [
 	"type": "section",
 	"items": [
 		{"type": "toggle",	"id":"changelog","label": "Version 0.8 - Tap for older changelog","defaultValue": false},
-		{"type": "text",		"id": "change0","defaultValue": "Version 0.8:  2017-10-20<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Aplite (OG) and Chalk (Time Round) release!<br> * Fonts fixed and modified to fit the W800 style better.<br> * Lots of tweaks and optimizations.<br>"},
-		{"type": "text",		"id": "change5","defaultValue": "Version 0.7:  2017-06-20<br> * Fixed Word Slot steps counter.<br>"},
-		{"type": "text",		"id": "change4","defaultValue": "Version 0.6:  2017-06-19<br> * Added customizable colours.<br> * Added a second Weather Box, Tap support and automatic branding blanking.<br> * Added a lot of new Weather Box data combinations<br> * Made PMkey import the API keys instead of polling every time, eventually reaching a daily limit.<br> * Added 'CASIO' Logo and new top slogans.<br> * Optimized and cleaned the code.<br> * <a href='https://github.com/JohnEdwa/W800'>Github Release.</a><br>"},
-		{"type": "text",		"id": "change3","defaultValue": "Version 0.5:  2017-06-15<br> * Added Pebble Master Key (pmkey.xyz) support.<br> * Added Week, Day and Month numbers.<br> * Added Debug/Error display to Weather Box.<br> * Fiddled with the config page order and added some descriptions. <br> * Fixed weather autolocation.<br> * Font Fixes.<br> * Temp fix for sunset/sunrise times (Forces 24 hour mode until I figure it out properly)"},
+		{"type": "text",		"id": "change0","defaultValue": "Version 0.8: 2017-11-01<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Aplite (OG) and Chalk (Time Round) release!<br> * Fonts fixed and modified to fit the W800 style better.<br> * Lots of tweaks and optimizations.<br>"},
+		{"type": "text",		"id": "change5","defaultValue": "Version 0.7: 2017-06-20<br> * Fixed Word Slot steps counter.<br>"},
+		{"type": "text",		"id": "change4","defaultValue": "Version 0.6: 2017-06-19<br> * Added customizable colours.<br> * Added a second Weather Box, Tap support and automatic branding blanking.<br> * Added a lot of new Weather Box data combinations<br> * Made PMkey import the API keys instead of polling every time, eventually reaching a daily limit.<br> * Added 'CASIO' Logo and new top slogans.<br> * Optimized and cleaned the code.<br> * <a href='https://github.com/JohnEdwa/W800'>Github Release.</a><br>"},
+		{"type": "text",		"id": "change3","defaultValue": "Version 0.5: 2017-06-15<br> * Added Pebble Master Key (pmkey.xyz) support.<br> * Added Week, Day and Month numbers.<br> * Added Debug/Error display to Weather Box.<br> * Fiddled with the config page order and added some descriptions. <br> * Fixed weather autolocation.<br> * Font Fixes.<br> * Temp fix for sunset/sunrise times (Forces 24 hour mode until I figure it out properly)"},
 		{"type": "text",		"id": "change2","defaultValue": "Version 0.4: 2017-06-13<br> * Fixed weather refresh after settings changes."},
 		{"type": "text",		"id": "change1","defaultValue": "Version 0.1: 2017-06-13<br> * Initial release for Basalt and Diorite."},
 		{"type": "toggle",	"id":"issues","label": "Tap for a list of known issues","defaultValue": false},
-		{"type": "text", 		"id":"issues1","defaultValue": "Known Issues: <br> * Roman Numeral Vibes are always full strength."},
-		{"capabilities": ["PLATFORM_APLITE"],	"type": "text", "id":"issues2","defaultValue": "Aplite (OG) Specific Issues: <br> * No Quiet Time status API available -> QTM toggle shows always off, vibrations won't respect QT."},
-		{"capabilities": ["PLATFORM_CHALK"],	"type": "text",	"id":"issues3","defaultValue": "Chalk (Time Round) Specific Issues: <br> * Top/Bottom box data clips outside screen bounds."},		
+		{"type": "text", 		"id":"issues1","defaultValue": " * Roman Numeral Vibes are always full strength.<br> * Config page remembers only one set of saved items, even when swapping watches.<br> * Sunrise/Sunset always in 24h display.<br> * Seconds display uses a little more battery than needed."},
 	]
 },
-
+		
+{"capabilities": ["PLATFORM_APLITE"],	"type": "text", "defaultValue": "Aplite (OG) Notes: <br> * No Quiet Time  API  -> QTM toggle shows always off, vibrations won't respect QT."},
+{"capabilities": ["PLATFORM_CHALK"],	"type": "text",	"defaultValue": "Chalk (Time Round) Notes: <br> * Branding and Weather box data hasn't been fixed for round screens yet."},	
+	
 // General Settings
 {
 	"type": "section",
@@ -244,6 +245,7 @@ module.exports = [
 			"defaultValue": true
 		},
 		{
+			"capabilities": ["NOT_PLATFORM_CHALK"],
 			"type": "toggle",
 			"messageKey": "bConf[4]",
 			"label": "Show Light/Next/Prev labels.",
@@ -281,6 +283,7 @@ module.exports = [
 			]
 		},
 		{
+			"capabilities": ["NOT_PLATFORM_CHALK"],
 			"type": "select",
 			"messageKey": "bConf[2]",
 			"defaultValue": "2",

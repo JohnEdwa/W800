@@ -79,12 +79,6 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/IMAGE_BG_BIT.PNG",
-                    "name": "IMAGE_BG_BIT",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
                     "characterRegex": "[0-9:. ]",
                     "file": "fonts/FONT_SECOND_25.TTF",
                     "name": "FONT_SECOND_25",

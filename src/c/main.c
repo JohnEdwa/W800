@@ -153,7 +153,6 @@ static GBitmap *s_bitmap_toggle_pm;
 
 // Palettes
 static GColor *cornerPalette;
-static GColor *bitPalette;
 static GColor *brandingPalette;
 static GColor *brandingPalette2;
 static GColor *togglePalette;
@@ -626,7 +625,6 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	
 	// Show the W800 border...
 	if (conf.brandingStyle == 1) {
-		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bg, GRect(SCREENLEFT+3, SCREENTOP+3, gbitmap_get_bounds(s_bitmap_brand_bg).size.w, gbitmap_get_bounds(s_bitmap_brand_bg).size.h));
 	}
 	else if (conf.brandingStyle == 2) {
@@ -636,12 +634,14 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+75, SCREENTOP+25, 1, 1), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+76, SCREENTOP, 1, 25), 0, 0);
 	}
+	
 	if (conf.brandingStyle != 0 && conf.brandingStyle != 3) {
 	// Draw Toggle line
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+79, SCREENTOP+26, PBL_IF_RECT_ELSE(57,68), 1), 0, 0);
 		graphics_fill_rect(ctx, GRect(SCREENLEFT+80, SCREENTOP+25, PBL_IF_RECT_ELSE(56,68), 1), 0, 0);
 	}
+	
 	if (conf.brandingStyle != 0 && conf.brandingStyle != 2 && conf.brandingStyle != 4) {
 		// Draw Bottom Line
 		graphics_context_set_fill_color(ctx, conf.displayBorderColor);
@@ -650,21 +650,30 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 		
 	// If weather box is empty, draw the branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
-		if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
-		if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+66, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+		#if defined(PBL_RECT)
+			if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
+			if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+54, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+		#else
+			if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(90-(gbitmap_get_bounds(s_bitmap_brand_logo).size.w/2), 9, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
+			if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(90-(gbitmap_get_bounds(s_bitmap_brand_top).size.w/2), 168-gbitmap_get_bounds(s_bitmap_brand_top).size.h, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+		#endif
 	}
 	
 	// Bottom Branding
+	#if defined(PBL_RECT)
 	if ((!tapTrigger && conf.weatherBoxBottom == 0) || (tapTrigger && conf.weatherBoxBottomTap == 0)) {
 		if (conf.brandingBottom != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_bottom, GRect(SCREENLEFT+4, SCREENTOP+121, gbitmap_get_bounds(s_bitmap_brand_bottom).size.w, gbitmap_get_bounds(s_bitmap_brand_bottom).size.h));
 	}
+	#endif
 	
 	// NExt/Prev/Light labels
+	#if defined(PBL_RECT)
 	if (conf.brandingLabel != 0) {
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT-9, SCREENTOP-50, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT+135, SCREENTOP-49, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 		graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_labels, GRect(SCREENLEFT+135, SCREENTOP+117, gbitmap_get_bounds(s_bitmap_brand_labels).size.w, gbitmap_get_bounds(s_bitmap_brand_labels).size.h));
 	}
+	#endif	
 }
 
 // Builds the toggle layer
@@ -788,7 +797,9 @@ static void timeInit() {
 static void main_window_load(Window *window) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Load - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 
-		// Get information about the Window
+	window_set_background_color(s_main_window, conf.bgColor);
+	
+	// Get information about the Window
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_bounds(window_layer);
 
@@ -805,14 +816,19 @@ static void main_window_load(Window *window) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Load Bitmap Sheets - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 	// Load Bitmaps
 	s_bitmap_background = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_TINY);
-	s_bitmap_brand_bg = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BG_BIT);
 	s_bitmap_sheet_branding = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_BRANDING);
 	s_bitmap_sheet_toggles = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SHEET_TOGGLES);
 	s_bitmap_brand_labels = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BUTTON_LABELS);
 
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Creating bitmaps - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
+	#if defined(PBL_RECT)
+	s_bitmap_brand_bg = gbitmap_create_as_sub_bitmap(s_bitmap_background, GRect(20,0,74,24));
+	#else
+	s_bitmap_brand_bg = gbitmap_create_as_sub_bitmap(s_bitmap_background, GRect(0,23,74,24));
+	gbitmap_set_bounds(s_bitmap_background, GRect(0, 0, 128,23));
+	#endif
 	s_bitmap_brand_logo = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingLogo > 0 ? (conf.brandingLogo-1) * 16 : 0) , 52, 16));
-	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(64,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 70, 9));
+	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(52,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 76, 9));
 	s_bitmap_brand_bottom = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingBottom > 0 ? ((conf.brandingBottom-1) * 12) + 48 : 0), 128, 12));
 	s_bitmap_toggle_enabled = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,0,17,4));
 	s_bitmap_toggle_battery = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,4,17,4));
@@ -826,11 +842,6 @@ static void main_window_load(Window *window) {
 	cornerPalette[1] = conf.bgColor;
 	cornerPalette[3] = conf.displayColor;
 	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
-	
-	bitPalette = gbitmap_get_palette(s_bitmap_brand_bg);
-	bitPalette[0] = conf.displayBorderColor;
-	bitPalette[1] = conf.displayColor;
-	gbitmap_set_palette(s_bitmap_brand_bg, bitPalette, false);
 	
 	brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
 	brandingPalette[0] = conf.bgTextColor;
@@ -1200,7 +1211,6 @@ static void init() {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Main Window Creation - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
 
 	s_main_window = window_create();
-	window_set_background_color(s_main_window, conf.bgColor);
 	//window_set_background_color(s_main_window, GColorBlack);
 	window_set_window_handlers(s_main_window, (WindowHandlers) { .load = main_window_load, .unload = main_window_unload });
 	window_stack_push(s_main_window, true);
@@ -1236,7 +1246,8 @@ static void main_window_unload(Window *window) {
 	layer_destroy(s_layer_toggle);
 
 	// Destroy GBitmap
-	gbitmap_destroy(s_bitmap_background);
+	gbitmap_destroy(s_bitmap_brand_bg);
+	
 	gbitmap_destroy(s_bitmap_brand_logo);
 	gbitmap_destroy(s_bitmap_brand_top);
 	gbitmap_destroy(s_bitmap_brand_bottom);
@@ -1244,10 +1255,11 @@ static void main_window_unload(Window *window) {
 	gbitmap_destroy(s_bitmap_toggle_battery);
 	gbitmap_destroy(s_bitmap_toggle_enabled);
 	gbitmap_destroy(s_bitmap_brand_labels);
-	gbitmap_destroy(s_bitmap_brand_bg);
+	
 	gbitmap_destroy(s_bitmap_toggle_charge);
 	gbitmap_destroy(s_bitmap_toggle_pm);
 
+	gbitmap_destroy(s_bitmap_background);
 	gbitmap_destroy(s_bitmap_sheet_branding);
 	gbitmap_destroy(s_bitmap_sheet_toggles);
 	
