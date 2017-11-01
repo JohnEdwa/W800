@@ -6,7 +6,7 @@ module.exports = [
 	"type": "section",
 	"items": [
 		{"type": "toggle",	"id":"changelog","label": "Version 0.8 - Tap for older changelog","defaultValue": false},
-		{"type": "text",		"id": "change0","defaultValue": "Version 0.8:  2017-10-20<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Initial Aplite (OG) release!<br> * Compiled for Chalk (Time Round) as a workaround config reset bug fix.<br> * Fonts fixed and modified to fit the W800 style better.<br> * Lots of tweaks and optimizations.<br>"},
+		{"type": "text",		"id": "change0","defaultValue": "Version 0.8:  2017-10-20<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Aplite (OG) and Chalk (Time Round) release!<br> * Fonts fixed and modified to fit the W800 style better.<br> * Lots of tweaks and optimizations.<br>"},
 		{"type": "text",		"id": "change5","defaultValue": "Version 0.7:  2017-06-20<br> * Fixed Word Slot steps counter.<br>"},
 		{"type": "text",		"id": "change4","defaultValue": "Version 0.6:  2017-06-19<br> * Added customizable colours.<br> * Added a second Weather Box, Tap support and automatic branding blanking.<br> * Added a lot of new Weather Box data combinations<br> * Made PMkey import the API keys instead of polling every time, eventually reaching a daily limit.<br> * Added 'CASIO' Logo and new top slogans.<br> * Optimized and cleaned the code.<br> * <a href='https://github.com/JohnEdwa/W800'>Github Release.</a><br>"},
 		{"type": "text",		"id": "change3","defaultValue": "Version 0.5:  2017-06-15<br> * Added Pebble Master Key (pmkey.xyz) support.<br> * Added Week, Day and Month numbers.<br> * Added Debug/Error display to Weather Box.<br> * Fiddled with the config page order and added some descriptions. <br> * Fixed weather autolocation.<br> * Font Fixes.<br> * Temp fix for sunset/sunrise times (Forces 24 hour mode until I figure it out properly)"},
@@ -48,14 +48,15 @@ module.exports = [
 			"min": 0,	"max": 15,	"step": 1
 		},
 		{
-			"capabilities": ["NOT_PLATFORM_APLITE"],
-			"type": "text",
-			"defaultValue": "<i>Vibration Settings:</i>"
+			"type": "heading",
+			"size": 4,
+			"defaultValue": "Vibration Settings:",
 		},
 		{
 			"capabilities": ["PLATFORM_APLITE"],
-			"type": "text",
-			"defaultValue": "<i>Vibration Settings:</i> <br> * Doesn't respect Quiet Time on Aplite (OG)."
+			"type": "heading",
+			"size": 6,
+			"defaultValue": "Note: Doesn't respect Quiet Time on Aplite (OG).",
 		},
 		{
 			"type": "select",
@@ -166,8 +167,9 @@ module.exports = [
 			"defaultValue": "Branding and Visuals:",
 		},
 		{
-			"type": "text",
-			"defaultValue": "<i>Colour options:</i>",
+			"type": "heading",
+			"size": 4,
+			"defaultValue": "Colour options:",
 		},
 		{
 			"type": "color",
@@ -206,8 +208,9 @@ module.exports = [
 			"sunlight": false,	"allowGray": false
 		},
 		{
-			"type": "text",
-			"defaultValue": "<i>UI Style options:</i>",
+			"type": "heading",
+			"size": 4,
+			"defaultValue": "UI Style options:",
 		},
 		{
 			"type": "select",
@@ -247,8 +250,9 @@ module.exports = [
 			"defaultValue": true
 		},
 		{
-			"type": "text",
-			"defaultValue": "<i>Branding options:</i>",
+			"type": "heading",
+			"size": 4,
+			"defaultValue": "Branding options:",
 		},
 		{
 			"type": "select",
@@ -299,7 +303,8 @@ module.exports = [
 			"defaultValue": "Word slot:"
 		},
 		{
-			"type": "text",
+			"type": "heading",
+			"size": 6,
 			"defaultValue": "Fits four characters max, and has a wide segment font.",
 		},
 		{
@@ -415,7 +420,8 @@ module.exports = [
 			"defaultValue": "Top Data Slots:"
 		},
 		{ 
-			"type": "text",
+			"type": "heading",
+			"size": 6,
 			"defaultValue": "Smaller fits 8 characters per slot, larger fits 6.",
 		},
 		{
@@ -675,7 +681,8 @@ module.exports = [
 			"defaultValue": "Bottom Data Slots"
 		},
 		{
-			"type": "text",
+			"type": "heading",
+			"size": 6,
 			"defaultValue": "Smaller fits 16 characters, larger fits 12.",
 		},
 		{
@@ -924,7 +931,8 @@ module.exports = [
 			"defaultValue": "Weather Box",
 		},
 		{
-			"type": "text",
+			"type": "heading",
+			"size": 6,
 			"defaultValue": "Replace top or bottom branding with weather information. 'Location' also returns error messages, use them to make sure PMkey, WU & OWM API keys are correct.<br>Note: OWM will fail 'silently' on an invalid location, returning the closest location it geomaps your connection to.",
 		},
 		{
@@ -1118,7 +1126,8 @@ module.exports = [
 			"defaultValue": "API Keys." 
 		}, 
 		{ 
-			"type": "text",
+			"type": "heading",
+			"size": 6,
 			"defaultValue": "You can import missing API keys through Pebble Master Key (pmkey.xyz), or manually write them below.",
 		},
 		{
