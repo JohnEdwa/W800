@@ -241,8 +241,8 @@ static ClaySettings conf;
 // Default settings function
 static void default_settings() {
 
-	conf.bgColor = GColorBlack;
-	conf.bgTextColor = GColorWhite;
+	conf.bgColor = GColorWhite;
+	conf.bgTextColor = GColorBlack;
 	conf.displayColor = GColorWhite;
 	conf.displayTextColor = GColorBlack;
 	conf.displayBorderColor = GColorBlack;
@@ -617,9 +617,7 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 			gbitmap_set_bounds(s_bitmap_background, GRect(0, 0, 10,10));
 			graphics_draw_bitmap_in_rect(ctx, s_bitmap_background, GRect(SCREENLEFT+130, SCREENTOP+104, 10,10));
 		#else
-			//gbitmap_set_bounds(s_bitmap_background, GRect(0, 0, 128,23));
 			graphics_draw_rotated_bitmap(ctx, s_bitmap_background, GPoint(0,0), DEG_TO_TRIGANGLE(90), GPoint(SCREENLEFT+154, SCREENTOP-9));
-			//gbitmap_set_bounds(s_bitmap_background, GRect(0, 23, 128,23));
 			graphics_draw_rotated_bitmap(ctx, s_bitmap_background, GPoint(128,23), DEG_TO_TRIGANGLE(270), GPoint(SCREENLEFT+4, SCREENTOP-10));
 		#endif
 	
@@ -842,6 +840,8 @@ static void main_window_load(Window *window) {
 	cornerPalette[1] = conf.bgColor;
 	cornerPalette[3] = conf.displayColor;
 	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
+	
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "Branding colours: %d/%d/%d - %d/%d/%d", conf.bgTextColor.r,conf.bgTextColor.g,conf.bgTextColor.b,conf.bgColor.r,conf.bgColor.b,conf.bgColor.b);
 	
 	brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
 	brandingPalette[0] = conf.bgTextColor;

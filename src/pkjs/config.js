@@ -18,7 +18,7 @@ module.exports = [
 },
 		
 {"capabilities": ["PLATFORM_APLITE"],	"type": "text", "defaultValue": "Aplite (OG) Notes: <br> * No Quiet Time  API  -> QTM toggle shows always off, vibrations won't respect QT."},
-{"capabilities": ["PLATFORM_CHALK"],	"type": "text",	"defaultValue": "Chalk (Time Round) Notes: <br> * Branding and Weather box data hasn't been fixed for round screens yet."},	
+{"capabilities": ["PLATFORM_CHALK"],	"type": "text",	"defaultValue": "Chalk (Time Round) Notes: <br> * Some Weather Box items will clip the screen edges."},	
 	
 // General Settings
 {
