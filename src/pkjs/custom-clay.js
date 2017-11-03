@@ -34,10 +34,10 @@ module.exports = function(minified) {
 	
 	function forecastText() {
 		try {
-			var today = clayConfig.getItemByMessageKey('wConf[6]').get();
+			var today = clayConfig.getItemByMessageKey('wConf[4]').get();
 			var time = new Date();
 			if (time.getHours() < today) {clayConfig.getItemById('sliderText').set("Forecast at current time: Today.");}
-			else {clayConfig.getItemById('sliderText').set("Forecast at current time: Tomorrow.");}	
+			else {clayConfig.getItemById('sliderText').set("Forecast at current time: Tomorrow. ");}	
 		} catch (e) {}
 	}
 	
@@ -100,12 +100,9 @@ module.exports = function(minified) {
 		} catch (e) {}
 
 		try {
-			var sliderText1 = clayConfig.getItemByMessageKey('wConf[6]');
-			var sliderText2 = clayConfig.getItemByMessageKey('wConf[7]');
-			
+			var sliderText1 = clayConfig.getItemByMessageKey('wConf[4]');			
 			forecastText.call(sliderText1);
 			sliderText1.on('change', forecastText);
-			sliderText2.on('change', forecastText);
 		} catch (e) {}
 		
 		try {

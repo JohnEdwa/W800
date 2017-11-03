@@ -129,7 +129,7 @@ function getWeather(locationString, autoLocation) {
 							if (!('error' in json.response)) {
 
 								time = new Date();
-								if (time.getHours() < settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
+								if (time.getHours() < settings['wConf[4]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
 								else {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
 								/*
 								if (time.getHours() <= settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
@@ -196,7 +196,7 @@ function getWeather(locationString, autoLocation) {
 				 if (json.cod == "200") {
 					 
 					 time = new Date();
-					 if (time.getHours() < settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
+					 if (time.getHours() < settings['wConf[4]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
 						else {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
 					 /*
 					 if ( (time.getHours() >= settings['wConf[7]']) && (settings['wConf[7]'] >= settings['wConf[6]']) ) {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
