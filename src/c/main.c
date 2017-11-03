@@ -220,10 +220,8 @@ typedef struct ClaySettings {
 	unsigned char weatherBoxBottomTap;
 	unsigned char weatherProvider;
 	unsigned char weatherTempUnit;
-	unsigned char weatherWindUnit;
 	unsigned char weatherUpdateRate;
 	unsigned char weatherDayNight;
-	unsigned char weatherNightMorning;
 
 	char locationString[32];
 	char wuKeyString[20];
@@ -241,8 +239,8 @@ static ClaySettings conf;
 // Default settings function
 static void default_settings() {
 
-	conf.bgColor = GColorWhite;
-	conf.bgTextColor = GColorBlack;
+	conf.bgColor = GColorBlack;
+	conf.bgTextColor = GColorWhite;
 	conf.displayColor = GColorWhite;
 	conf.displayTextColor = GColorBlack;
 	conf.displayBorderColor = GColorBlack;
@@ -255,9 +253,9 @@ static void default_settings() {
 	conf.fourCaps = 1;	conf.fourData = 1;	 conf.fourDataTap = 9;
 	conf.infoLeftStyle = 1;	conf.infoRightStyle = 1; conf.infoLeftData = 7; conf.infoRightData = 8; conf.infoLeftDataTap = 0;	conf.infoRightDataTap = 0;
 	conf.bottomStyle = 2; conf.bottomLeftData = 4;	conf.bottomRightData = 3; conf.bottomLeftDataTap = 0;	conf.bottomRightDataTap = 0;
-	conf.weatherProvider = 1;	conf.weatherTempUnit = 1;	conf.weatherWindUnit = 1; conf.weatherUpdateRate = 30;
-	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 0; conf.weatherBoxTopTap = 24; conf.weatherBoxBottomTap = 15;
-	conf.weatherDayNight = 15;	conf.weatherNightMorning = 21;
+	conf.weatherProvider = 1;	conf.weatherTempUnit = 1; conf.weatherUpdateRate = 30;
+	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 0; conf.weatherBoxTopTap = 13; conf.weatherBoxBottomTap = 25;
+	conf.weatherDayNight = 15;
 	strcpy(conf.locationString,""); strcpy(conf.wuKeyString,""); strcpy(conf.owmKeyString,"");
 	conf.batteryStyle = 0;
 	
@@ -276,9 +274,6 @@ typedef struct WeatherData {
 	char tempMin[5];
 	char tempMax[5];
 
-	char windCur[8];
-	char windMax[8];
-	char humidity[5];
 	char sunset[6];
 	char sunrise[6];
 
@@ -299,9 +294,6 @@ static void clear_weather() {
 	strcpy(weather.tempCur,"");
 	strcpy(weather.tempMin,"");
 	strcpy(weather.tempMax,"");
-	strcpy(weather.windCur,"");
-	strcpy(weather.windMax,"");
-	strcpy(weather.humidity,"");
 	strcpy(weather.sunset,"");
 	strcpy(weather.sunrise,"");
 	strcpy(weather.location,"Loading...");
@@ -528,18 +520,18 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 		switch (confValue) {
 			case 0: strcpy(inBuf," "); break;
 			case 1: snprintf(inBuf, bufSize, "%s", weather.location); break;
-			case 2: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
+			case 2: snprintf(inBuf, bufSize, "Lo %s%s   [ %s%s ]    Hi %s%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
 			case 3: 
 			case 4: snprintf(inBuf, bufSize, "%s", confValue == 3 ? weather.condDesc : weather.condForecast); break;
-			case 5: snprintf(inBuf, bufSize, "%s                %s", weather.sunrise, weather.sunset); break;
-			case 21: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.location); break;
+			case 5: snprintf(inBuf, bufSize, "%s                  %s", weather.sunrise, weather.sunset); break;
+			case 21: snprintf(inBuf, bufSize, "Lo %s%s   [ %s%s ]    Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.location); break;
 			case 23:
-			case 24: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, confValue == 23 ? weather.condDesc : weather.condForecast); break;
-			case 25: snprintf(inBuf, bufSize, "Lo %s%s  [ %s%s ]   Hi %s%s\n%s                %s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.sunrise, weather.sunset); break;
-			case 12: snprintf(inBuf, bufSize, "%s\nLo %s%s  [ %s%s ]   Hi %s%s", weather.location, weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
+			case 24: snprintf(inBuf, bufSize, "Lo %s%s   [ %s%s ]    Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, confValue == 23 ? weather.condDesc : weather.condForecast); break;
+			case 25: snprintf(inBuf, bufSize, "Lo %s%s   [ %s%s ]    Hi %s%s\n%s                  %s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.sunrise, weather.sunset); break;
+			case 12: snprintf(inBuf, bufSize, "%s\nLo %s%s   [ %s%s ]    Hi %s%s", weather.location, weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
 			case 13:
 			case 14: snprintf(inBuf, bufSize, "%s\n%s", weather.location, confValue == 13 ? weather.condDesc : weather.condForecast); break;
-			case 15: snprintf(inBuf, bufSize, "%s\n%s                %s",weather.location, weather.sunrise, weather.sunset); break;
+			case 15: snprintf(inBuf, bufSize, "%s\n%s                  %s",weather.location, weather.sunrise, weather.sunset); break;
 			case 34: 
 			case 43:
 				//if (strcmp(weather.condDesc, weather.condForecast) == 0) snprintf(inBuf, bufSize, "%s", weather.condDesc);
@@ -649,8 +641,8 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	// If weather box is empty, draw the branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
 		#if defined(PBL_RECT)
-			if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
 			if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+54, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+			if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
 		#else
 			if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(90-(gbitmap_get_bounds(s_bitmap_brand_logo).size.w/2), 9, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
 			if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(90-(gbitmap_get_bounds(s_bitmap_brand_top).size.w/2), 168-gbitmap_get_bounds(s_bitmap_brand_top).size.h, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
@@ -826,7 +818,7 @@ static void main_window_load(Window *window) {
 	gbitmap_set_bounds(s_bitmap_background, GRect(0, 0, 128,23));
 	#endif
 	s_bitmap_brand_logo = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingLogo > 0 ? (conf.brandingLogo-1) * 16 : 0) , 52, 16));
-	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(52,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 10 : 0) , 76, 9));
+	s_bitmap_brand_top = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(52,(conf.brandingTop > 0 ? (conf.brandingTop-1) * 9 : 0) , 76, 9));
 	s_bitmap_brand_bottom = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_branding, GRect(0,(conf.brandingBottom > 0 ? ((conf.brandingBottom-1) * 12) + 48 : 0), 128, 12));
 	s_bitmap_toggle_enabled = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,0,17,4));
 	s_bitmap_toggle_battery = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,4,17,4));
@@ -1065,9 +1057,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			snprintf(weather.tempCur, sizeof(weather.tempCur), "%s", t_weather[1]->value->cstring);
 			snprintf(weather.tempMin, sizeof(weather.tempMin), "%s", t_weather[2]->value->cstring);
 			snprintf(weather.tempMax, sizeof(weather.tempMax), "%s", t_weather[3]->value->cstring);
-			//snprintf(weather.windCur, sizeof(weather.windCur), "%s", t_weather[]->value->cstring);
-			//snprintf(weather.windMax, sizeof(weather.windMax), "%s", t_weather[]->value->cstring);
-			//snprintf(weather.humidity, sizeof(weather.humidity), "%s", t_weather[]->value->cstring);
 			snprintf(weather.sunrise, sizeof(weather.sunrise), "%s", t_weather[7]->value->cstring);
 			snprintf(weather.sunset, sizeof(weather.sunset), "%s", t_weather[8]->value->cstring);
 			snprintf(weather.condMain, sizeof(weather.condMain), "%s", t_weather[15]->value->cstring);
@@ -1110,10 +1099,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			}
 			if (t_wConfig[0]) conf.weatherProvider = atoi(t_wConfig[0]->value->cstring);
 			if (t_wConfig[1]) conf.weatherTempUnit = atoi(t_wConfig[1]->value->cstring);
-			if (t_wConfig[2]) conf.weatherWindUnit = atoi(t_wConfig[2]->value->cstring);
 			if (t_wConfig[3]) conf.weatherUpdateRate = atoi(t_wConfig[3]->value->cstring);
 			if (t_wConfig[4]) conf.weatherDayNight = atoi(t_wConfig[4]->value->cstring);
-			if (t_wConfig[5]) conf.weatherNightMorning = atoi(t_wConfig[5]->value->cstring);
 			
 			if (t_wConfig[6]) conf.weatherBoxTop = atoi(t_wConfig[6]->value->cstring);
 			if (t_wConfig[7]) conf.weatherBoxBottom = atoi(t_wConfig[7]->value->cstring);

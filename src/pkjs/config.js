@@ -6,14 +6,14 @@ module.exports = [
 	"type": "section",
 	"items": [
 		{"type": "toggle",	"id":"changelog","label": "Version 0.8 - Tap for older changelog","defaultValue": false},
-		{"type": "text",		"id": "change0","defaultValue": "Version 0.8: 2017-11-01<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Aplite (OG) and Chalk (Time Round) release!<br> * Fonts fixed and modified to fit the W800 style better.<br> * Lots of tweaks and optimizations.<br>"},
+		{"type": "text",		"id": "change0","defaultValue": "Version 0.8: 2017-11-01<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Aplite (OG) and Chalk (Time Round) release!<br> * Fonts fixed and modified to fit the W800 style better.<br> * Fixed weather issues.<br> * Lots of tweaks and optimizations.<br>"},
 		{"type": "text",		"id": "change5","defaultValue": "Version 0.7: 2017-06-20<br> * Fixed Word Slot steps counter.<br>"},
 		{"type": "text",		"id": "change4","defaultValue": "Version 0.6: 2017-06-19<br> * Added customizable colours.<br> * Added a second Weather Box, Tap support and automatic branding blanking.<br> * Added a lot of new Weather Box data combinations<br> * Made PMkey import the API keys instead of polling every time, eventually reaching a daily limit.<br> * Added 'CASIO' Logo and new top slogans.<br> * Optimized and cleaned the code.<br> * <a href='https://github.com/JohnEdwa/W800'>Github Release.</a><br>"},
 		{"type": "text",		"id": "change3","defaultValue": "Version 0.5: 2017-06-15<br> * Added Pebble Master Key (pmkey.xyz) support.<br> * Added Week, Day and Month numbers.<br> * Added Debug/Error display to Weather Box.<br> * Fiddled with the config page order and added some descriptions. <br> * Fixed weather autolocation.<br> * Font Fixes.<br> * Temp fix for sunset/sunrise times (Forces 24 hour mode until I figure it out properly)"},
 		{"type": "text",		"id": "change2","defaultValue": "Version 0.4: 2017-06-13<br> * Fixed weather refresh after settings changes."},
 		{"type": "text",		"id": "change1","defaultValue": "Version 0.1: 2017-06-13<br> * Initial release for Basalt and Diorite."},
 		{"type": "toggle",	"id":"issues","label": "Tap for a list of known issues","defaultValue": false},
-		{"type": "text", 		"id":"issues1","defaultValue": " * Roman Numeral Vibes are always full strength.<br> * Config page remembers only one set of saved items, even when swapping watches.<br> * Sunrise/Sunset always in 24h display.<br> * Seconds display uses a little more battery than needed."},
+		{"type": "text", 		"id":"issues1","defaultValue": " * Roman Numeral Vibes are always full strength.<br> * Config page remembers only one set of saved items, even when swapping watches.<br> * Seconds display uses a little more battery than needed."},
 	]
 },
 		
@@ -936,11 +936,11 @@ module.exports = [
 		{
 			"type": "heading",
 			"size": 6,
-			"defaultValue": "Replace top or bottom branding with weather information. 'Location' also returns error messages, use them to make sure PMkey, WU & OWM API keys are correct.<br>Note: OWM will fail 'silently' on an invalid location, returning the closest location it geomaps your connection to.",
+			"defaultValue": "Replace top or bottom branding with weather information. 'Location' also returns error messages, use them to make sure PMkey, WU & OWM API keys are correct.",
 		},
 		{
 			"type": "select",
-			"messageKey": "wConf[4]",
+			"messageKey": "wConf[6]",
 			"defaultValue": "0",
 			"label": "Top data",
 			"options": [
@@ -964,7 +964,7 @@ module.exports = [
 		},
 		{
 			"type": "select",
-			"messageKey": "wConf[5]",
+			"messageKey": "wConf[7]",
 			"defaultValue": "0",
 			"label": "Bottom data",
 			"options": [
@@ -989,7 +989,7 @@ module.exports = [
 		{
 			"type": "select",
 			"messageKey": "wConf[8]",
-			"defaultValue": "24",
+			"defaultValue": "13",
 			"label": "Top Tap data ",
 			"options": [
 				{"label": "Disable Tap",	"value": "0"},
@@ -1013,7 +1013,7 @@ module.exports = [
 		{
 			"type": "select",
 			"messageKey": "wConf[9]",
-			"defaultValue": "15",
+			"defaultValue": "25",
 			"label": "Bottom Tap data",
 			"options": [
 				{"label": "Disable Tap",	"value": "0"},
@@ -1060,7 +1060,7 @@ module.exports = [
 		"messageKey": "wLoc",
 		"defaultValue": "",
 		"label": "Custom Location String",
-		"description" : "Leave blank for Autolocation. This gets passed straight to OWM/WU, so you need to know what you enter here.",
+		"description" : "Leave blank for Autolocation. This gets passed straight to OWM/WU, so you need to know what you enter here.<br>Note: OWM will fail 'silently' on an invalid location, returning the closest location it geomaps your connection to.",
 		"attributes": {	"placeholder": "AutoLocation On",	"limit": 32,}
 		},
 		{
@@ -1071,17 +1071,6 @@ module.exports = [
 			"options": [
 				{"label": "Celcius", "value": "1"},
 				{"label": "Fahrenheit",	"value": "2"}
-			]
-		},
-		{
-			"type": "select",
-			"messageKey": "wConf[2]",
-			"defaultValue": "1",
-			"label": "Wind unit",
-			"options": [
-				{"label": "m/s", "value": "1"},
-				{"label": "km/h",	"value": "2"},
-				{"label": "mph",	"value": "3"}
 			]
 		},
 		{
@@ -1098,25 +1087,17 @@ module.exports = [
 			]
 		},
 		{
-			"type": "text",
-			"defaultValue": "Forecast weather data (min/max temp & forecast description) is based on these trigger hours. <br>Note: OWM only has a single daily forecast - tonight is equal to today.",
-		},
-		{
 			"type": "slider",
-			"messageKey": "wConf[6]",
-			"label": "Today -> Tonight switch hour",
-			"defaultValue" : 16,	"min" : 0,	"max" : 24				
+			"messageKey": "wConf[4]",
+			"description" : "0 to always show Tomorrow, 24 to always show Today.",
+			"label": "Forecast switch hour.",
+			"defaultValue" : 20,	"min" : 0,	"max" : 24				
 		},
 		{
-			"type": "slider",
-			"messageKey": "wConf[7]",
-			"label": "Tonight -> Tomorrow switch hour",
-			"defaultValue" : 22,	"min" : 0,	"max" : 24
-		},
-		{
-			"type": "text",
+			"type": "heading",
+			"size": 6,
 			"id" : "sliderText",
-			"defaultValue": "Current Settings : ",
+			"defaultValue": "Currently showing: ",
 		},
 	]
 },

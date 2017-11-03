@@ -35,18 +35,12 @@ module.exports = function(minified) {
 	function forecastText() {
 		try {
 			var today = clayConfig.getItemByMessageKey('wConf[6]').get();
-			var tomorrow = clayConfig.getItemByMessageKey('wConf[7]').get();
-			var prov = clayConfig.getItemByMessageKey('wConf[0]').get();
-			var time = new Date();						
-			
-			if (time.getHours() <= today) { clayConfig.getItemById('sliderText').set("Forecast at current time: Today.");}
-			else if ( (time.getHours() >= tomorrow) && (tomorrow >= today) ) {clayConfig.getItemById('sliderText').set("Forecast at current time: Tomorrow.");}
-			else {
-				if (prov === 2) clayConfig.getItemById('sliderText').set("Forecast at current time: Tonight.");
-				else  clayConfig.getItemById('sliderText').set("Forecast at current time: Today.");
-			}			
+			var time = new Date();
+			if (time.getHours() < today) {clayConfig.getItemById('sliderText').set("Forecast at current time: Today.");}
+			else {clayConfig.getItemById('sliderText').set("Forecast at current time: Tomorrow.");}	
 		} catch (e) {}
 	}
+	
 	
 	function toggleChangelog() {
 		if (this.get()) {

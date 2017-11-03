@@ -30,9 +30,6 @@ var url = null;
 var tempCurrent = null;
 var tempMin = null;
 var tempMax = null;
-var windCurrent = null;
-var windMax = null;
-var humidity = null;
 var sunrise = null;
 var sunset = null;	
 var condMain = null;
@@ -42,10 +39,7 @@ var location = null;
 var forecastNumber = 0;
 var time = null;
 
-function pad (str, max) {
-  str = str.toString();
-  return str.length < max ? pad("0" + str, max) : str;
-}
+function round(acc, vars) { return (Math.round( (vars)*10 ) / 10).toFixed(acc);}
 
 function tempTo(temp) {
 		if (settings['wConf[1]'] == 1) return (Math.round( (temp - 273.15)*10 ) / 10).toFixed(0);
@@ -54,21 +48,36 @@ function tempTo(temp) {
 		else return temp;
 }
 
-function timeTo(time) {
-	var date = new Date(time*1000);
-	return date.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', hour12: false});
+function timeToUnix(hour, minute) {
+	var time = new Date();
+	time.setHours(hour);
+	time.setMinutes(minute);
+	return time;
 }
 
-function windTo(wind) {
-	if (settings['wConf[2]'] == 1) return (Math.round(wind*10) / 10).toFixed(1);
-	if (settings['wConf[2]'] == 3) return (Math.round( (wind * 2.23694)*10 ) / 10).toFixed(1);
-	if (settings['wConf[2]'] == 2) return (Math.round( (wind * 3.6)*10 ) / 10).toFixed(1);
-	else return wind;
+function getSunTime(timeIn) {
+	//console.log('Weather - getSunTime in [' + timeIn + ']');
+	var time = new Date(timeIn);
+	var hours = time.getHours();
+	var minutes = time.getMinutes();
+	
+	var date = new Date(Date.UTC(2012, 11, 12, 3, 0, 0));
+	var dateString = date.toLocaleTimeString();
+	if (dateString.match(/am|pm/i) || date.toString().match(/am|pm/i) )
+	{
+		var ampm = hours >= 12 ? 'P' : 'A';
+  	hours = hours % 12;
+  	hours = hours ? hours : 12; // the hour '0' should be '12'
+  	minutes = minutes < 10 ? '0'+minutes : minutes;
+		return hours <= 9 ? (hours + ':' + minutes + '' + ampm) : (hours + ':' + minutes);
+	}
+	else {
+		hours = hours < 10 ? '0'+hours : hours;
+		minutes = minutes < 10 ? '0'+minutes : minutes;
+		return hours + ':' + minutes;
+	}	
 }
 
-function round(acc, vars) {
-	return (Math.round( (vars)*10 ) / 10).toFixed(acc);
-}
 
 function sendMessage(d) {
 	// Send to Pebble
@@ -86,9 +95,6 @@ function buildMessage(provider) {
 			d[keys.jsWeatherData + 1] = tempCurrent +'';
 			d[keys.jsWeatherData + 2] = tempMin +'';
 			d[keys.jsWeatherData + 3] = tempMax + '';
-			d[keys.jsWeatherData + 4] = windCurrent +'';
-			d[keys.jsWeatherData + 5] = windMax +'';
-			d[keys.jsWeatherData + 6] = humidity +'';
 			d[keys.jsWeatherData + 7] = sunrise + '';
 			d[keys.jsWeatherData + 8] = sunset + '';
 			d[keys.jsWeatherData + 12] = location + '';
@@ -109,10 +115,11 @@ function buildMessage(provider) {
 	
 function getWeather(locationString, autoLocation) {
 	console.log("Weather - Sending Requests");
+	// Get weather from WU
 		if (settings['wConf[0]'] == 2) {
 			if (DEBUG) console.log('Weather - Using WU with API key [' + wuAPIkey + ']');
 			url = 'https://api.wunderground.com/api/' + wuAPIkey + '/forecast/conditions/astronomy/q/'+ locationString + '.json';
-
+			
 			xhrRequest
 					 (url, 'GET', 
 						function(responseText) {
@@ -121,10 +128,14 @@ function getWeather(locationString, autoLocation) {
 							var json = JSON.parse(responseText);
 							if (!('error' in json.response)) {
 
-								time = new Date();						
+								time = new Date();
+								if (time.getHours() < settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
+								else {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
+								/*
 								if (time.getHours() <= settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
 								else if ( (time.getHours() >= settings['wConf[7]']) && (settings['wConf[7]'] >= settings['wConf[6]']) ) {forecastNumber = 2; console.log("Weather - Forecast : Tomorrow.");}
 								else {forecastNumber = 1; console.log("Weather - Forecast : Tonight.");}
+								*/
 
 								if (settings['wConf[1]'] == 1) {
 									tempCurrent = round(0,json.current_observation.temp_c);
@@ -137,26 +148,12 @@ function getWeather(locationString, autoLocation) {
 									tempMax = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].high.fahrenheit);
 								}
 
-								if (settings['wConf[2]'] == 1) {
-									windCurrent = round(1,json.current_observation.wind_kph*0.277778);
-									windMax = round(1,json.forecast.simpleforecast.forecastday[forecastNumber].maxwind.kph*0.277778);
-								}
-								else if (settings['wConf[2]'] == 2) {
-									windCurrent = round(1,json.current_observation.wind_kph);
-									windMax = round(1,json.forecast.simpleforecast.forecastday[forecastNumber].maxwind.kph);	
-								}
-								else if (settings['wConf[2]'] == 3) {
-									windCurrent = round(1,json.current_observation.wind_mph);
-									windMax = round(1,json.forecast.simpleforecast.forecastday[forecastNumber].maxwind.mph);	
-								}
-
 								condMain = json.current_observation.weather;						
 								condDesc = json.current_observation.weather;
-								humidity = json.current_observation.relative_humidity;
 								condForecast = json.forecast.simpleforecast.forecastday[forecastNumber].conditions;
 								location = json.current_observation.display_location.city;
-								sunrise = pad(json.sun_phase.sunrise.hour,2) + ':' + pad(json.sun_phase.sunrise.minute,2);
-								sunset =  pad(json.sun_phase.sunset.hour,2) + ':' +  pad(json.sun_phase.sunset.minute,2);
+								sunrise = getSunTime(timeToUnix(json.sun_phase.sunrise.hour, json.sun_phase.sunrise.minute));
+								sunset =  getSunTime(timeToUnix(json.sun_phase.sunset.hour, json.sun_phase.sunset.minute));
 
 								buildMessage(2);
 							}
@@ -174,6 +171,7 @@ function getWeather(locationString, autoLocation) {
 						}
 					 );
 		}
+	// Get weather from OWM
 		else {
 			if (owmAPIkey === '') owmAPIkey = defaultOWMkey;
 			if (DEBUG) console.log('Weather - Using OWM with API key [' + owmAPIkey + ']');
@@ -197,16 +195,17 @@ function getWeather(locationString, autoLocation) {
 				 var json = JSON.parse(responseText);
 				 if (json.cod == "200") {
 					 
-					 time = new Date();						
+					 time = new Date();
+					 if (time.getHours() < settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
+						else {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
+					 /*
 					 if ( (time.getHours() >= settings['wConf[7]']) && (settings['wConf[7]'] >= settings['wConf[6]']) ) {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
 					 else {forecastNumber = 0; console.log("Weather - Forecast : Today");}
+					 */
 					 
 					 //tempCurrent = tempTo(json.list[0].temp.day);
 					 tempMin = tempTo(json.list[forecastNumber].temp.min);
 					 tempMax = tempTo(json.list[forecastNumber].temp.max);				
-					 //condMain = json.list[0].weather[0].main;
-					 //condDesc = json.list[0].weather[0].description;
-					 windMax = windTo(json.list[forecastNumber].speed);
 					 condForecast = json.list[forecastNumber].weather[0].description;
 
 					 xhrRequest
@@ -217,13 +216,11 @@ function getWeather(locationString, autoLocation) {
 							var json = JSON.parse(responseText);
 							if (json.cod == "200") {
 
-								windCurrent = windTo(json.wind.speed,1);
 								tempCurrent = tempTo(json.main.temp,1);
 								condMain = json.weather[0].main;
 								condDesc = json.weather[0].description;
-								humidity = json.main.humidity;
-								sunrise = timeTo(json.sys.sunrise);
-								sunset = timeTo(json.sys.sunset);
+								sunrise = getSunTime(json.sys.sunrise*1000);
+								sunset = getSunTime(json.sys.sunset*1000);
 								location = json.name;
 
 								buildMessage(1);
