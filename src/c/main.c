@@ -17,6 +17,7 @@
 #define COLORDEBUG 0
 
 // Persistent storage key
+#define VERSION 80
 #define SETTINGS_KEY 1
 #define WEATHER_KEY 2
 
@@ -175,6 +176,7 @@ static char s_bufferWeatherBottom[64];
 
 // Define our settings struct
 typedef struct ClaySettings {
+	unsigned int version;
 	bool showZero;
 	bool enHealth;
 	bool enWeather;
@@ -238,6 +240,7 @@ static ClaySettings conf;
 
 // Default settings function
 static void default_settings() {
+	conf.version = VERSION;
 
 	conf.bgColor = GColorBlack;
 	conf.bgTextColor = GColorWhite;
@@ -641,8 +644,8 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	// If weather box is empty, draw the branding.
 	if ((!tapTrigger && conf.weatherBoxTop == 0) || (tapTrigger && conf.weatherBoxTopTap == 0)) {
 		#if defined(PBL_RECT)
-			if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+54, SCREENTOP-19, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
-			if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+7, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
+			if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(SCREENLEFT+56, SCREENTOP-20, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
+			if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(SCREENLEFT+4, SCREENTOP-23, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
 		#else
 			if (conf.brandingLogo != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_logo, GRect(90-(gbitmap_get_bounds(s_bitmap_brand_logo).size.w/2), 9, gbitmap_get_bounds(s_bitmap_brand_logo).size.w, gbitmap_get_bounds(s_bitmap_brand_logo).size.h));
 			if (conf.brandingTop != 0) graphics_draw_bitmap_in_rect(ctx, s_bitmap_brand_top, GRect(90-(gbitmap_get_bounds(s_bitmap_brand_top).size.w/2), 168-gbitmap_get_bounds(s_bitmap_brand_top).size.h, gbitmap_get_bounds(s_bitmap_brand_top).size.w, gbitmap_get_bounds(s_bitmap_brand_top).size.h));
@@ -833,8 +836,6 @@ static void main_window_load(Window *window) {
 	cornerPalette[3] = conf.displayColor;
 	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
 	
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "Branding colours: %d/%d/%d - %d/%d/%d", conf.bgTextColor.r,conf.bgTextColor.g,conf.bgTextColor.b,conf.bgColor.r,conf.bgColor.b,conf.bgColor.b);
-	
 	brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
 	brandingPalette[0] = conf.bgTextColor;
 	brandingPalette[1] = conf.bgColor;
@@ -1023,7 +1024,8 @@ static void load_settings() {
 	// Read settings from persistent storage, if they exist
 	int ret = persist_read_data(SETTINGS_KEY, &conf, sizeof(conf));
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Settings Loaded (%d)", ret);
-	//APP_LOG(APP_LOG_LEVEL_DEBUG, "Colours: %d / %d / %d / %d", conf.displayTextColor, conf.displayColor, conf.displayBorderColor, conf.bgTextColor);
+	// reset if the settings are not for the current version
+	if (conf.version != VERSION) default_settings();
 }
 
 // Receive JS Messages from the phone
