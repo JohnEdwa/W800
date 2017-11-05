@@ -14,7 +14,6 @@
 #include <pebble.h>
 
 #define DEBUG 0
-#define COLORDEBUG 0
 
 // Persistent storage key
 #define VERSION 80
@@ -257,7 +256,7 @@ static void default_settings() {
 	conf.infoLeftStyle = 1;	conf.infoRightStyle = 1; conf.infoLeftData = 7; conf.infoRightData = 8; conf.infoLeftDataTap = 0;	conf.infoRightDataTap = 0;
 	conf.bottomStyle = 2; conf.bottomLeftData = 4;	conf.bottomRightData = 3; conf.bottomLeftDataTap = 0;	conf.bottomRightDataTap = 0;
 	conf.weatherProvider = 1;	conf.weatherTempUnit = 1; conf.weatherUpdateRate = 30;
-	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 0; conf.weatherBoxTopTap = 13; conf.weatherBoxBottomTap = 25;
+	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 21; conf.weatherBoxTopTap = 13; conf.weatherBoxBottomTap = 25;
 	conf.weatherDayNight = 15;
 	strcpy(conf.locationString,""); strcpy(conf.wuKeyString,""); strcpy(conf.owmKeyString,"");
 	conf.batteryStyle = 0;
@@ -299,7 +298,7 @@ static void clear_weather() {
 	strcpy(weather.tempMax,"");
 	strcpy(weather.sunset,"");
 	strcpy(weather.sunrise,"");
-	strcpy(weather.location,"Loading...");
+	strcpy(weather.location,conf.enWeather?"Loading...":"Disabled");
 	strcpy(weather.condMain,"");
 	strcpy(weather.condDesc,"");
 	strcpy(weather.condForecast,"");
@@ -976,13 +975,15 @@ static void main_window_load(Window *window) {
 
 // Ask JS for a weather update
 static void get_weather() {
-	if (s_jsReady) {
-		DictionaryIterator *iter;
-		app_message_outbox_begin(&iter);
-		dict_write_uint8(iter, 0, 0);
-		app_message_outbox_send();
+	if (conf.enWeather) {
+		if (s_jsReady) {
+			DictionaryIterator *iter;
+			app_message_outbox_begin(&iter);
+			dict_write_uint8(iter, 0, 0);
+			app_message_outbox_send();
+		}
+		else APP_LOG(APP_LOG_LEVEL_ERROR, "GetWeather: js connection not ready.");
 	}
-	else APP_LOG(APP_LOG_LEVEL_ERROR, "GetWeather: js connection not ready.");
 }
 
 // Save the weather to persistent storage
@@ -994,15 +995,18 @@ static void save_weather() {
 
 // Load weather from persistent storage and check it's not too old.
 static void load_weather() {
-	int ret = persist_read_data(WEATHER_KEY, &weather, sizeof(weather));
-	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Weather Loaded: (%d)", ret);
-	APP_LOG(APP_LOG_LEVEL_INFO, "Weather: loaded (%d), ts: [%lu], timeNow: [%lu], age: [%lu] seconds",ret, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
+	if (conf.enWeather) {
+		int ret = persist_read_data(WEATHER_KEY, &weather, sizeof(weather));
+		if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Weather Loaded: (%d)", ret);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather: loaded (%d), ts: [%lu], timeNow: [%lu], age: [%lu] seconds",ret, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
 
-	if ( ((time(NULL)-weather.timeStamp) > (conf.weatherUpdateRate < 30 ? (conf.weatherUpdateRate*3600)*4 : (conf.weatherUpdateRate*60)*4) ) || weather.provider != conf.weatherProvider) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Weather: data too old, clearing. ");
-		//APP_LOG(APP_LOG_LEVEL_INFO, "Weather: (wp: [%d], cwp: [%d], ts: [%lu], timeNow: [%lu], age: [%lu] seconds)", weather.provider, conf.weatherProvider, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
-		clear_weather();
+		if ( ((time(NULL)-weather.timeStamp) > (conf.weatherUpdateRate < 30 ? (conf.weatherUpdateRate*3600)*4 : (conf.weatherUpdateRate*60)*4) ) || weather.provider != conf.weatherProvider) {
+			APP_LOG(APP_LOG_LEVEL_INFO, "Weather: data too old, clearing. ");
+			//APP_LOG(APP_LOG_LEVEL_INFO, "Weather: (wp: [%d], cwp: [%d], ts: [%lu], timeNow: [%lu], age: [%lu] seconds)", weather.provider, conf.weatherProvider, weather.timeStamp, time(NULL), time(NULL)-weather.timeStamp);
+			clear_weather();
+		}
 	}
+	else clear_weather();
 }
 
 // Save config settings and issue reloads to displays
@@ -1037,6 +1041,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if (t_jsReady && !s_jsReady) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "jsReady received.");
 		s_jsReady = t_jsReady->value->int32 == 1;
+		if (conf.enWeather) get_weather();
 	}
 	else {	
 		// Check for weather data tuples

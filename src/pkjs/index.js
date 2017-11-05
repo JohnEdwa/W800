@@ -20,11 +20,13 @@ var keys = require('message_keys');
 var settings = {};
 var err = {};
 
-var defaultOWMkey = '47890866bbb2ccff2ce7017025bd0ebb';
-//var defaultWUkey = '2a463e04116b6a6c'
+var provider = 1;
+var owmAPIkey = '47890866bbb2ccff2ce7017025bd0ebb';
+var wuAPIkey = null;
+var locationString = null;
+var tempUnit = 1;
+var forecastTime = 19;
 
-var owmAPIkey = '';
-var wuAPIkey = '';
 
 var url = null;	
 var tempCurrent = null;
@@ -42,9 +44,9 @@ var time = null;
 function round(acc, vars) { return (Math.round( (vars)*10 ) / 10).toFixed(acc);}
 
 function tempTo(temp) {
-		if (settings['wConf[1]'] == 1) return (Math.round( (temp - 273.15)*10 ) / 10).toFixed(0);
-		if (settings['wConf[1]'] == 2) return (Math.round( ( (temp * 9/5) - 459.67)*10 ) / 10).toFixed(0);
-		if (settings['wConf[1]'] == 3) return (Math.round(temp*10) / 10).toFixed(0);
+		if (tempUnit == 1) return (Math.round( (temp - 273.15)*10 ) / 10).toFixed(0);
+		if (tempUnit == 2) return (Math.round( ( (temp * 9/5) - 459.67)*10 ) / 10).toFixed(0);
+		//if (tempUnit == 3) return (Math.round(temp*10) / 10).toFixed(0);
 		else return temp;
 }
 
@@ -114,9 +116,12 @@ function buildMessage(provider) {
 }
 	
 function getWeather(locationString, autoLocation) {
-	console.log("Weather - Sending Requests");
-	// Get weather from WU
-		if (settings['wConf[0]'] == 2) {
+	console.log("Weather - Sending xhr requests.");
+	
+	// Get weather from WU		
+	if (settings['wConf[0]'] == 2) {
+		try {
+			wuAPIkey = settings.keyWU;
 			if (DEBUG) console.log('Weather - Using WU with API key [' + wuAPIkey + ']');
 			url = 'https://api.wunderground.com/api/' + wuAPIkey + '/forecast/conditions/astronomy/q/'+ locationString + '.json';
 			
@@ -129,7 +134,7 @@ function getWeather(locationString, autoLocation) {
 							if (!('error' in json.response)) {
 
 								time = new Date();
-								if (time.getHours() < settings['wConf[4]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
+								if (time.getHours() < forecastTime) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
 								else {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
 								/*
 								if (time.getHours() <= settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
@@ -137,12 +142,12 @@ function getWeather(locationString, autoLocation) {
 								else {forecastNumber = 1; console.log("Weather - Forecast : Tonight.");}
 								*/
 
-								if (settings['wConf[1]'] == 1) {
+								if (tempUnit == 1) {
 									tempCurrent = round(0,json.current_observation.temp_c);
 									tempMin = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].low.celsius);
 									tempMax = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].high.celsius);
 								}
-								else if (settings['wConf[1]'] == 2) {
+								else if (tempUnit == 2) {
 									tempCurrent = round(0,json.current_observation.temp_f);
 									tempMin = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].low.fahrenheit);
 									tempMax = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].high.fahrenheit);
@@ -170,10 +175,16 @@ function getWeather(locationString, autoLocation) {
 							}
 						}
 					 );
-		}
+			}
+			catch(e) {				
+				if (wuAPIkey == null) location = ('WU API key error');
+				else location = 'WU error';
+				console.error("Weather - WU Weather Failure: " + location);
+				buildMessage(0); 
+				}
+			}
 	// Get weather from OWM
 		else {
-			if (owmAPIkey === '') owmAPIkey = defaultOWMkey;
 			if (DEBUG) console.log('Weather - Using OWM with API key [' + owmAPIkey + ']');
 			//url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude + '&appid=' + owmAPIkey;
 			var urlForecast;
@@ -196,7 +207,7 @@ function getWeather(locationString, autoLocation) {
 				 if (json.cod == "200") {
 					 
 					 time = new Date();
-					 if (time.getHours() < settings['wConf[4]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
+					 if (time.getHours() < forecastTime) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
 						else {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
 					 /*
 					 if ( (time.getHours() >= settings['wConf[7]']) && (settings['wConf[7]'] >= settings['wConf[6]']) ) {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
@@ -257,7 +268,7 @@ function getWeather(locationString, autoLocation) {
 function locationSuccess(pos) {
   // Construct URL
 	var location = null;
-	if (settings['wConf[0]'] == 2) { location = pos.coords.latitude + ',' + pos.coords.longitude;	}
+	if (provider == 2) { location = pos.coords.latitude + ',' + pos.coords.longitude;	}
 	else { location = 'lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude; }
 	getWeather(location, 1);
 }
@@ -274,39 +285,43 @@ function locationError(error) {
 }
 
 function getWeatherSetup() {
-	owmAPIkey = settings.keyOWM;
-	wuAPIkey = settings.keyWU;
-	if (settings.wLoc === null || settings.wLoc === undefined || settings.wLoc === "") {
+	console.log('Weather: Determening location...');
+	if (locationString === null || locationString === undefined || locationString === "") {
 		navigator.geolocation.getCurrentPosition(locationSuccess,locationError, {timeout: 15000, maximumAge: 60000, enableHighAccuracy: false});
-	}	else { getWeather(settings.wLoc, 0); }
+	}	else { getWeather(location, 0); }
 	//watchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {timeout: 5000, maximumAge: 0}); // Register to location updates
 }
 
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
-		try {settings = JSON.parse(localStorage.getItem('clay-settings')) || {};
-		} catch (ee) { console.error("Could not load clay settings!");}		
-    if (DEBUG) console.log('PebbleKit JS ready!');
+    if (DEBUG) console.log('PebbleKit JS ready!');	
 		
 		Pebble.sendAppMessage
 		({'jsReady': 1},
 			function(e) {if (DEBUG) console.log('jsReady sent to Pebble successfully!');},
-			function(e) {console.error('Error sending info to Pebble!');}
+			function(e) {console.error('Error sending jsReady to Pebble!');}
 		);
-		
-    // Get the initial weather
-		//if (settings.enWeather === true) { getWeatherSetup(); }
   }
 );
 
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
   function(e) {
-		try { settings = JSON.parse(localStorage.getItem('clay-settings')) || {};
-		} catch (ee) { console.error("Could not load clay settings!");}
+		if (JSON.parse(localStorage.getItem('clay-settings')) != null){
+			try {
+				settings = JSON.parse(localStorage.getItem('clay-settings'));
+				try { provider = settings['wConf[0]']; } catch (ee) {console.error('Weather - Clay provider missing');}			
+				try { owmAPIkey = settings.keyOWM; } catch (ee) {console.error('Weather - Clay OWMkey missing');}			
+				try { wuAPIkey = settings.keyWU; } catch (ee) {console.error('Weather - Clay WUKey missing');}			
+				try { tempUnit = settings['wConf[1]']; } catch (ee) {console.error('Weather - Clay TempUnit missing');}			
+				try { forecastTime = settings['wConf[4]']; } catch (ee) {console.error('Weather - Clay forecastTime missing');}
+				try { locationString = settings.wLoc; } catch (ee) {console.error('Weather - Clay location missing');}
+				console.log('Weather - Clay settings loaded.');
+			} catch (ee) {}			
+		}
 		
 		console.log('Weather - Update Request received.');
-    if (settings.enWeather === true) { getWeatherSetup(); }
+    getWeatherSetup();
   }                     
 );
