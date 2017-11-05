@@ -285,10 +285,10 @@ function locationError(error) {
 }
 
 function getWeatherSetup() {
-	console.log('Weather: Determening location...');
+	console.log('Weather - Determening location...');
 	if (locationString === null || locationString === undefined || locationString === "") {
 		navigator.geolocation.getCurrentPosition(locationSuccess,locationError, {timeout: 15000, maximumAge: 60000, enableHighAccuracy: false});
-	}	else { getWeather(location, 0); }
+	}	else { getWeather(locationString, 0); }
 	//watchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {timeout: 5000, maximumAge: 0}); // Register to location updates
 }
 
