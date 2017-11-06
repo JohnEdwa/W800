@@ -16,7 +16,7 @@
 #define DEBUG 0
 
 // Persistent storage key
-#define VERSION 80
+#define VERSION 81
 #define SETTINGS_KEY 1
 #define WEATHER_KEY 2
 
@@ -225,8 +225,8 @@ typedef struct ClaySettings {
 	unsigned char weatherDayNight;
 
 	char locationString[32];
-	char wuKeyString[20];
-	char owmKeyString[40];
+	char wuKeyString[32];
+	char owmKeyString[32];
 
 	GColor bgColor;
 	GColor bgTextColor;
@@ -241,11 +241,11 @@ static ClaySettings conf;
 static void default_settings() {
 	conf.version = VERSION;
 
-	conf.bgColor = GColorBlack;
-	conf.bgTextColor = GColorWhite;
+	conf.bgColor = GColorBlack;	
 	conf.displayColor = GColorWhite;
 	conf.displayTextColor = GColorBlack;
 	conf.displayBorderColor = GColorBlack;
+	conf.bgTextColor = GColorWhite;
 
 	conf.btDCVibe = 0;	conf.btConVibe = 0;	conf.hourVibe = 0;	conf.vibeStrength = 3;
 	conf.enHealth = 1;	conf.enWeather = 1;
@@ -256,7 +256,7 @@ static void default_settings() {
 	conf.infoLeftStyle = 1;	conf.infoRightStyle = 1; conf.infoLeftData = 7; conf.infoRightData = 8; conf.infoLeftDataTap = 0;	conf.infoRightDataTap = 0;
 	conf.bottomStyle = 2; conf.bottomLeftData = 4;	conf.bottomRightData = 3; conf.bottomLeftDataTap = 0;	conf.bottomRightDataTap = 0;
 	conf.weatherProvider = 1;	conf.weatherTempUnit = 1; conf.weatherUpdateRate = 30;
-	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 21; conf.weatherBoxTopTap = 13; conf.weatherBoxBottomTap = 25;
+	conf.weatherBoxTop = 0; conf.weatherBoxBottom = 0; conf.weatherBoxTopTap = 13; conf.weatherBoxBottomTap = 25;
 	conf.weatherDayNight = 15;
 	strcpy(conf.locationString,""); strcpy(conf.wuKeyString,""); strcpy(conf.owmKeyString,"");
 	conf.batteryStyle = 0;
@@ -984,6 +984,7 @@ static void get_weather() {
 		}
 		else APP_LOG(APP_LOG_LEVEL_ERROR, "GetWeather: js connection not ready.");
 	}
+	else clear_weather();
 }
 
 // Save the weather to persistent storage
@@ -1014,11 +1015,9 @@ static void save_settings() {
 	int ret = persist_write_data(SETTINGS_KEY, &conf, sizeof(conf));
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Settings Saved: (%d)", ret);
 
-	clear_weather();
-	get_weather();
 	window_stack_pop_all(true);
 	window_stack_push(s_main_window, true);
-	
+	get_weather();
 }
 
 // Load Config settings
@@ -1029,7 +1028,10 @@ static void load_settings() {
 	int ret = persist_read_data(SETTINGS_KEY, &conf, sizeof(conf));
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Settings Loaded (%d)", ret);
 	// reset if the settings are not for the current version
-	if (conf.version != VERSION) default_settings();
+	if (conf.version != VERSION) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Config: Config from old version, clearing (sorry!)");
+		default_settings();
+	}
 }
 
 // Receive JS Messages from the phone
@@ -1052,7 +1054,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		}
 		
 		// weather data is available, save it
-		if (t_weather[13] != 0 && t_weather[12])
+		if (t_weather[13]) weather.provider = atoi(t_weather[13]->value->cstring);		
+		if (weather.provider != 0 && t_weather[12])
 		{
 			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather data.");
 
@@ -1060,7 +1063,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			weather.retryCount = 0;
 			weather.retryTimer = 0;
 			
-			weather.provider = atoi(t_weather[13]->value->cstring);
 			snprintf(weather.tempCur, sizeof(weather.tempCur), "%s", t_weather[1]->value->cstring);
 			snprintf(weather.tempMin, sizeof(weather.tempMin), "%s", t_weather[2]->value->cstring);
 			snprintf(weather.tempMax, sizeof(weather.tempMax), "%s", t_weather[3]->value->cstring);
@@ -1075,9 +1077,9 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			save_weather();
 			update_fourSlot(false);
 		}
-		else if (t_weather[13] == 0 && t_weather[12]) {
+		else if (weather.provider == 0 && t_weather[12]) {
 			// Error happened.
-			snprintf(weather.location, sizeof(weather.location), "%s", t_weather[13]->value->cstring);
+			snprintf(weather.location, sizeof(weather.location), "%s", t_weather[12]->value->cstring);
 			
 			weather.retryTimer = weather.retryTimer + weather.retryCount;
 			weather.retryCount++;

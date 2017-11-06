@@ -175,14 +175,14 @@ module.exports = [
 		{
 			"type": "color",
 			"messageKey": "Color[0]",
-			"defaultValue": "000000",
+			"defaultValue": "GColorBlack",
 			"label": "Background Color",
 			"sunlight": false,	"allowGray": true,
 		},
 		{
 			"type": "color",
 			"messageKey": "Color[1]",
-			"defaultValue": "ffffff",
+			"defaultValue": "GColorWhite",
 			"label": "Background Text Color",
 			"sunlight": false,
 			"allowGray": false
@@ -190,23 +190,23 @@ module.exports = [
 		{
 			"type": "color",
 			"messageKey": "Color[2]",
-			"defaultValue": "ffffff",
+			"defaultValue": "GColorWhite",
 			"label": "Display Color",
 			"sunlight": false,	"allowGray": true,
 		},
 		{
 			"type": "color",
-			"messageKey": "Color[4]",
-			"defaultValue": "000000",
-			"label": "Display Border Color",
-			"sunlight": false,	"allowGray": true,
+			"messageKey": "Color[3]",
+			"defaultValue": "GColorBlack",
+			"label": "Display Text Color",
+			"sunlight": false,	"allowGray": false
 		},
 		{
 			"type": "color",
-			"messageKey": "Color[3]",
-			"defaultValue": "000000",
-			"label": "Display Text Color",
-			"sunlight": false,	"allowGray": false
+			"messageKey": "Color[4]",
+			"defaultValue": "GColorBlack",
+			"label": "Display Border Color",
+			"sunlight": false,	"allowGray": true,
 		},
 		{
 			"type": "heading",

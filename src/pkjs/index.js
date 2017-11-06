@@ -82,11 +82,12 @@ function getSunTime(timeIn) {
 
 
 function sendMessage(d) {
+	if (DEBUG) console.log('Weather - Sending Message!');
 	// Send to Pebble
 	Pebble.sendAppMessage
 	(d,
-		function(e) {if (DEBUG) console.log('Info sent to Pebble successfully!');},
-		function(e) {console.error('Error sending info to Pebble!');}
+		function(e) {if (DEBUG) console.log('Weather - Message sent to Pebble successfully!');},
+		function(e) {console.error('Weather - Error sending message to Pebble!');}
 	);
 }
 
@@ -109,14 +110,15 @@ function buildMessage(provider) {
 		} catch (e) {console.error('buildMessage: Failed!');}
 	}
 	else {
+		if (DEBUG) console.log('Weather - Building Error Message');
 		d[keys.jsWeatherData + 12] = location + '';
-		d[keys.jsWeatherData + 13] = 0;
+		d[keys.jsWeatherData + 13] = 0 + '';
 		sendMessage(d);
 	}
 }
 	
 function getWeather(locationString, autoLocation) {
-	console.log("Weather - Sending xhr requests.");
+	console.log("Weather - Sending weather requests.");
 	
 	// Get weather from WU		
 	if (settings['wConf[0]'] == 2) {
@@ -128,7 +130,7 @@ function getWeather(locationString, autoLocation) {
 			xhrRequest
 					 (url, 'GET', 
 						function(responseText) {
-							console.log("Weather - Got Request, Parsing Current");	
+							if (DEBUG)  console.log("Weather - Got response, parsing weather.");	
 
 							var json = JSON.parse(responseText);
 							if (!('error' in json.response)) {
@@ -165,13 +167,7 @@ function getWeather(locationString, autoLocation) {
 							else {
 								console.error("Weather - Current Weather Failure.");
 								location = 'WU: ' + json.response.error.description + '';
-								buildMessage(0); 
-								/*
-								console.log(JSON.stringify(json, null, 4));
-								err[keys.jsWeatherData + 12] = 'WU: ' + json.response.error.description + '';
-								err[keys.jsWeatherData + 13] = '0';
-					 			sendMessage(err);
-								*/
+								buildMessage(0);
 							}
 						}
 					 );
@@ -202,7 +198,7 @@ function getWeather(locationString, autoLocation) {
 			xhrRequest
 			(urlForecast, 'GET', 
 			 function(responseText) {
-				 if (DEBUG) console.log("Weather - Got Request, Parsing Forecast");
+				 if (DEBUG) console.log("Weather - Got response, pParsing forecast");
 				 var json = JSON.parse(responseText);
 				 if (json.cod == "200") {
 					 
@@ -222,7 +218,7 @@ function getWeather(locationString, autoLocation) {
 					 xhrRequest
 					 (urlCurrent, 'GET', 
 						function(responseText) {
-							if (DEBUG) console.log("Weather - Got Request, Parsing Current");	
+							if (DEBUG) console.log("Weather - Got responce, parsing current");	
 
 							var json = JSON.parse(responseText);
 							if (json.cod == "200") {
@@ -240,12 +236,6 @@ function getWeather(locationString, autoLocation) {
 								console.error("Weather - Current Weather Failure.");
 								location = 'OWM: ' + json.message + '';
 								buildMessage(0);
-								/*
-								console.log(JSON.stringify(json, null, 4));
-								err[keys.jsWeatherData + 12] = 'OWM: ' + json.message + '';
-								err[keys.jsWeatherData + 13] = '0';
-					 			sendMessage(err);
-								*/
 							}
 						}
 					 );
@@ -253,12 +243,6 @@ function getWeather(locationString, autoLocation) {
 					 	console.error("Weather - Forecast Weather Failure.");
 					 	location = 'OWM: ' + json.message + '';
 						buildMessage(0);
-					 /*
-						console.log(JSON.stringify(json, null, 4));
-						err[keys.jsWeatherData + 12] = 'OWM: ' + json.message + '';
-					  err[keys.jsWeatherData + 13] = '0';
-					 	sendMessage(err);
-						*/
 					}
 			 }
 			);
@@ -276,18 +260,18 @@ function locationSuccess(pos) {
 function locationError(error) {
 	if(error.code == error.PERMISSION_DENIED) {
     console.error('Weather: Location access was denied by the user.');
-		err[keys.jsWeatherData + 12] = 'Location Permission Denied.';
+		location = 'Location Permission Denied.';
   } else {
 		console.error('Weather: : (' + error.code + '): ' + error.message);
-		err[keys.jsWeatherData + 12] = 'Err: (' + error.code + '): ' + error.message;
+		location = 'Err: ' + error.message;
   }
-	sendMessage(err);
+	buildMessage(0);
 }
 
 function getWeatherSetup() {
 	console.log('Weather - Determening location...');
 	if (locationString === null || locationString === undefined || locationString === "") {
-		navigator.geolocation.getCurrentPosition(locationSuccess,locationError, {timeout: 15000, maximumAge: 60000, enableHighAccuracy: false});
+		navigator.geolocation.getCurrentPosition(locationSuccess,locationError, {timeout: 45000, maximumAge: 120000, enableHighAccuracy: false});
 	}	else { getWeather(locationString, 0); }
 	//watchId = navigator.geolocation.watchPosition(locationSuccess, locationError, {timeout: 5000, maximumAge: 0}); // Register to location updates
 }
@@ -317,7 +301,7 @@ Pebble.addEventListener('appmessage',
 				try { tempUnit = settings['wConf[1]']; } catch (ee) {console.error('Weather - Clay TempUnit missing');}			
 				try { forecastTime = settings['wConf[4]']; } catch (ee) {console.error('Weather - Clay forecastTime missing');}
 				try { locationString = settings.wLoc; } catch (ee) {console.error('Weather - Clay location missing');}
-				console.log('Weather - Clay settings loaded.');
+				if (DEBUG) console.log('Weather - Clay settings loaded.');
 			} catch (ee) {}			
 		}
 		
