@@ -230,6 +230,7 @@ typedef struct ClaySettings {
 
 	GColor bgColor;
 	GColor bgTextColor;
+	GColor bgBrandColor;
 	GColor displayColor;
 	GColor displayTextColor;
 	GColor displayBorderColor;
@@ -246,6 +247,7 @@ static void default_settings() {
 	conf.displayTextColor = GColorBlack;
 	conf.displayBorderColor = GColorBlack;
 	conf.bgTextColor = GColorWhite;
+	conf.bgBrandColor = GColorWhite;
 
 	conf.btDCVibe = 0;	conf.btConVibe = 0;	conf.hourVibe = 0;	conf.vibeStrength = 3;
 	conf.enHealth = 1;	conf.enWeather = 1;
@@ -836,12 +838,12 @@ static void main_window_load(Window *window) {
 	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
 	
 	brandingPalette = gbitmap_get_palette(s_bitmap_sheet_branding);
-	brandingPalette[0] = conf.bgTextColor;
+	brandingPalette[0] = conf.bgBrandColor;
 	brandingPalette[1] = conf.bgColor;
 	gbitmap_set_palette(s_bitmap_sheet_branding, brandingPalette, false);
 	
 	brandingPalette2 = gbitmap_get_palette(s_bitmap_brand_labels);
-	brandingPalette2[0] = conf.bgTextColor;
+	brandingPalette2[0] = conf.bgBrandColor;
 	brandingPalette2[1] = conf.bgColor;
 	gbitmap_set_palette(s_bitmap_brand_labels, brandingPalette2, false);
 	
@@ -1092,18 +1094,19 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 			// Colour config
 			Tuple *t_cConfig[5];
-			for (int i = 0; i <= 5; i++) {
+			for (int i = 0; i < 5; i++) {
 				t_cConfig[i] = dict_find(iter, MESSAGE_KEY_Color + i);
 			}
-			if (t_cConfig[0]) conf.bgColor = GColorFromHEX(t_cConfig[0]->value->int32);
-			if (t_cConfig[1]) conf.bgTextColor = GColorFromHEX(t_cConfig[1]->value->int32);
-			if (t_cConfig[2]) conf.displayColor = GColorFromHEX(t_cConfig[2]->value->int32);
-			if (t_cConfig[3]) conf.displayTextColor = GColorFromHEX(t_cConfig[3]->value->int32);
+			if (t_cConfig[0]) 					 conf.bgColor = GColorFromHEX(t_cConfig[0]->value->int32);
+			if (t_cConfig[1]) 			 conf.bgTextColor = GColorFromHEX(t_cConfig[1]->value->int32);
+			if (t_cConfig[1]) 			conf.bgBrandColor = GColorFromHEX(t_cConfig[1]->value->int32);
+			if (t_cConfig[2]) 			conf.displayColor = GColorFromHEX(t_cConfig[2]->value->int32);
+			if (t_cConfig[3]) 	conf.displayTextColor = GColorFromHEX(t_cConfig[3]->value->int32);
 			if (t_cConfig[4]) conf.displayBorderColor = GColorFromHEX(t_cConfig[4]->value->int32);
 
 			// Weather Config t_wConfig[]
 			Tuple *t_wConfig[10];
-			for (int i = 0; i <= 10; i++) {
+			for (int i = 0; i < 10; i++) {
 				t_wConfig[i] = dict_find(iter, MESSAGE_KEY_wConf + i);
 			}
 			if (t_wConfig[0]) conf.weatherProvider = atoi(t_wConfig[0]->value->cstring);
@@ -1120,7 +1123,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			
 			// Vibration Settings
 			Tuple *t_vConfig[5];
-			for (int i = 0; i <= 4; i++) {
+			for (int i = 0; i < 5; i++) {
 				t_vConfig[i] = dict_find(iter, MESSAGE_KEY_VibeConf + i);
 			}
 			if (t_vConfig[0]) conf.btDCVibe = atoi(t_vConfig[0]->value->cstring);
@@ -1144,7 +1147,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 			// InfoBar Settings
 			Tuple *t_ibConfig[6];
-			for (int i = 0; i <= 5; i++) {
+			for (int i = 0; i < 6; i++) {
 				t_ibConfig[i] = dict_find(iter, MESSAGE_KEY_InfoBarConf + i);
 			}
 			if (t_ibConfig[0]) conf.infoLeftStyle = atoi(t_ibConfig[0]->value->cstring);
@@ -1156,7 +1159,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 			// Bottom Bar settings
 			Tuple *t_bbConfig[5];
-			for (int i = 0; i <= 4; i++) {
+			for (int i = 0; i < 5; i++) {
 				t_bbConfig[i] = dict_find(iter, MESSAGE_KEY_BottomBarConf + i);
 			}
 
@@ -1168,7 +1171,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 			// Branding settings
 			Tuple *t_bConfig[7];
-			for (int i = 0; i <= 6; i++) {
+			for (int i = 0; i < 7; i++) {
 				t_bConfig[i] = dict_find(iter, MESSAGE_KEY_bConf + i);
 			}
 			if (t_bConfig[0]) conf.brandingLogo = atoi(t_bConfig[0]->value->cstring);

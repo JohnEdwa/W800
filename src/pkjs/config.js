@@ -184,8 +184,7 @@ module.exports = [
 			"messageKey": "Color[1]",
 			"defaultValue": "GColorWhite",
 			"label": "Background Text Color",
-			"sunlight": false,
-			"allowGray": false
+			"sunlight": false, "allowGray": true,
 		},
 		{
 			"type": "color",
@@ -199,7 +198,7 @@ module.exports = [
 			"messageKey": "Color[3]",
 			"defaultValue": "GColorBlack",
 			"label": "Display Text Color",
-			"sunlight": false,	"allowGray": false
+			"sunlight": false,	"allowGray": true,
 		},
 		{
 			"type": "color",

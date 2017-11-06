@@ -23,7 +23,7 @@
             "BottomBarConf[5]",
             "bConf[7]",
             "FourConf[3]",
-            "wConf[20]",
+            "wConf[10]",
             "keyWU",
             "keyOWM",
             "wLoc",
@@ -33,7 +33,7 @@
             "TapDuration",
             "pmkEmail",
             "pmkPin",
-            "Color",
+            "Color[6]",
             "jsReady"
         ],
         "projectType": "native",
