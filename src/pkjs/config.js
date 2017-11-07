@@ -130,17 +130,6 @@ module.exports = [
 		},
 		{
 			"type": "select",
-			"messageKey": "mainTimeStyle",
-			"defaultValue": "2",
-			"label": "Main Time Style",
-			"options": [
-				{"label": "Larger",	"value": "2"},
-				{"label": "Smaller",	"value": "1"},
-				{"label": "Smaller with Seconds",	"value": "3"}
-			]
-		},
-		{
-			"type": "select",
 			"messageKey": "dateStyle",
 			"defaultValue": "2",
 			"label": "Date Style",
@@ -155,6 +144,18 @@ module.exports = [
 					{"label": "(dd- m) 06- 1",	"value": "7"},
 					{"label": "(dd-mm) 06-01",	"value": "8"}
 				]}
+			]
+		},
+		{
+			"type": "select",
+			"messageKey": "mainTimeStyle",
+			"defaultValue": "2",
+			"label": "Main Time Style",
+			"description": "<img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbIAAAAwAQMAAABOsm04AAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACLklEQVRIx9WWy27TQBSGfyepbKlSY/YVLk/Alp274zF4EYRHYgEr8gp5kKp2KVK3vEGN2LCrWWEJ1z/nzEwSO1FdEy5Vnc2Zy5czc64D7nzZzky+M1Pgv3MlAierYBCO5QpgJYPAdCy3RCA7b62+zOBgLBdjkpI1WYlQIFKuRKqrCFrRL1yNudstf7ziIsxkUyWoCCVi5QokstgCjb18Xsm15TNIgcxzM0TClWQjQoUT5ZZ4Tl6LvjeYKPcNh+QP2f3KIPfclJVwhY6cIFyMl+SCZpJiJsP8E56QX+X4iyJIBrgI78g5i1lqIuU+4hl5ySqYl5MhLpRfK6aoU1bKXfCCfEuda7a4Jv1b3FG6xS0eG2f2tCeyPbinPLf6Ql3VOKMXMnW59Tvl8LVyl/yifte59jg7zpRbsJGl7zaus1ICSkYJr3pxdqXrPs5W3DVb+aOfNo9kfKhczpteXN/ouo/rM8+tv506sckjP2Hz6PUA5/Tdat529Z1q3p5tn/Oz5LY/p7tfbabs3q89kWoU7NjlvejydnH2VFN27dnaIrDi1n4I3Wk3/tP5rv/Uo+I/c96Pl6mrOPdxCbJ+vIzlTG7yIe7oxRb3wXFiteTPuSZ9aO4uuzws17Onq9f1achuvW7jgFqv7+Zcf9jEtesPLq6HONePNnnk+5HNo5wuXtZ9bCbN0fexe/qfjc9134xsHsUj+q3p9enY5m302++Cpa0TB//6HbLvu+dxvOt+AaT13TfVxIWsAAAAAElFTkSuQmCC'>",
+			"options": [
+				{"label": "Larger",	"value": "2"},
+				{"label": "Smaller",	"value": "1"},
+				{"label": "Smaller with Seconds",	"value": "3"}
 			]
 		}
 	]
@@ -213,24 +214,25 @@ module.exports = [
 			"defaultValue": "UI Style options:",
 		},
 		{
-			"type": "select",
-			"messageKey": "bConf[5]",
-			"defaultValue": "1",
-			"label": "Display style",
-			"options": [
-				{"label": "W800",	"value": "1"},
-				{"label": "W96H",	"value": "2"},
-				{"label": "Only Bottom Divider",	"value": "3"},
-				{"label": "Only Toggle Divider",	"value": "4"},
-				{"label": "Only Both Dividers",	"value": "5"},
-				{"label": "Clean",	"value": "0"}
-			]
+			"capabilities": ["NOT_PLATFORM_CHALK"],
+			"type": "toggle",
+			"messageKey": "bConf[4]",
+			"label": "Show Light/Next/Prev labels.",
+			"defaultValue": true
+		},
+		{
+			"type": "toggle",
+			"messageKey": "bConf[3]",
+			"description": "<img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAL0AAAAPAQMAAACLG1wNAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAkklEQVQY02P4jwB/kdg/GOgh8UPOgv9B/gP7Bwf8aj/YFNgfOH+g/mDjnB8Mv9/er3+//v3/+9VHaj/PtPl/zv/8/znPO4A6ZO/XA3XU36++WPvB0uY/UAdQogGo4wU/WMed6tu1nyfIgHXMeD4FqEP6ff2DBAX7B79v134wnvP/wAGH+oMgCbg76hGu+kcnnwMAsvM/VoJ9WC4AAAAASUVORK5CYII='>",
+			"label": "Bold Bat/Ble/Qtm labels.",
+			"defaultValue": true
 		},
 		{
 			"type": "select",
 			"messageKey": "bConf[6]",
 			"defaultValue": "1",
 			"label": "Battery Toggle Style",
+			"description": "<img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQQAAAAMAQMAAAC+4lGQAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAeUlEQVQY02P4Dwd/EczfCOYHBtqp+OP+//+R8v//3oFUMDAC5Z6DVPxjKAbqPg82I/z//69QFf8Yqv//YHwPUvGH4fv/D8z3MVV8/v+D+TxExfP/H9jnw1XUQ9zxh4H9/+f/II1/QUY9/78frALoji8wdwxgeCCpAADotnHZZL/JrgAAAABJRU5ErkJggg=='>",
 			"options": [
 				{"label": "Toggle button bar.",	"value": "0"},
 				{"label": "Full height bar.",	"value": "1"},
@@ -238,18 +240,21 @@ module.exports = [
 			]
 		},
 		{
-			"type": "toggle",
-			"messageKey": "bConf[3]",
-			"label": "Bold Bat/Ble/Qtm labels.",
-			"defaultValue": true
+			"type": "select",
+			"messageKey": "bConf[5]",
+			"defaultValue": "1",
+			"label": "Display style",
+			"description": "<img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbIAAAB2AQMAAACXs4RJAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABE0lEQVRYw+3ZMQ6CQBAF0DEWlh6Bo3AtO+gsPZLb0ekVTChoITSQbFgxsCJ/CQlTaGL+NJBhHxmWMMUgThVG1C6VWexeyXk494BMYsRCSuIOM5HDzNFIk8wr6CIb+/PrcDh2EZR5NlJh6ZfGgcss3NvlRnJ0WYUub3BNZaTwz3wYc0WNrm7Rtb1Lp43c4u7+mX0xdYGurdHZ3vnds9vcze9Vl9DR0X3Zab9bdZ9496VyOO6npn4ar0zOd/fevfvgI3Bl4JrJYQ0fdbq1Ouno6Ojo6Ojo6Ojo6Oh+4nAYKPvQlbhG9I7vge4fXbCqCFYtz5OVLpx7B25x7r02Z/d3Wpqzr831x1ic62v/I2j/WzhVqN0TeeRxzsC4Ad0AAAAASUVORK5CYII='>",
+			"options": [
+				{"label": "Clean",	"value": "0"},
+				{"label": "W800",	"value": "1"},
+				{"label": "W96H",	"value": "2"},
+				{"label": "Both Dividers",	"value": "5"},
+				{"label": "Only Bottom Divider",	"value": "3"},
+				{"label": "Only Toggle Divider",	"value": "4"},				
+			]
 		},
-		{
-			"capabilities": ["NOT_PLATFORM_CHALK"],
-			"type": "toggle",
-			"messageKey": "bConf[4]",
-			"label": "Show Light/Next/Prev labels.",
-			"defaultValue": true
-		},
+
 		{
 			"type": "heading",
 			"size": 4,
@@ -260,6 +265,7 @@ module.exports = [
 			"messageKey": "bConf[0]",
 			"defaultValue": "1",
 			"label": "Top Logo",
+			"description": "<img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMUAAAAUAQMAAAAHlGs5AAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA3UlEQVQoz2P4DwX7ofR7KP2DgSiZn//q5xMr8/79e6Jk/jA//CDzQB5JZuKPSjn3efLvfzA+fMBzgB8o86EgIyOf/f/+hg8WfMxz+N///Hnm+Znz54Eyz9XV1fWK/+/vSZc4Zjjz+Puf/888/wOWeb9+/fp1v//vn5cg+axyBjtQZl6BDERmgf76dcwgmZ9AGXugTEP9Gaie9+vX/QeZNgNo2nOgPQzqMHueq6vVg1wgAXQBO9Bt9goQtz0oMCgoZga52hLoan6gf+wNIP6Benr/fIwQJUeGsphDlQEAVm6cXSyXZVoAAAAASUVORK5CYII='>",
 			"options": [
 				{"label": "Nothing",	"value": "0"},
 				{"label": "Pebble, Slim",	"value": "1"},
@@ -272,6 +278,7 @@ module.exports = [
 			"messageKey": "bConf[1]",
 			"defaultValue": "1",
 			"label": "Top Slogan",
+			"description": "<img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPUAAAAbAQMAAACeMVvUAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABSElEQVQoz2P4Dwf34az3cNYPBsrlP/yFCIDl6////osm/w8o8LseJK/REyJepnBU/v2/9zvSbXL5jJNB8n8/zno801j7//1/z7Inl5ee3nMfKL97ufXa0suxYPm3r96+zs0G6s97fb289PXe++//5kev2v2w9CpY/vfbrrfdiSD5dTD5P/kSWbvf8sLks95m50Pkp1etPQ2U/73u9drda0uvQeQ/9jzu3VwMtD/vTbjsPY2jQPlFr9fuyS0zS4b4/x8Q/8YTPj+B+DmZ4UcI0Dz+/gB5X78DxXDKv///9zuQuL/bUPCYYZLxjN0o8n9z0md8e5cGDN9Vt8tuvY+vzZ2MKp+9/nXZ+rVLQfKGx4rTq3NXo8qvXt9dtk737f/716TLbv2truXdjS6fXR67di1Q/rbYLWX34lw0+TPl3eVxZrk0S9945QEcN8WCH01VvQAAAABJRU5ErkJggg=='>",
 			"options": [
 				{"label": "Nothing", "value": "0"},
 				{"label": "'7 Day Battery'",	"value": "1"},
@@ -287,6 +294,7 @@ module.exports = [
 			"messageKey": "bConf[2]",
 			"defaultValue": "2",
 			"label": "Bottom Slogan",
+			"description": "<img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAW0AAAAWAQMAAAAxXV/XAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABT0lEQVQ4y2P4jwZ+o/H/IXN+MAxC5Q8YGBhJUH4fLk6U8v1AXE+88jqL5/P3IysHuo4dm/LP5xIc2f/XTEqW3/8h4VgS+2+4635DlbM3Pp75oOKBQyOzMUh55Xnj//VGCfL7P6tP8pz/+9+bI+5A18m8+/v/n2HHkbr/z+c8nvnc4ufn+ZZA5T9kLA8DlU8CKVc8lw5Uvjr3NlD56xSg8uu1+/79Pz/n5OHnRpVA5e1g5edBjkmZv/9D+rNikPKcaKDy2VlA5RfnngMrf/6gqPJzM/P5Hwx/LGcCHbPP4sn8eqhjVuQeB5meB1Ru/vbbv//z5xx8/twAZDpE+UFjSLh/VjiWPP/3/2iQ6fdl3v0Gmi7RB1I+5/lzdUuIckhAvP///y9KNAEFvkNDZn7jnOcP0i0/NyKUf2BgYEZR/h2sg+gk9oOBQX6IpHcaKQcAFUWHf6NvmvgAAAAASUVORK5CYII='>",
 			"options": [
 				{"label": "Nothing", "value": "0"},
 				{"label": "'Water 30M Resist' #1",	"value": "1"},

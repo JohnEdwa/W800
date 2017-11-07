@@ -695,7 +695,7 @@ static void toggle_update_proc(Layer *layer, GContext *ctx) {
 	else if (conf.batteryStyle == 2) {
 		// Text
 		char batBuf[8];
-		if (batteryLevel >= 1  || batteryCharge == 1) { snprintf(batBuf, sizeof(batBuf), batteryCharge == 1 ? "+%d" : "%d", batteryLevel*10); }
+		if (batteryLevel >= 1  || batteryCharge == 1) { snprintf(batBuf, sizeof(batBuf), batteryCharge == 1 ? "%d!" : "%d", batteryLevel*10); }
 		else { snprintf(batBuf, sizeof(batBuf), "!!!"); }
 		graphics_context_set_text_color(ctx, conf.displayTextColor);		
 		graphics_draw_text(ctx, batBuf, s_font_bat, GRect(26,-11,16,16), GTextOverflowModeWordWrap, GTextAlignmentRight, NULL);
