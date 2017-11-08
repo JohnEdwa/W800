@@ -20,8 +20,10 @@ var keys = require('message_keys');
 var settings = {};
 var err = {};
 
+var owmDefaultKey = '47890866bbb2ccff2ce7017025bd0ebb';
+
 var provider = 1;
-var owmAPIkey = '47890866bbb2ccff2ce7017025bd0ebb';
+var owmAPIkey = null;
 var wuAPIkey = null;
 var locationString = null;
 var tempUnit = 1;
@@ -181,6 +183,7 @@ function getWeather(locationString, autoLocation) {
 			}
 	// Get weather from OWM
 		else {
+			if (owmAPIkey === null || owmAPIkey === undefined || owmAPIkey === "") owmAPIkey = owmDefaultKey;
 			if (DEBUG) console.log('Weather - Using OWM with API key [' + owmAPIkey + ']');
 			//url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude + '&appid=' + owmAPIkey;
 			var urlForecast;
@@ -296,7 +299,7 @@ Pebble.addEventListener('appmessage',
 			try {
 				settings = JSON.parse(localStorage.getItem('clay-settings'));
 				try { provider = settings['wConf[0]']; } catch (ee) {console.error('Weather - Clay provider missing');}			
-				try { owmAPIkey = settings.keyOWM; } catch (ee) {console.error('Weather - Clay OWMkey missing');}			
+				try { owmAPIkey = settings.keyOWM; } catch (ee) {console.error('Weather - Clay OWMkey missing');}		
 				try { wuAPIkey = settings.keyWU; } catch (ee) {console.error('Weather - Clay WUKey missing');}			
 				try { tempUnit = settings['wConf[1]']; } catch (ee) {console.error('Weather - Clay TempUnit missing');}			
 				try { forecastTime = settings['wConf[4]']; } catch (ee) {console.error('Weather - Clay forecastTime missing');}
