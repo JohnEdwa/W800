@@ -588,7 +588,7 @@ static void background_update_proc(Layer *layer, GContext *ctx) {
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "background_update_proc");
 	
 	// Draw the BG bitmap
-	graphics_context_set_compositing_mode(ctx, GCompOpSet);	
+	//graphics_context_set_compositing_mode(ctx, GCompOpAssign);	
 	
 	//graphics_context_set_fill_color(ctx, conf.bgColor);
 	//graphics_fill_rect(ctx, GRect(0, 0, 180, 180), 0, 0);
@@ -831,9 +831,11 @@ static void main_window_load(Window *window) {
 	s_bitmap_toggle_pm = gbitmap_create_as_sub_bitmap(s_bitmap_sheet_toggles, GRect(46,12,6,7));
 	
 	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Setting Bitmap Palettes - heap used %d, heap free %d", (int) heap_bytes_used(), (int) heap_bytes_free());
+	
 	cornerPalette = gbitmap_get_palette(s_bitmap_background);
 	cornerPalette[0] = conf.displayBorderColor;
 	cornerPalette[1] = conf.bgColor;
+	cornerPalette[2] = conf.displayColor;
 	cornerPalette[3] = conf.displayColor;
 	gbitmap_set_palette(s_bitmap_background, cornerPalette, false);
 	
