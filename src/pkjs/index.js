@@ -301,7 +301,7 @@ Pebble.addEventListener('appmessage',
 				try { tempUnit = settings['wConf[1]']; } catch (ee) {console.error('Weather - Clay TempUnit missing');}			
 				try { forecastTime = settings['wConf[4]']; } catch (ee) {console.error('Weather - Clay forecastTime missing');}
 				try { locationString = settings.wLoc; } catch (ee) {console.error('Weather - Clay location missing');}
-				if (DEBUG) console.log('Weather - Clay settings loaded.');
+				console.log('Weather - Clay settings loaded.');
 			} catch (ee) {}			
 		}
 		

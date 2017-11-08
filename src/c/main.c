@@ -1019,6 +1019,7 @@ static void save_settings() {
 
 	window_stack_pop_all(true);
 	window_stack_push(s_main_window, true);
+	
 	get_weather();
 }
 
