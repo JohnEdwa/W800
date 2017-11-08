@@ -300,7 +300,7 @@ static void clear_weather() {
 	strcpy(weather.tempMax,"");
 	strcpy(weather.sunset,"");
 	strcpy(weather.sunrise,"");
-	strcpy(weather.location,conf.enWeather?"Loading...":"Disabled");
+	strcpy(weather.location,conf.enWeather?"No data":"Disabled");
 	strcpy(weather.condMain,"");
 	strcpy(weather.condDesc,"");
 	strcpy(weather.condForecast,"");
@@ -981,10 +981,12 @@ static void main_window_load(Window *window) {
 static void get_weather() {
 	if (conf.enWeather) {
 		if (s_jsReady) {
+			strcpy(weather.location,"Sending Request");
 			DictionaryIterator *iter;
 			app_message_outbox_begin(&iter);
 			dict_write_uint8(iter, 0, 0);
 			app_message_outbox_send();
+			strcpy(weather.location,"Request Sent");
 		}
 		else APP_LOG(APP_LOG_LEVEL_ERROR, "GetWeather: js connection not ready.");
 	}
@@ -1000,6 +1002,7 @@ static void save_weather() {
 
 // Load weather from persistent storage and check it's not too old.
 static void load_weather() {
+	strcpy(weather.location,"Loading Saved Weather");
 	if (conf.enWeather) {
 		int ret = persist_read_data(WEATHER_KEY, &weather, sizeof(weather));
 		if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Config: Persistent Weather Loaded: (%d)", ret);

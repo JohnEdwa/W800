@@ -201,7 +201,7 @@ function getWeather(locationString, autoLocation) {
 			xhrRequest
 			(urlForecast, 'GET', 
 			 function(responseText) {
-				 if (DEBUG) console.log("Weather - Got response, pParsing forecast");
+				 if (DEBUG) console.log("Weather - Got response, parsing forecast");
 				 var json = JSON.parse(responseText);
 				 if (json.cod == "200") {
 					 
@@ -254,10 +254,10 @@ function getWeather(locationString, autoLocation) {
 
 function locationSuccess(pos) {
   // Construct URL
-	var location = null;
-	if (provider == 2) { location = pos.coords.latitude + ',' + pos.coords.longitude;	}
-	else { location = 'lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude; }
-	getWeather(location, 1);
+	var coordinates = null;
+	if (provider == 2) { coordinates = pos.coords.latitude + ',' + pos.coords.longitude;	}
+	else { coordinates = 'lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude; }
+	getWeather(coordinates, 1);
 }
 
 function locationError(error) {
