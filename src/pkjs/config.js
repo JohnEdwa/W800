@@ -6,7 +6,7 @@ module.exports = [
 	"type": "section",
 	"items": [
 		{"type": "toggle",	"id":"changelog","label": "Version 0.8 - Tap for older changelog","defaultValue": false},
-		{"type": "text",		"id": "change0","defaultValue": "Version 0.8: 2017-11-01<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Aplite (OG) and Chalk (Time Round) release!<br> * Fonts fixed and modified to fit the W800 style better.<br> * Fixed weather issues.<br> * Lots of tweaks and optimizations.<br>"},
+		{"type": "text",		"id": "change0","defaultValue": "Version 0.8: 2017-11-20<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Aplite (OG) and Chalk (Time Round) release!<br> * Fonts fixed and modified to fit the W800 style better.<br> * Added images to Config Page.<br> * Fixed weather issues.<br> * Lots of tweaks and optimizations.<br>"},
 		{"type": "text",		"id": "change5","defaultValue": "Version 0.7: 2017-06-20<br> * Fixed Word Slot steps counter.<br>"},
 		{"type": "text",		"id": "change4","defaultValue": "Version 0.6: 2017-06-19<br> * Added customizable colours.<br> * Added a second Weather Box, Tap support and automatic branding blanking.<br> * Added a lot of new Weather Box data combinations<br> * Made PMkey import the API keys instead of polling every time, eventually reaching a daily limit.<br> * Added 'CASIO' Logo and new top slogans.<br> * Optimized and cleaned the code.<br> * <a href='https://github.com/JohnEdwa/W800'>Github Release.</a><br>"},
 		{"type": "text",		"id": "change3","defaultValue": "Version 0.5: 2017-06-15<br> * Added Pebble Master Key (pmkey.xyz) support.<br> * Added Week, Day and Month numbers.<br> * Added Debug/Error display to Weather Box.<br> * Fiddled with the config page order and added some descriptions. <br> * Fixed weather autolocation.<br> * Font Fixes.<br> * Temp fix for sunset/sunrise times (Forces 24 hour mode until I figure it out properly)"},
@@ -223,7 +223,7 @@ module.exports = [
 		{
 			"type": "toggle",
 			"messageKey": "bConf[3]",
-			"description": "<img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAL0AAAAPAQMAAACLG1wNAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAkklEQVQY02P4jwB/kdg/GOgh8UPOgv9B/gP7Bwf8aj/YFNgfOH+g/mDjnB8Mv9/er3+//v3/+9VHaj/PtPl/zv/8/znPO4A6ZO/XA3XU36++WPvB0uY/UAdQogGo4wU/WMed6tu1nyfIgHXMeD4FqEP6ff2DBAX7B79v134wnvP/wAGH+oMgCbg76hGu+kcnnwMAsvM/VoJ9WC4AAAAASUVORK5CYII='>",
+			"description": "Battery, Bluetooth And Quiet Time status indicators.<br><img width='100%' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAL0AAAAPAQMAAACLG1wNAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAkklEQVQY02P4jwB/kdg/GOgh8UPOgv9B/gP7Bwf8aj/YFNgfOH+g/mDjnB8Mv9/er3+//v3/+9VHaj/PtPl/zv/8/znPO4A6ZO/XA3XU36++WPvB0uY/UAdQogGo4wU/WMed6tu1nyfIgHXMeD4FqEP6ff2DBAX7B79v134wnvP/wAGH+oMgCbg76hGu+kcnnwMAsvM/VoJ9WC4AAAAASUVORK5CYII='>",
 			"label": "Bold Bat/Ble/Qtm labels.",
 			"defaultValue": true
 		},

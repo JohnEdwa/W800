@@ -888,16 +888,16 @@ static void main_window_load(Window *window) {
 
 	// Configure Main Time Layers
 	if (conf.mainTimeStyle == 1) {
-		editTextLayer(s_layer_hour, GRect(SCREENLEFT+19, SCREENTOP+48, 100, 70), conf.displayTextColor, GColorClear, s_font_hour, GTextAlignmentLeft);
+		editTextLayer(s_layer_hour, GRect(SCREENLEFT+18, SCREENTOP+48, 100, 70), conf.displayTextColor, GColorClear, s_font_hour, GTextAlignmentRight);
 		layer_set_frame(bitmap_layer_get_layer(s_layer_pm), GRect(SCREENLEFT+25, SCREENTOP+55, 10, 11));
 	}
 	else if (conf.mainTimeStyle == 2) {
-		editTextLayer(s_layer_hour, GRect(SCREENLEFT+4, SCREENTOP+45, 144, 100), conf.displayTextColor, GColorClear, s_font_hour_big, GTextAlignmentLeft);
+		editTextLayer(s_layer_hour, GRect(SCREENLEFT-8, SCREENTOP+45, 144, 100), conf.displayTextColor, GColorClear, s_font_hour_big, GTextAlignmentRight);
 		layer_set_frame(bitmap_layer_get_layer(s_layer_pm), GRect(SCREENLEFT+12, SCREENTOP+52, 10, 11));
 	}
 	else if (conf.mainTimeStyle == 3) {
-		editTextLayer(s_layer_hour,GRect(SCREENLEFT+4, SCREENTOP+48, 100, 70), conf.displayTextColor, GColorClear, s_font_hour, GTextAlignmentLeft);
-		editTextLayer(s_layer_second,GRect(SCREENLEFT+104, SCREENTOP+58, 40, 40), conf.displayTextColor, GColorClear, s_font_second, GTextAlignmentLeft);
+		editTextLayer(s_layer_hour,GRect(SCREENLEFT+3, SCREENTOP+48, 100, 70), conf.displayTextColor, GColorClear, s_font_hour, GTextAlignmentRight);
+		editTextLayer(s_layer_second,GRect(SCREENLEFT+96, SCREENTOP+58, 40, 40), conf.displayTextColor, GColorClear, s_font_second, GTextAlignmentRight);
 		layer_set_frame(bitmap_layer_get_layer(s_layer_pm), GRect(SCREENLEFT+10, SCREENTOP+55, 10, 11));
 	}
 
