@@ -6,7 +6,7 @@ module.exports = [
 	"type": "section",
 	"items": [
 		{"type": "toggle",	"id":"changelog","label": "Version 0.10 - Tap for older changelog","defaultValue": false},
-		{"type": "text",		"id": "change0","defaultValue": "Version 0.10: 2018-02-21<br> * Fixed a fatal bug that could randomly crash and force factory reboot a watch that is on the v4 firmware, if using text_layer_get_content_size().<br>"},
+		{"type": "text",		"id": "change0","defaultValue": "Version 0.10: 2018-02-21<br> * Fixed a fatal fimrware bug on weatherbox alignement that could randomly crash and force a factory reboot. See known issues for more details.<br>"},
 		{"type": "text",		"id": "change6","defaultValue": "Version 0.8: 2017-11-20<br> * New Display Styles<br> * Two new Battery toggle styles.<br> * Aplite (OG) and Chalk (Time Round) release!<br> * Fonts fixed and modified to fit the W800 style better.<br> * Added images to Config Page.<br> * Fixed weather issues.<br> * Lots of tweaks and optimizations.<br>"},
 		{"type": "text",		"id": "change5","defaultValue": "Version 0.7: 2017-06-20<br> * Fixed Word Slot steps counter.<br>"},
 		{"type": "text",		"id": "change4","defaultValue": "Version 0.6: 2017-06-19<br> * Added customizable colours.<br> * Added a second Weather Box, Tap support and automatic branding blanking.<br> * Added a lot of new Weather Box data combinations<br> * Made PMkey import the API keys instead of polling every time, eventually reaching a daily limit.<br> * Added 'CASIO' Logo and new top slogans.<br> * Optimized and cleaned the code.<br> * <a href='https://github.com/JohnEdwa/W800'>Github Release.</a><br>"},
@@ -14,7 +14,7 @@ module.exports = [
 		{"type": "text",		"id": "change2","defaultValue": "Version 0.4: 2017-06-13<br> * Fixed weather refresh after settings changes."},
 		{"type": "text",		"id": "change1","defaultValue": "Version 0.1: 2017-06-13<br> * Initial release for Basalt and Diorite."},
 		{"type": "toggle",	"id":"issues","label": "Tap for a list of known issues","defaultValue": false},
-		{"type": "text", 		"id":"issues1","defaultValue": "<br> * Roman Numeral Vibes are always full strength.<br> * Config page remembers only one set of saved items, even when swapping watches.<br> * Seconds display uses a little more battery than needed."},
+		{"type": "text", 		"id":"issues1","defaultValue": "Sometimes when ivoking 'text_layer_get_content_size()' on version 4 firmware, the watch will freeze and crash. This command is required to dynamically get the weather box size to determine if it should be two lines, or one centered line, so a hacky workaround based on character lenghts was implemented. Contact me if you find something looking wrong.<br> * Roman Numeral Vibes are always full strength.<br> * Config page remembers only one set of saved items, even when swapping watches.<br> * Seconds display uses a little more battery than needed."},
 	]
 },
 		
@@ -33,12 +33,14 @@ module.exports = [
 			"type": "toggle",
 			"messageKey": "enWeather",
 			"label": "Enable Weather.",
+			"description": "Required for any weather information.",
 			"defaultValue": true
 		},
 		{
 			"type": "toggle",
 			"messageKey": "enHealth",
 			"label": "Enable Health",
+			"description": "Required for steps or heartrate displays.",
 			"defaultValue": true,
 			"capabilities": ["HEALTH"],
 		},
@@ -219,6 +221,7 @@ module.exports = [
 			"type": "toggle",
 			"messageKey": "bConf[4]",
 			"label": "Show Light/Next/Prev labels.",
+			"description": "Small labels for the physical buttons.",
 			"defaultValue": true
 		},
 		{
@@ -957,15 +960,15 @@ module.exports = [
 				{"label": "Temperatures (Low/Current/Max)",	"value": "2"},
 				{"label": "Current Weather",	"value": "3"},
 				{"label": "Forecast Weather",	"value": "4"},
-				{"label": "Sunrise + Sunset Times",	"value": "5"},
+				{"label": "Sunrise & Sunset Times",	"value": "5"},
 				{"label": "Temps + Location",	"value": "21"},
 				{"label": "Temps + Current Weather",	"value": "23"},
 				{"label": "Temps + Forecast Weather",	"value": "24"},
-				{"label": "Temps + Sunrise + Sunset",	"value": "25"},	
+				{"label": "Temps + Sunrise & Sunset",	"value": "25"},	
 				{"label": "Location + Temps",	"value": "12"},
 				{"label": "Location + Current Weather",	"value": "13"},
 				{"label": "Location + Forecast Weather",	"value": "14"},
-				{"label": "Location + Sunrise + Sunset",	"value": "15"},
+				{"label": "Location + Sunrise & Sunset",	"value": "15"},
 				{"label": "Current Weather + Forecast Weather",	"value": "34"},
 				{"label": "Forecast Weather + Current Weather",	"value": "43"},
 			]
@@ -981,15 +984,15 @@ module.exports = [
 				{"label": "Temperatures (Low/Current/Max)",	"value": "2"},
 				{"label": "Current Weather",	"value": "3"},
 				{"label": "Forecast Weather",	"value": "4"},
-				{"label": "Sunrise + Sunset Times",	"value": "5"},
+				{"label": "Sunrise & Sunset Times",	"value": "5"},
 				{"label": "Temps + Location",	"value": "21"},
 				{"label": "Temps + Current Weather",	"value": "23"},
 				{"label": "Temps + Forecast Weather",	"value": "24"},
-				{"label": "Temps + Sunrise + Sunset",	"value": "25"},	
+				{"label": "Temps + Sunrise & Sunset",	"value": "25"},	
 				{"label": "Location + Temps",	"value": "12"},
 				{"label": "Location + Current Weather",	"value": "13"},
 				{"label": "Location + Forecast Weather",	"value": "14"},
-				{"label": "Location + Sunrise + Sunset",	"value": "15"},
+				{"label": "Location + Sunrise & Sunset",	"value": "15"},
 				{"label": "Current Weather + Forecast Weather",	"value": "34"},
 				{"label": "Forecast Weather + Current Weather",	"value": "43"},
 			]
@@ -1005,15 +1008,15 @@ module.exports = [
 				{"label": "Temperatures (Low/Current/Max)",	"value": "2"},
 				{"label": "Current Weather",	"value": "3"},
 				{"label": "Forecast Weather",	"value": "4"},
-				{"label": "Sunrise + Sunset Times",	"value": "5"},
+				{"label": "Sunrise & Sunset Times",	"value": "5"},
 				{"label": "Temps + Location",	"value": "21"},
 				{"label": "Temps + Current Weather",	"value": "23"},
 				{"label": "Temps + Forecast Weather",	"value": "24"},
-				{"label": "Temps + Sunrise + Sunset",	"value": "25"},	
+				{"label": "Temps + Sunrise & Sunset",	"value": "25"},	
 				{"label": "Location + Temps",	"value": "12"},
 				{"label": "Location + Current Weather",	"value": "13"},
 				{"label": "Location + Forecast Weather",	"value": "14"},
-				{"label": "Location + Sunrise + Sunset",	"value": "15"},
+				{"label": "Location + Sunrise & Sunset",	"value": "15"},
 				{"label": "Current Weather + Forecast Weather",	"value": "34"},
 				{"label": "Forecast Weather + Current Weather",	"value": "43"},
 			]
@@ -1029,15 +1032,15 @@ module.exports = [
 				{"label": "Temperatures (Low/Current/Max)",	"value": "2"},
 				{"label": "Current Weather",	"value": "3"},
 				{"label": "Forecast Weather",	"value": "4"},
-				{"label": "Sunrise + Sunset Times",	"value": "5"},
+				{"label": "Sunrise & Sunset Times",	"value": "5"},
 				{"label": "Temps + Location",	"value": "21"},
 				{"label": "Temps + Current Weather",	"value": "23"},
 				{"label": "Temps + Forecast Weather",	"value": "24"},
-				{"label": "Temps + Sunrise + Sunset",	"value": "25"},	
+				{"label": "Temps + Sunrise & Sunset",	"value": "25"},	
 				{"label": "Location + Temps",	"value": "12"},
 				{"label": "Location + Current Weather",	"value": "13"},
 				{"label": "Location + Forecast Weather",	"value": "14"},
-				{"label": "Location + Sunrise + Sunset",	"value": "15"},
+				{"label": "Location + Sunrise & Sunset",	"value": "15"},
 				{"label": "Current Weather + Forecast Weather",	"value": "34"},
 				{"label": "Forecast Weather + Current Weather",	"value": "43"},
 			]
@@ -1085,13 +1088,15 @@ module.exports = [
 			"type": "select",
 			"messageKey": "wConf[3]",
 			"defaultValue": "30",
-			"description" : "Weather data that is 4 times older than this value gets cleared (15 min -> 60 min, 2 hours -> 8 hours)",
+			"description" : "Weather data that is 4 times older than this value gets cleared to not show old information. (because of BT or network issues, or using another app on the watch.)<br>",
 			"label": "Weather update period.",
 			"options": [
 				{"label": "15min",	"value": "15"},
 				{"label": "30min",	"value": "30"},
 				{"label": "1 hour",	"value": "1"},
-				{"label": "2 hours",	"value": "2"}
+				{"label": "2 hours",	"value": "2"},
+				{"label": "3 hours",	"value": "3"},
+				{"label": "4 hours",	"value": "4"},
 			]
 		},
 		{
@@ -1127,7 +1132,7 @@ module.exports = [
 			"messageKey": "pmkEmail",
 			"defaultValue": "",
 			"label": "PMKey Email",
-			"attributes": {	"placeholder": "Pebble Master Key Email Address",	"limit": 16,	"type": "email",}
+			"attributes": {	"placeholder": "Pebble Master Key Email Address",	"limit": 64,	"type": "email",}
 		},
 		{
 			"type": "input",
@@ -1152,14 +1157,14 @@ module.exports = [
 			"messageKey": "keyWU",
 			"defaultValue": "",
 			"label": "Weather Undeground API Key",
-			"attributes": {	"placeholder": "API key is REQUIRED for WU.",	"limit": 19,}
+			"attributes": {	"placeholder": "API key is REQUIRED for WU.",	"limit": 32,}
 		},
 		{
 			"type": "input",
 			"messageKey": "keyOWM",
 			"defaultValue": "",
 			"label": "OpenWeatherMap API Key",
-			"attributes": {	"placeholder": "Using default OWM Key.",	"limit": 39,}
+			"attributes": {	"placeholder": "Using default OWM Key.",	"limit": 32,}
 		},
 		]
 	},
@@ -1172,7 +1177,7 @@ module.exports = [
 		{"type": "text", "defaultValue": "<a rel='license' href='http://creativecommons.org/licenses/by-sa/4.0/'><img alt='Creative Commons License' style='border-width:0' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAAAPCAMAAABEF7i9AAAAllBMVEUAAAD///+rsapERER3d3eIiIjMzMzu7u4iIiKUmZO6v7rKzsoODg4RERFVVVUNDQ0NDg0PEA8zMzNLTEtbXltmZmZydnF9gn2AgICPkI+ZmZmqqqq7u7vFxsXIzMgNDQwZGRkgICAhISEkJSMnKCcuMC4xMzE5Ozk7PTtBQkFCQkJDQ0Nna2eGhoaHh4ezuLLGysbd3d1wVGpAAAAA0klEQVR42q2T1xbCIAyGk0CXdlmto3XvPd7/5QRL1432WHI4XED4+PMHALQHag0JJBlXMNQScx2ibu9PdTnQcY3iErYl6oxbAo/rUrUJA6J5vx0wNNC0gVkMbBPZXtQ8Uf6qpNJwOf0EjmCKto+ce1aSIg9FzTO1/xlYyVeL34FDMC3ZFT+SNXOX6PEsBKm0rIOYPYuGClnsWTxBHtQV1gRhI4UUGJh6EAsPoxdedjUPK+dzT38DDyvNXXYW9wJ43mh4h6ItN8U7Ldv+FN1/WXO8Aed5CQIgC4KiAAAAAElFTkSuQmCC' /></a>&nbsp; &nbsp; &nbsp;<a href='https://github.com/JohnEdwa/W800'><img src='data:image/png;base64,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'></a>"},
 		{"type": "toggle",	"id":"credits", "label": "Tap for other credits.", "defaultValue": false},
 		{"type": "text", "id":"credits1", "defaultValue": "Thanks to orviwan for the <a href='https://apps.getpebble.com/en_US/application/52b231c2b70e1c159500009b'>91 DUB V4.0</a>, and Pedro for the <a href='https://apps.getpebble.com/en_US/application/540888f892ecf49ebe000106'>DB 31</a> watchfaces which were my main inspiration for this project, and also the source for a few of the resources used."},
-		{"type": "text", "id":"credits2", "defaultValue": "Thanks for bug reports and suggestions go to (in no particular order): <br> Michael Abdelmalek, /u/NiVZ78, /u/spoi, /u/Birde-x, /u/dryingsocks, /u/duhwiked, /u/RoelSG7, /u/u532m3132, /u/shindrichs and /u/IDontReadTheTitle."},
+		{"type": "text", "id":"credits2", "defaultValue": "Thanks for bug reports and suggestions go to (in no particular order): <br> Michael Abdelmalek, Joe Sparano, /u/NiVZ78, /u/spoi, /u/Birde-x, /u/dryingsocks, /u/duhwiked, /u/RoelSG7, /u/u532m3132, /u/shindrichs and /u/IDontReadTheTitle."},
 		{"type": "text", "id":"credits0", "defaultValue": "Weather provided by: <a href='https://openweathermap.org/'><img src='http://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/logo_OpenWeatherMap_orange.svg' style='width:55%'></a><a href='https://www.wunderground.com/'><img style='width:80%' src='https://icons.wxug.com/logos/PNG/wundergroundLogo_4c_rev_horz.png'></a>"},
 		{"type": "text","defaultValue": "",},
 	]
