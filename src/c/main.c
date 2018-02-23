@@ -1,7 +1,7 @@
 /*
 
 	W800 by JohnEdwa
-	Version 0.8
+	Version 0.10
 
 	I'm a hobby coder at best, and this is my very first Pebble Watchface,
 		so most of the code I've used here is just the first thing that worked,
@@ -300,7 +300,7 @@ static void clear_weather() {
 	strcpy(weather.tempMax,"");
 	strcpy(weather.sunset,"");
 	strcpy(weather.sunrise,"");
-	strcpy(weather.location,conf.enWeather?"No data":"Disabled");
+	strcpy(weather.location,conf.enWeather?"No data.":"Disabled.");
 	strcpy(weather.condMain,"");
 	strcpy(weather.condDesc,"");
 	strcpy(weather.condForecast,"");
@@ -508,14 +508,14 @@ static char *getSlotData(char *inBuf, bool tap) {
 
 // Sets a Weather box Data
 static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize, bool tap) {
+	if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "setWeatherData");
 	if ((tap && tapTrigger) || (!tap && !tapTrigger)) {
 		unsigned char confValue = 255;
 		char unit[3];
 		strcpy(unit,(conf.weatherTempUnit == 1 || conf.weatherTempUnit == 2 ? "°" : "K"));
-		
 		if (inBuf == s_bufferWeatherTop) {confValue = tap ? conf.weatherBoxTopTap : conf.weatherBoxTop;}
 		else if (inBuf == s_bufferWeatherBottom) {confValue = tap ? conf.weatherBoxBottomTap : conf.weatherBoxBottom;}
-				
+		
 		/*
 		if (inBuf == s_bufferWeatherTop)	{ bufSize = sizeof(s_bufferWeatherTop); confValue = tap ? (conf.infoLeftDataTap > 0 ? conf.infoLeftDataTap : conf.infoLeftData) : conf.infoLeftData;}
 		else if (inBuf == s_bufferWeatherBottom) { bufSize = sizeof(s_bufferWeatherBottom); confValue = tap ? (conf.infoRightDataTap > 0 ?  conf.infoRightDataTap : conf.infoRightData) : conf.infoRightData;}
@@ -527,7 +527,7 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 			case 2: snprintf(inBuf, bufSize, "Lo %s%s   [ %s%s ]    Hi %s%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
 			case 3: 
 			case 4: snprintf(inBuf, bufSize, "%s", confValue == 3 ? weather.condDesc : weather.condForecast); break;
-			case 5: snprintf(inBuf, bufSize, "%s                  %s", weather.sunrise, weather.sunset); break;
+			case 5: snprintf(inBuf, bufSize, "%s                   %s", weather.sunrise, weather.sunset); break;
 			case 21: snprintf(inBuf, bufSize, "Lo %s%s   [ %s%s ]    Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, weather.location); break;
 			case 23:
 			case 24: snprintf(inBuf, bufSize, "Lo %s%s   [ %s%s ]    Hi %s%s\n%s", weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit, confValue == 23 ? weather.condDesc : weather.condForecast); break;
@@ -535,7 +535,7 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 			case 12: snprintf(inBuf, bufSize, "%s\nLo %s%s   [ %s%s ]    Hi %s%s", weather.location, weather.tempMin, unit, weather.tempCur, unit, weather.tempMax, unit); break;
 			case 13:
 			case 14: snprintf(inBuf, bufSize, "%s\n%s", weather.location, confValue == 13 ? weather.condDesc : weather.condForecast); break;
-			case 15: snprintf(inBuf, bufSize, "%s\n%s                  %s",weather.location, weather.sunrise, weather.sunset); break;
+			case 15: snprintf(inBuf, bufSize, "%s\n%s                   %s",weather.location, weather.sunrise, weather.sunset); break;
 			case 34: 
 			case 43:
 				//if (strcmp(weather.condDesc, weather.condForecast) == 0) snprintf(inBuf, bufSize, "%s", weather.condDesc);
@@ -543,13 +543,33 @@ static void setWeatherData(TextLayer *layer, char *inBuf, unsigned char bufSize,
 				break;
 			default: strcpy(inBuf," "); break;
 		}
+	
+		text_layer_set_text(layer, inBuf);	
+
+		GRect frame = layer_get_frame(text_layer_get_layer(layer));
+		if ((strlen(inBuf) < 22 && confValue == 1) || strlen(inBuf) < 32)  {
+			switch (confValue) {
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 15:
+					layer_set_frame(text_layer_get_layer(layer), GRect(frame.origin.x, frame.origin.y + (frame.size.h - 14) / 2,frame.size.w, 14)); break;
+				default:
+					layer_set_frame(text_layer_get_layer(layer), GRect(frame.origin.x, frame.origin.y + (frame.size.h - 28) / 2,frame.size.w, 28));
+					break;
+			}
+		}
+		else {
+			layer_set_frame(text_layer_get_layer(layer), GRect(frame.origin.x, frame.origin.y + (frame.size.h - 28) / 2,frame.size.w, 28));	
+		}
 		
-		text_layer_set_text(layer, inBuf);
 		
 		// Vertical alignment
-		GRect frame = layer_get_frame(text_layer_get_layer(layer));
-		GSize content = text_layer_get_content_size(layer);
-		layer_set_frame(text_layer_get_layer(layer), GRect(frame.origin.x, frame.origin.y + (frame.size.h - content.h) / 2,frame.size.w, content.h));
+		//GRect frame = layer_get_frame(text_layer_get_layer(layer));
+		//GSize content = text_layer_get_content_size(layer);
+		//layer_set_frame(text_layer_get_layer(layer), GRect(frame.origin.x, frame.origin.y + (frame.size.h - content.h) / 2,frame.size.w, content.h));
 		//if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "Size: Frame %d/%d, Layer %d/%d. GRect: %d,%d,%d,%d",frame.size.w, frame.size.h, content.w, content.h,frame.origin.x, frame.origin.y + (frame.size.h - content.h - 5) / 2,frame.size.w, content.h);
 	}
 }
@@ -981,12 +1001,14 @@ static void main_window_load(Window *window) {
 static void get_weather() {
 	if (conf.enWeather) {
 		if (s_jsReady) {
-			strcpy(weather.location,"Sending Request");
+			strcpy(weather.location,"Sending Request...");
 			DictionaryIterator *iter;
 			app_message_outbox_begin(&iter);
 			dict_write_uint8(iter, 0, 0);
-			app_message_outbox_send();
-			strcpy(weather.location,"Request Sent");
+			int res = app_message_outbox_send();
+			if (res == 0) strcpy(weather.location,"Request Sent.");
+			else if (res == 8) strcpy(weather.location,"Disconnected.");
+			else strcpy(weather.location,"Error.");
 		}
 		else APP_LOG(APP_LOG_LEVEL_ERROR, "GetWeather: js connection not ready.");
 	}
@@ -1110,11 +1132,16 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 			if (t_cConfig[3]) 	conf.displayTextColor = GColorFromHEX(t_cConfig[3]->value->int32);
 			if (t_cConfig[4]) conf.displayBorderColor = GColorFromHEX(t_cConfig[4]->value->int32);
 
+			
 			// Weather Config t_wConfig[]
 			Tuple *t_wConfig[10];
 			for (int i = 0; i < 10; i++) {
-				t_wConfig[i] = dict_find(iter, MESSAGE_KEY_wConf + i);
+				if (dict_find(iter, MESSAGE_KEY_wConf + i) != NULL) {
+					t_wConfig[i] = dict_find(iter, MESSAGE_KEY_wConf + i);
+				}
 			}
+			if (t_wConfig[0]) {};
+			
 			if (t_wConfig[0]) conf.weatherProvider = atoi(t_wConfig[0]->value->cstring);
 			if (t_wConfig[1]) conf.weatherTempUnit = atoi(t_wConfig[1]->value->cstring);
 			if (t_wConfig[3]) conf.weatherUpdateRate = atoi(t_wConfig[3]->value->cstring);
