@@ -1080,7 +1080,7 @@ module.exports = [
 			"defaultValue": "1",
 			"label": "Temperature unit",
 			"options": [
-				{"label": "Celcius", "value": "1"},
+				{"label": "Celsius", "value": "1"},
 				{"label": "Fahrenheit",	"value": "2"}
 			]
 		},
