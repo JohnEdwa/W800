@@ -24,7 +24,6 @@ var owmDefaultKey = '47890866bbb2ccff2ce7017025bd0ebb';
 
 var provider = 1;
 var owmAPIkey = null;
-var wuAPIkey = null;
 var locationString = null;
 var tempUnit = 1;
 var forecastTime = 19;
@@ -124,62 +123,7 @@ function getWeather(locationString, autoLocation) {
 
     // Get weather from WU
     if (provider == 2) {
-        try {
-            wuAPIkey = settings.keyWU;
-            if (DEBUG) console.log('Weather - Using WU with API key [' + wuAPIkey + ']');
-            url = 'https://api.wunderground.com/api/' + wuAPIkey + '/forecast/conditions/astronomy/q/'+ locationString + '.json';
-
-            xhrRequest
-            (url, 'GET',
-                function(responseText) {
-                    if (DEBUG)  console.log("Weather - Got response, parsing weather.");
-
-                    var json = JSON.parse(responseText);
-                    if (!('error' in json.response)) {
-
-                        time = new Date();
-                        if (time.getHours() < forecastTime) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
-                        else {forecastNumber = 1; console.log("Weather - Forecast : Tomorrow.");}
-                        /*
-                if (time.getHours() <= settings['wConf[6]']) {forecastNumber = 0; console.log("Weather - Forecast : Today.");}
-                else if ( (time.getHours() >= settings['wConf[7]']) && (settings['wConf[7]'] >= settings['wConf[6]']) ) {forecastNumber = 2; console.log("Weather - Forecast : Tomorrow.");}
-                else {forecastNumber = 1; console.log("Weather - Forecast : Tonight.");}
-                */
-
-                        if (tempUnit == 1) {
-                            tempCurrent = round(0,json.current_observation.temp_c);
-                            tempMin = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].low.celsius);
-                            tempMax = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].high.celsius);
-                        }
-                        else if (tempUnit == 2) {
-                            tempCurrent = round(0,json.current_observation.temp_f);
-                            tempMin = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].low.fahrenheit);
-                            tempMax = round(0,json.forecast.simpleforecast.forecastday[forecastNumber].high.fahrenheit);
-                        }
-
-                        condMain = json.current_observation.weather;
-                        condDesc = json.current_observation.weather;
-                        condForecast = json.forecast.simpleforecast.forecastday[forecastNumber].conditions;
-                        location = json.current_observation.display_location.city;
-                        sunrise = getSunTime(timeToUnix(json.sun_phase.sunrise.hour, json.sun_phase.sunrise.minute));
-                        sunset =  getSunTime(timeToUnix(json.sun_phase.sunset.hour, json.sun_phase.sunset.minute));
-
-                        buildMessage(2);
-                    }
-                    else {
-                        console.error("Weather - Current Weather Failure.");
-                        location = 'WU: ' + json.response.error.description + '';
-                        buildMessage(0);
-                    }
-                }
-            );
-        }
-        catch(e) {
-            if (wuAPIkey == null) location = ('WU API key error');
-            else location = 'WU error';
-            console.error("Weather - WU Weather Failure: " + location);
-            buildMessage(0);
-        }
+      console.log("WeaatherUndergound API is discontinued");
     }
     // Get weather from OWM
     else {
@@ -332,7 +276,6 @@ Pebble.addEventListener('appmessage',
                 settings = JSON.parse(localStorage.getItem('clay-settings'));
                 try { provider = settings['wConf[0]']; } catch (ee) {console.error('Weather - Clay provider missing');}
                 try { owmAPIkey = settings.keyOWM; } catch (ee) {console.error('Weather - Clay OWMkey missing');}
-                try { wuAPIkey = settings.keyWU; } catch (ee) {console.error('Weather - Clay WUKey missing');}
                 try { tempUnit = settings['wConf[1]']; } catch (ee) {console.error('Weather - Clay TempUnit missing');}
                 try { forecastTime = settings['wConf[4]']; } catch (ee) {console.error('Weather - Clay forecastTime missing');}
                 try { locationString = settings.wLoc; } catch (ee) {console.error('Weather - Clay location missing');}

@@ -4,34 +4,6 @@ module.exports = function(minified) {
   var $ = minified.$;
   var HTML = minified.HTML;
 
-	function importPMkey() {
-		var PMemail = clayConfig.getItemByMessageKey('pmkEmail').get();
-		var PMpin = clayConfig.getItemByMessageKey('pmkPin').get();
-		var wuKey = clayConfig.getItemByMessageKey('keyWU').get();
-		var owmKey = clayConfig.getItemByMessageKey('keyOWM').get();
-		
-		try {
-			if (PMemail !== "" && PMpin !== "" && PMemail !== null && PMpin !== null && PMemail !== undefined && PMpin !== undefined) {
-				if (wuKey === '' || owmKey === '') {							
-					 // Set the value of an item based on the userData
-					$.request('get', "https://pmkey.xyz/search/?email=" + PMemail + "&pin=" + PMpin)
-						.then(function(result) {
-						var json = JSON.parse(result);
-						if(json.success) {					 
-							if(json.keys.weather.wu !== ""){ clayConfig.getItemByMessageKey('keyWU').set(json.keys.weather.wu );}
-							if(json.keys.weather.owm !== ""){ clayConfig.getItemByMessageKey('keyOWM').set(json.keys.weather.owm );}
-							clayConfig.getItemById('pmkeyText').set("Import Successful.");	
-						} else {
-							clayConfig.getItemById('pmkeyText').set(json.error );	
-						}
-				})
-				.error(function(status, statusText, responseText) {
-				});
-				} else clayConfig.getItemById('pmkeyText').set("Both API keys already exist.");	
-			} else clayConfig.getItemById('pmkeyText').set("PMkey login details not filled.");	
-		} catch (e) {}
-	}
-	
 	function forecastText() {
 		try {
 			var today = clayConfig.getItemByMessageKey('wConf[4]').get();
@@ -121,12 +93,6 @@ module.exports = function(minified) {
 			var issuesToggle = clayConfig.getItemById('issues');
 			toggleIssues.call(issuesToggle);
 			issuesToggle.on('change', toggleIssues);
-		} catch (e) {}
-		
-		try {
-			var importButton = clayConfig.getItemById('import');
-			//importPMkey.call(importButton);
-			importButton.on('click', importPMkey);
 		} catch (e) {}
 
   });  

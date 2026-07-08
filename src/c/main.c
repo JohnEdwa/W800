@@ -1,7 +1,7 @@
 /*
 
 	W800 by JohnEdwa
-	Version 0.10
+	Version 0.20
 
 	I'm a hobby coder at best, and this is my very first Pebble Watchface,
 		so most of the code I've used here is just the first thing that worked,
@@ -13,7 +13,7 @@
 
 #include <pebble.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 // Persistent storage key
 #define VERSION 81
@@ -409,7 +409,6 @@ static void handle_health(HealthEventType event, void *context) {
 
 // Gets the correct buffer data for the info slots
 static char *getSlotData(char *inBuf, bool tap) {
-    //if (DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "getSlotData");
     static char outBuf[16] = {};
     strcpy(outBuf,inBuf);
 
@@ -447,7 +446,7 @@ static char *getSlotData(char *inBuf, bool tap) {
                      // Day Number
             case 16: snprintf(buf, sizeof(buf), "%2s", getDateString(false, 2));break;
                      // Week Number
-            case 17: strftime(buf, sizeof(buf), "%U", tick_time); break;
+            case 17: strftime(buf, sizeof(buf), "%V", tick_time); break;
                      // Month Number
             case 18: snprintf(buf, sizeof(buf), "%2s", getDateString(false, 1)); break;
                      // Battery Level
@@ -1392,7 +1391,7 @@ static char *getDateString(bool four, unsigned char mode) {
     static char dateStringBuffer[8] = {};
 
     const char *datestr[] = {	"%2d%2d",		"%2d%02d",		"%02d%2d",		"%02d%02d",	"%2d-%2d",		"%2d-%02d",		"%02d-%2d",		"%02d-%02d",	};
-
+  
     if (mode == 0) {
         if (conf.dateStyle < 5) snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? datestr[conf.dateStyle-1] : datestr[conf.dateStyle+3], tick_time->tm_mon+1, tick_time->tm_mday);
         else snprintf(dateStringBuffer, sizeof(dateStringBuffer),four ? datestr[conf.dateStyle-5] : datestr[conf.dateStyle-1], tick_time->tm_mday, tick_time->tm_mon+1);

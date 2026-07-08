@@ -4,14 +4,14 @@
         "pebble-clay": "^1.0.4"
     },
     "keywords": [],
-    "name": "w800",
+    "name": "w800h",
     "pebble": {
         "capabilities": [
             "location",
             "configurable",
             "health"
         ],
-        "displayName": "W800 Casio",
+        "displayName": "W800H Casio",
         "enableMultiJS": true,
         "messageKeys": [
             "mainTimeStyle",
@@ -24,15 +24,12 @@
             "bConf[7]",
             "FourConf[3]",
             "wConf[10]",
-            "keyWU",
             "keyOWM",
             "wLoc",
             "VibeConf[4]",
             "enHealth",
             "enWeather",
             "TapDuration",
-            "pmkEmail",
-            "pmkPin",
             "Color[6]",
             "jsReady"
         ],
@@ -41,7 +38,7 @@
             "media": [
                 {
                     "characterRegex": "[0-9:chr!]",
-                    "file": "fonts/FONT_BAT_5.ttf",
+                    "file": "fonts/FONT_BAT_5.TTF",
                     "name": "FONT_BAT_16",
                     "targetPlatforms": null,
                     "trackingAdjust": 1,
@@ -80,7 +77,7 @@
                 },
                 {
                     "characterRegex": "[0-9:. -]",
-                    "file": "fonts/FONT_SECOND_25.ttf",
+                    "file": "fonts/FONT_SECOND_25.TTF",
                     "name": "FONT_SECOND_25",
                     "targetPlatforms": null,
                     "trackingAdjust": 2,
@@ -88,7 +85,7 @@
                 },
                 {
                     "characterRegex": "[0-9A-Z %()*:$-]",
-                    "file": "fonts/FONT_INFO_SMALL_16.ttf",
+                    "file": "fonts/FONT_INFO_SMALL_16.TTF",
                     "name": "FONT_INFO_SMALL_16",
                     "targetPlatforms": null,
                     "trackingAdjust": -1,
@@ -96,14 +93,14 @@
                 },
                 {
                     "characterRegex": "[0-9A-Z %()*:$-]",
-                    "file": "fonts/FONT_INFO_BIG_16.ttf",
+                    "file": "fonts/FONT_INFO_BIG_16.TTF",
                     "name": "FONT_INFO_BIG_16",
                     "targetPlatforms": null,
                     "type": "font"
                 },
                 {
                     "characterRegex": "[0-9:. ]",
-                    "file": "fonts/FONT_HOUR_BIG_42.ttf",
+                    "file": "fonts/FONT_HOUR_BIG_42.TTF",
                     "name": "FONT_HOUR_BIG_42",
                     "targetPlatforms": null,
                     "trackingAdjust": 3,
@@ -111,7 +108,7 @@
                 },
                 {
                     "characterRegex": "[0-9: ]",
-                    "file": "fonts/FONT_HOUR_35.ttf",
+                    "file": "fonts/FONT_HOUR_35.TTF",
                     "name": "FONT_HOUR_35",
                     "targetPlatforms": null,
                     "trackingAdjust": 1,
@@ -119,7 +116,7 @@
                 },
                 {
                     "characterRegex": "[\u00b0 -~]",
-                    "file": "fonts/FONT_FOURCHAR_16.ttf",
+                    "file": "fonts/FONT_FOURCHAR_16.TTF",
                     "name": "FONT_FOURCHAR_16",
                     "targetPlatforms": null,
                     "type": "font"
@@ -138,5 +135,5 @@
             "watchface": true
         }
     },
-    "version": "0.10.0"
+    "version": "0.20.0"
 }
